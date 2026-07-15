@@ -16,7 +16,7 @@ if [ "$CMD" = "version" ]; then
 fi
 
 case "$CMD" in
-  clone | developer | dockercreate)
+  clone | developer | dockercreateX)
     #Clone the eme-server-client repo to the specified path
 
     #verify is not running as root
@@ -48,6 +48,13 @@ case "$CMD" in
   
   dockercreate)
     ## eme.sh dockercreate <server-path> <nodenumber>
+
+    ##if missing $2, $3 or $4 exit
+    if [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
+        echo "Usage: sudo eme.sh dockercreate <server-path> <nodenumber> <ownedby>"
+        exit 1
+    fi
+
     echo "Creating Docker instance for $SERVERHOME"
     SERVERHOME="$2"
     SERVERNAME="$(basename "$SERVERHOME")"

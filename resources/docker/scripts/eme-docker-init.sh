@@ -20,8 +20,8 @@ if [[ ! $(id -u) -eq 0 ]]; then
   exit 1
 fi
 
-if [ "$#" -ne 2 ]; then
-    echo "Usage: sudo ./eme-docker-init.sh sitename nodenumber"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: sudo ./eme-docker-init.sh <sitename> <nodenumber> <ownedby>"
     exit 1
 fi
 
@@ -35,8 +35,10 @@ SITE=$1
 NODENUMBER=$2
 OWNEDBY=$3
 
-if [ ${#NODENUMBER} -ge 4 ]; then echo "Node Number must be between 100-250" ; exit
-else echo "Using Node Number: $NODENUMBER"
+if [ ${#NODENUMBER} -ge 4 ]; then 
+	echo "Node Number must be between 100-250" ; exit
+else 
+	echo "Using Node Number: $NODENUMBER"
 fi
 
 INSTANCE=$SITE$NODENUMBER
