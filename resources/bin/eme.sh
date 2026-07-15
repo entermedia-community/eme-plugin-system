@@ -1,8 +1,12 @@
 #!/bin/bash -e
-
 set -x 
 
-##This is run from the /bin/eme location that is linked
+## Download and run this script to create a new eme server instance
+## curl -o eme.sh -jL get-eme.eme.world
+## 1. Local Developer Instance
+## sudo bash eme.sh developer <server-path> 
+## 2. Docker Instance 
+## sudo bash eme.sh dockercreate <server-path> <nodenumber> <ownedby>
 
 CMD="${1:-start}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -32,10 +36,10 @@ case "$CMD" in
     SERVERHOME="$2"
     SERVERNAME="$(basename "$SERVERHOME")"
     git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
-    cd $SERVERNAME
+    cd $SERVERHOME
     git submodule update --init --recursive --depth 1
   ;;
-  
+
   developer)
     ## Opens default workspace in VS Code for development
     code eme-server.code-workspace
