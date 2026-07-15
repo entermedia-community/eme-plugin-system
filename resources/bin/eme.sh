@@ -15,20 +15,6 @@ if [ "$CMD" = "version" ]; then
     exit 0
 fi
 
-##JAVA_HOME is not set throw an error if JAVA_HOME is not set
-if [ -z "$JAVA_HOME" ]; then
-    #checi if there is a jre path
-    if [ -d "/usr/lib/jvm/jre" ]; then
-        JAVA_HOME="/usr/lib/jvm/jre"
-    elif [ -d "/usr/lib/jvm/default-java" ]; then
-        JAVA_HOME="/usr/lib/jvm/default-java"
-    else
-        echo "JAVA_HOME is not set and /usr/lib/jvm/jre does not exist. Please set JAVA_HOME to a valid JRE path."
-        echo "Please run iwth your local java version: sudo update-alternatives --install /usr/lib/jvm/jre jre /usr/lib/jvm/java-X.XX.X-openjdk-amd64 20000"
-        exit 1
-    fi
-fi  
-
 case "$CMD" in
   clone | developer | dockercreate)
     #Clone the eme-server-client repo to the specified path
@@ -111,6 +97,20 @@ case "$CMD" in
         echo "Don't run this script as root."
         exit 1
     fi
+
+    ##JAVA_HOME is not set throw an error if JAVA_HOME is not set
+    if [ -z "$JAVA_HOME" ]; then
+        #checi if there is a jre path
+        if [ -d "/usr/lib/jvm/jre" ]; then
+            JAVA_HOME="/usr/lib/jvm/jre"
+        elif [ -d "/usr/lib/jvm/default-java" ]; then
+            JAVA_HOME="/usr/lib/jvm/default-java"
+        else
+            echo "JAVA_HOME is not set and /usr/lib/jvm/jre does not exist. Please set JAVA_HOME to a valid JRE path."
+            echo "Please run with your local java version: sudo update-alternatives --install /usr/lib/jvm/jre jre /usr/lib/jvm/java-X.XX.X-openjdk-amd64 20000"
+            exit 1
+        fi
+    fi  
     
     #Set USERID and GROUPID to the current user if not running in Docker
     USERID="$(id -un)"
