@@ -1,0 +1,20 @@
+#
+#Fri Jul 03 17:35:43 CST 2026
+All\ Fields=Todos los campos
+Creation\ Date=Fecha de creaci\u00F3n
+Email=Email
+Enable\ HTML\ editing=Habilitar la edici\u00F3n de HTML
+Enabled=habilitado
+EnterMedia\ Key=EnterMedia clave
+Failed\ login\ attempts=intentos de conexi\u00F3n fallidos
+First\ Name=Nombre de pila
+Groups=grupos
+Last\ Login\ Date=\u00DAltima fecha de conexi\u00F3n
+Last\ Name=Apellido
+Name=Nombre
+Notes=notas
+Password=Contrase\u00F1a
+Screen\ Name=Nombre de pantalla
+User\ Search=usuario Buscar
+Username=Nombre de usuario
+id=carn\u00E9 de identidad

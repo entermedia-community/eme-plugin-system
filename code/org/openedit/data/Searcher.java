@@ -1,0 +1,210 @@
+package org.openedit.data;
+
+import java.text.DateFormat;
+import java.util.Collection;
+import java.util.List;
+
+import org.json.simple.JSONObject;
+import org.openedit.CatalogEnabled;
+import org.openedit.Data;
+import org.openedit.OpenEditException;
+import org.openedit.WebPageRequest;
+import org.openedit.hittracker.HitTracker;
+import org.openedit.hittracker.SearchQuery;
+import org.openedit.profile.UserProfile;
+import org.openedit.users.User;
+
+
+public interface Searcher extends CatalogEnabled
+{
+	
+	public String nextId();
+	
+	public abstract HitTracker cachedSearch(WebPageRequest inPageRequest, SearchQuery inQuery) throws OpenEditException;
+
+	public abstract HitTracker loadHits(WebPageRequest inReq) throws OpenEditException;
+
+	public abstract HitTracker loadHits(WebPageRequest inReq, String hitsname) throws OpenEditException;
+
+	/** @deprecated **/
+	public abstract DateFormat getDefaultDateFormat();
+
+	public abstract void setDefaultDateFormat(DateFormat inDefaultDateFormat);
+
+	public abstract HitTracker fieldSearch(WebPageRequest inReq) throws OpenEditException;
+
+	public HitTracker fieldSearch(String attr, String value);
+
+	public HitTracker fieldSearch(String attr, String value, String orderby); 
+
+	public abstract SearchQuery addStandardSearchTerms(WebPageRequest inPageRequest) throws OpenEditException;
+
+	public Data updateData(WebPageRequest inReq, String[] fields, Data data);
+	
+	public Collection<PropertyDetail> findSummaryFields(SearchQuery inQuery, UserProfile userprofile);
+
+	
+	
+	
+	public abstract List deselect(String inField, String[] toremove) throws OpenEditException;
+
+	public QueryBuilder query();
+
+	/**
+	 * Use this to automatically filter a search with the .xconf that declares the action.
+	 * Example: 
+	 * 	 <page-action name="OrderModule.getOrdersForUser">
+	 *	 	<not>
+	 *			<orderstatus>completed</orderstatus>
+	 *   	</not>
+	 *	 </page-action>
+	 * @param inReq
+	 * @param search
+	 * @return
+	 */
+	
+	public void addShowOnlyFilter(WebPageRequest inPageRequest, String querystring, SearchQuery search);
+
+
+	public abstract SearchQuery addActionFilters(WebPageRequest inReq, SearchQuery search);
+
+	public abstract HitTracker loadPageOfSearch(WebPageRequest inPageRequest) throws OpenEditException;
+
+	//Some of these may be able to become protected
+	public abstract void reIndexAll() throws OpenEditException;
+
+	public SearchQuery createSearchQuery();
+
+	public Object searchById(String inId);
+
+	public Data loadCachedData(String inId);
+
+	public Data loadData(Data inHit);
+	
+	public Data loadData(WebPageRequest inReq,String inDataid);
+
+	public Data loadData(String inId);
+	
+	public Object searchByField(String inField,String inValue);
+
+	public Data searchByQuery(SearchQuery inQuery);
+
+//	public abstract HitTracker search(String inQuery);
+
+	public abstract HitTracker search(SearchQuery inQuery);
+
+//	public abstract HitTracker search(String inQuery, String inOrdering);
+
+	public abstract String getIndexId();
+
+	public abstract void clearIndex();
+
+	public abstract PropertyDetailsArchive getPropertyDetailsArchive();
+
+	public abstract void setPropertyDetailsArchive(PropertyDetailsArchive inPropertyDetailsArchive);
+
+	public PropertyDetails getPropertyDetails();
+
+	public ViewFieldList getDetailsForView(String inViewId);
+	public ViewFieldList getDetailsForView(Data inViewData);
+	
+	public ViewFieldList getDetailsForView(String inViewId, UserProfile inProfile);
+	public ViewFieldList getDetailsForView(Data inViewData, UserProfile inUserProfile);
+
+	public Collection getProperties();
+
+	public abstract HitTracker getAllHits(WebPageRequest inReq);
+
+	public abstract HitTracker getAllHits();
+
+	public abstract SearcherManager getSearcherManager();
+
+	public abstract void setSearcherManager(SearcherManager inSearcherManager);
+
+	/**
+	 * @deprecated Use {@link #getSearchType()} instead
+	 */
+	public abstract String getFieldName();
+
+	public abstract String getSearchType();
+
+	/**
+	 * @deprecated Use {@link #setSearchType(String)} instead
+	 */
+	public abstract void setFieldName(String inFieldName);
+
+	public abstract void setSearchType(String inFieldName);
+
+	public abstract String getCatalogId();
+	
+	public abstract void setCatalogId(String inCatalogId);
+
+	public abstract void saveData(Data inData, User inUser);
+
+	public abstract Data createNewData();
+
+	public abstract void deleteAll(User inUser);
+
+	public abstract void delete(Data inData, User inUser);
+
+	public abstract void saveAllData(Collection<Data> inAll, User inUser);
+	
+	public abstract Data cloneData(Data inHit);
+	
+	public PropertyDetail getDetail(String inId);
+	
+	public void changeSort(WebPageRequest inReq);
+	
+	public void addChildQuery(WebPageRequest inReq);
+
+	/**
+	 * @deprecated use searchByQuery
+	 * @param inQ
+	 * @return
+	 */
+	public Data uniqueResult(SearchQuery inQ);
+
+	HitTracker searchByIds(Collection<String> inIds);
+
+	public void clearFilter(WebPageRequest inReq);
+
+	public void restoreSettings();
+	
+	public void reloadSettings();
+	
+	public boolean initialize();
+
+	public void setAllowRemoteDetails(boolean inB);
+
+	public void setAlternativeIndex(String inAlternativeIndex);
+
+	public boolean putMappings();
+
+	public void reindexInternal();
+	
+	
+	public void saveData(Data inData);
+
+
+	public void setForceBulk(boolean inForceBulk);
+
+	public Object createValue(String inHeaderid, String inVal);
+
+	public void deleteAll(Collection toDelete, User inUser);
+	
+
+	public void saveJson(Collection inJsonArray);
+	public SearchSecurity getSearchSecurity();
+
+	public void saveJson(String inId, JSONObject inObject);
+
+	public String getFulltext(Data inSearchHitData);
+
+	public HitTracker getCachedSearch(QueryBuilder inQ);
+
+	public void updateData(Data inChild, JSONObject inUpdate);
+
+	public SearchQuery copyQuery(SearchQuery inSearch);
+
+    
+}

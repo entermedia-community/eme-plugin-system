@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<reportss> 
+  <reports id="AVaTqBP6ygVLwyOAiTEp" ordering="0" searchtype="asset" outputtype="assetusage" runfilterview="historyedits" script="asset/assetdiskusage.groovy"> 
+    <name><![CDATA[Asset Disk Usage]]></name>  
+    <name><![CDATA[Asset Disk Usage]]></name> 
+  </reports> 
+<!--  
+  <reports id="AVaUgHarnzduSDGX3LDR" ordering="0" searchtype="assetdownloadLog" outputtype="downloadhistory" dashboard="true"> 
+    <name><![CDATA[Download History]]></name>  
+    <name><![CDATA[Download History]]></name> 
+  </reports>
+-->
+  <reports id="AVaUgHarnzduSDGX3LDR" ordering="2" searchtype="assetdownloadLog" outputtype="downloadhistory" script="asset/assetdownload.groovy" dashboard="true">
+    <name><![CDATA[Download History]]></name>
+  </reports>
+
+
+  <reports id="AVaYrpt-nzduSDGX3LG8" ordering="3" searchtype="userauthenticationLog" outputtype="userauthentication" dashboard="true"> 
+    <name><![CDATA[User Authentication]]></name>  
+    <name><![CDATA[User Authentication]]></name> 
+  </reports>  
+  <reports id="assetpreview" ordering="4" searchtype="assetpreviewLog" outputtype="assetviews" dashboard="true"> 
+    <name><![CDATA[Asset Previews]]></name>  
+    <name><![CDATA[Asset Previews]]></name> 
+  </reports>  
+ <!-- 
+  <reports id="libraryusage" ordering="0" searchtype="asset" outputtype="libraryusage" script="asset/diskspacebylibrary.groovy" dashboard="true"> 
+    <name><![CDATA[Disk Space By Library]]></name>  
+    <name><![CDATA[Disk Space By Library]]></name> 
+  </reports>
+   -->  
+  <reports id="diskusagefilemorat" ordering="5" searchtype="asset" outputtype="fileformatusage" script="asset/diskspacebyfileformat.groovy" dashboard="true"> 
+    <name><![CDATA[Disk Space By File Format]]></name>  
+    <name><![CDATA[Disk Space By File Format]]></name> 
+  </reports>  
+  <reports id="assetscreated" ordering="6" searchtype="asset" outputtype="assetadded" dashboard="true" script="asset/assetscreated.groovy" >
+    <name><![CDATA[New Assets]]></name>
+  </reports>
+  <reports id="transcribereport" ordering="7" searchtype="videotrack" outputtype="captions" dashboard="false" script="videotrack/closecaptions.groovy">
+    <name><![CDATA[Automatic Transcriptions]]></name>
+  </reports>
+  <reports id="assetedits" ordering="8" searchtype="asseteditLog" outputtype="assetedits" dashboard="true" runfilterview="reportbydate"> 
+    <name><![CDATA[Asset Edits]]></name>  
+    <name><![CDATA[Asset Edits]]></name> 
+  </reports>  
+  
+  
+</reportss>
+

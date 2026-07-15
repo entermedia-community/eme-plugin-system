@@ -1,0 +1,136 @@
+#macro(eid $inId)$inId.replace('.','-').replace('\\', '/')#end
+#macro(uuencode $invalue)$!url_util.encode($invalue)#end
+#macro(uudecode $invalue)$!url_util.decode($invalue)#end
+#macro(urlencode $invalue)$!url_util.urlEscape($invalue)#end
+#macro(urlescape $invalue)$!url_util.urlEscape($invalue)#end
+#macro(paramencode $invalue)$!url_util.encodeParamVal($invalue)#end
+#macro(esc $invalue)$!url_util.xmlEscape($invalue)#end
+#macro(escarea $invalue)$!url_util.xmlEscapeArea($invalue)#end
+#macro(escwrap $invalue $inwrap)$!url_util.xmlEscapeWithWrap($invalue, $inwrap)#end
+#macro(text $t)
+#set( $text = $context.getText($t) )
+$!{url_util.xmlEscape($text)}#end
+#macro(singular $t)
+#set( $text = $context.getText($t) )
+#set( $text = $inflector.singularize($text) )
+$!{url_util.xmlEscape($text)}#end
+#macro(datatext $data $field)
+#set( $text = $data.getText($field,$context))
+$!url_util.xmlEscape($text)
+#end
+#macro(linebreaks $text)
+#if($text)
+#set($text = $url_util.xmlEscape($text))
+$text.replaceAll("(\r\n|\n)", "<br />")
+#end
+#end
+#macro( translate $text )
+$!translations.getEntryForLocale($context.getLocale(), $text, $content.isPropertyTrue("auto_translate_${context.getLocale()}"))
+#end
+#macro(makeid $invalue)$!url_util.getPathUtilities().extractId($invalue)#end
+#macro(debug $invalue)
+#set ($mode = $user.get("showdebug"))
+#if($mode && $mode == "true")
+$invalue
+#end
+#end
+#macro(jsonmap $detail $map)
+$!jsonUtil.toJson($map)
+#end
+#macro(jsonarray $detail $list)
+$!jsonUtil.toJsonArray($list)
+#end
+#macro(datajsonmin $detail $value)
+#if( $detail.isList() )
+#set($data = false)
+#set($data = $value)
+#if( $searcherManager.isData($value) )
+#else
+	#set($data = $searcherManager.getData($detail, $value))
+#end
+{
+	#if( $data )
+	"id":"$data.getId()",
+	"name":#jesc($data.getName($context.getLocale()) )
+	#else
+	"id":"$!value"
+	#end
+}
+#elseif( $detail.isDataType("nested"))
+	$!jsonUtil.toJson($value)
+#else
+	{ 	"id":"$value" }
+#end
+#end
+#macro(jesc $object)"$!jsonUtil.escape($object)"#end
+#macro(jrender $object)$!jsonUtil.escape($object)#end
+#macro(json $hit $details)
+{ 
+#jsonpartial($hit, $details)
+}
+#end 
+
+#macro(rendervalue $hit $detail $value)
+"${detail.id}":#if($detail.isMultiValue())[
+#foreach($mvalue in $hit.getValues($detail.id))
+#if(${foreach.count} > 1),#end
+#datajsonmin($detail $mvalue)
+#end]
+#elseif($detail.isList())
+#datajsonmin($detail $value)
+#elseif($detail.isMultiLanguage())
+#jsonmap($detail $value)
+#elseif($detail.isDate()||$detail.isDateTime())"$jsonUtil.formatDateObj($value)"
+#else#jesc($context.getText($hit,$value))
+#end
+#end 
+
+##Just the fields, no { }
+#macro(jsonfields $hit $details)
+#set($rendercomma = false)
+#foreach($detail in $details)
+#set($value = false)#set($value = $hit.getValue(${detail.id}))
+#if($value)#if($rendercomma),#else
+#set($rendercomma = true)#end
+"${detail.id}":#if($detail.isMultiValue())[
+#foreach($mvalue in $hit.getValues($detail.id))
+#if(${foreach.count} > 1),#end
+#datajsonmin($detail $mvalue)
+#end]
+#elseif($detail.isList())
+#datajsonmin($detail $value)
+#elseif($detail.isMultiLanguage())
+#jsonmap($detail $value)
+#elseif($detail.isDate()||$detail.isDateTime())"$jsonUtil.formatDateObj($value)"
+#else#jesc($hit.get(${detail.id})) 
+#end
+#end
+#end
+#end
+
+
+#macro(jsonpartial $hit $details)
+#set($foreachcount = 0)
+#foreach($detail in $details)
+#set($value = $searcherManager.getValue($hit, $detail, $context.locale))
+#ifnotnull($value)
+#if($foreachcount >= 1),#end
+#rendervalue($hit $detail $value)
+#set($foreachcount = $foreachcount+1)
+#end
+#end
+#end
+
+#macro(datetime $inDate)$!context.getDateTime($inDate)#end
+#macro(date $value)$!context.getDate($inValue))#end
+#macro(date $inData $inField)$!context.getDate($inData.getDate($inField))#end
+#macro(dash $intext)$!url_util.getPathUtilities().dash($intext)#end
+
+#macro(elidemiddle $text $maxLength) 
+#if($text.length() <= $maxLength)
+$text
+#else
+#set($charsPerSide = ($maxLength - 3) / 2)
+$text.substring(0, $charsPerSide)...$text.substring($text.length() - $charsPerSide)
+#end
+#end 

@@ -1,0 +1,7 @@
+<properties index="true" stored="true">
+	<property id="id" index="true" stored="true">Id</property>
+	<property id="name" index="true" stored="true" editable="true">Name</property>
+	<property id="profilesearchfilters" index="true" stored="true" editable="true" note="Used for filtering">Filters</property>
+	<property id="viewtableresults"  index="true" editable="true">Table Columns</property>
+  	<property id="permissions" viewtype="multiselect" editable="true" index="true" stored="true" type="list" listid="permissionapp"  >Permissions</property>
+</properties>

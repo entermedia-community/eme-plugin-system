@@ -1,0 +1,5 @@
+#
+#Fri Jul 03 17:13:33 CST 2026
+Days=D\u00EDas
+Hours=Horas
+Minutes=Minutos
