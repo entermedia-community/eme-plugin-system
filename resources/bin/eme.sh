@@ -1,14 +1,13 @@
 #!/bin/bash -e
-set -x 
 
 ## Download and run this script to create a new eme server instance
 ## curl -o eme.sh -jL get-eme.eme.world
-## 1. Local Developer Instance
-## sudo bash eme.sh developer <server-path> 
+## 1. Local Developer Instance (Don't run as root)
+##    bash eme.sh developer <server-path> 
 ## 2. Docker Instance 
-## sudo bash eme.sh dockercreate <server-path> <nodenumber> <ownedby>
+##    sudo bash eme.sh dockercreate <server-path> <nodenumber> <ownedby>
 
-CMD="${1:-start}"
+CMD="${1:-help}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [ "$CMD" = "version" ]; then
@@ -33,18 +32,34 @@ fi
 case "$CMD" in
   clone | developer | dockercreate)
     #Clone the eme-server-client repo to the specified path
+
+    #verify is not running as root
+    if [[ $(id -u) -eq 0 ]]; then
+        echo "Don't run this script as root."
+        exit 1
+    fi
+
     SERVERHOME="$2"
     SERVERNAME="$(basename "$SERVERHOME")"
+
+    if [ -d "$SERVERHOME" ]; then
+        echo "Server path already exists: ${SERVERHOME}"
+        exit 1
+    fi
+    
     git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
     cd $SERVERHOME
     git submodule update --init --recursive --depth 1
-  ;;
+  
+  ;;&
 
   developer)
     ## Opens default workspace in VS Code for development
+    echo "Opening default workspace in VS Code for development"
     code eme-server.code-workspace
 
   ;;
+  
   dockercreate)
     ## eme.sh dockercreate <server-path> <nodenumber>
 
@@ -299,8 +314,14 @@ case "$CMD" in
         echo "Update complete."
         ;;
 
-  *)
-        echo "Usage: eme.sh [version | update [server-path] | dockerstart <server-path> | start [server-path]]" >&2
+  help | *)
+        echo -e "Eme Server Management Script\n"
+        echo "Setup local dev environment: "
+        echo " eme.sh developer <server-path>"
+        echo -e "\nUsage in Host: "
+        echo " sudo eme.sh dockercreate <server-path> <nodenumber> <ownedby> ]"
+        echo -e "\nUsage inside Docker: "
+        echo " eme.sh [ version | update [server-path] | dockerstart <server-path> | start [server-path]]" >&2
     exit 1
     ;;
 esac
