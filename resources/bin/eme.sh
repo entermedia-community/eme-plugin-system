@@ -27,6 +27,39 @@ if [ -z "$JAVA_HOME" ]; then
 fi  
 
 case "$CMD" in
+  clone | developer | dockerinit)
+    SERVERHOME="$2"
+    SERVERNAME="$(basename "$SERVERHOME")"
+    git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
+    cd $SERVERNAME
+    git submodule update --init --recursive --depth 1
+  ;;
+  developer)
+    
+    code eme-server.code-workspace
+
+  ;;
+  dockerinit)
+    ## eme.sh dockerinit <server-path> <nodenumber>
+
+    SERVERHOME="$2"
+    SERVERNAME="$(basename "$SERVERHOME")"
+    NODENUMBER="$3"
+    OWNEDBY="$4"
+    #check if .env file exists
+    
+    mkdir -p "$SERVERHOME"
+    echo "INSTANCE=$INSTANCE" > "$SERVERHOME/.env"
+    echo "SCRIPTROOT=${SERVERHOME}/bin" >> "$SERVERHOME/.env"
+    echo "SITE=$SITE" >> "$SERVERHOME/.env"
+    echo "NODENUMBER=$NODENUMBER" >> "$SERVERHOME/.env"
+    ##echo "IP_ADDR=$IP_ADDR" >> "$SERVERHOME/.env"
+    sudo chown -R "$OWNEDBY:$OWNEDBY" "$SERVERHOME"
+
+    
+    curl -s https://raw.githubusercontent.com/entermedia-community/eme-server/refs/heads/main/plugins/system/resources/docker/scripts/eme-docker-init.sh | sudo bash -s -- "$SERVERNAME" "$NODENUMBER" "$OWNEDBY"
+  ;;
+
   dockerstart)
     #Verify if $USERID is passed in
     if [ -z "$USERID" ]; then
@@ -71,7 +104,7 @@ case "$CMD" in
 
     echo "**** Starting server from: $SERVERHOME"
 
-    if [ ! -d "$SERVERHOME/webapp" ]; then
+    if [ ! -d "$SERVERHOME/.git" ]; then
         sudo mkdir -p "$SERVERHOME"
         sudo chown "$USERID:$GROUPID" "$SERVERHOME"
         cd "$SERVERHOME"

@@ -33,6 +33,7 @@ DOCKERNETWORKBASE=172.18.0
 SERVERHOMEBASE=/media/emsites
 SITE=$1
 NODENUMBER=$2
+OWNEDBY=$3
 
 if [ ${#NODENUMBER} -ge 4 ]; then echo "Node Number must be between 100-250" ; exit
 else echo "Using Node Number: $NODENUMBER"
@@ -52,12 +53,9 @@ IP_ADDR="$DOCKERNETWORKBASE.$NODENUMBER"
 SERVERHOME=$SERVERHOMEBASE/$SITE
 
 # Create entermedia user if needed
-if [[ ! $(id -u entermedia 2> /dev/null) ]]; then
-  groupadd entermedia > /dev/null
-  useradd -g entermedia entermedia > /dev/null
-fi
-USERID=$(id -u entermedia)
-GROUPID=$(id -g entermedia)
+
+USERID=$(id -u "$OWNEDBY")
+GROUPID=$(id -g "$OWNEDBY")
 
 # Docker networking
 if [[ ! $(docker network ls | grep $DOCKERNETWORK) ]]; then
@@ -73,20 +71,10 @@ echo "Review the following URL to get the full TZ list"
 echo "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
 echo "Default time zone(TZ) will be US Eastern time"
 
-#check if .env file exists
-if [ -f "$SERVERHOME/.env" ]; then	
-	echo "Using existing .env file"
-else
-	echo "Creating new .env file"
-	mkdir -p "$SERVERHOME"
-	echo "INSTANCE=$INSTANCE" > "$SERVERHOME/.env"
-	echo "SCRIPTROOT=$SCRIPTROOT" >> "$SERVERHOME/.env"
-	echo "SITE=$SITE" >> "$SERVERHOME/.env"
-	echo "NODENUMBER=$NODENUMBER" >> "$SERVERHOME/.env"
-	echo "IP_ADDR=$IP_ADDR" >> "$SERVERHOME/.env"
-	chown -R entermedia:entermedia "$SERVERHOME"
+if [ !-f "$SERVERHOME/.env" ]; then	
+    echo "Requires an .env file in $SERVERHOME"
+	exit 1
 fi
-
 
 set -e
 # Run Create Docker Instance, add Mounted HotFolders as needed
