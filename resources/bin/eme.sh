@@ -16,7 +16,7 @@ if [ "$CMD" = "version" ]; then
 fi
 
 case "$CMD" in
-  clone | developer | dockercreateX)
+  clone | developer | dockercreate)
     #Clone the eme-server-client repo to the specified path
 
     #verify is not running as root
@@ -63,9 +63,9 @@ case "$CMD" in
     #check if .env file exists
     
     mkdir -p "$SERVERHOME"
-    echo "INSTANCE=$INSTANCE" > "$SERVERHOME/.env"
+    echo "INSTANCE=$SERVERNAME$NODENUMBER" > "$SERVERHOME/.env"
     echo "SCRIPTROOT=${SERVERHOME}/bin" >> "$SERVERHOME/.env"
-    echo "SITE=$SITE" >> "$SERVERHOME/.env"
+    echo "SITE=$SERVERNAME" >> "$SERVERHOME/.env"
     echo "NODENUMBER=$NODENUMBER" >> "$SERVERHOME/.env"
     ##echo "IP_ADDR=$IP_ADDR" >> "$SERVERHOME/.env"
     sudo chown -R "$OWNEDBY:$OWNEDBY" "$SERVERHOME"
