@@ -48,7 +48,7 @@ case "$CMD" in
   
   dockercreate)
     ## eme.sh dockercreate <server-path> <nodenumber>
-
+    echo "Creating Docker instance for $SERVERHOME"
     SERVERHOME="$2"
     SERVERNAME="$(basename "$SERVERHOME")"
     NODENUMBER="$3"
@@ -63,7 +63,7 @@ case "$CMD" in
     ##echo "IP_ADDR=$IP_ADDR" >> "$SERVERHOME/.env"
     sudo chown -R "$OWNEDBY:$OWNEDBY" "$SERVERHOME"
     
-    curl -s https://raw.githubusercontent.com/entermedia-community/eme-server/refs/heads/main/plugins/system/resources/docker/scripts/eme-docker-init.sh | sudo bash -s -- "$SERVERNAME" "$NODENUMBER" "$OWNEDBY"
+    curl -s https://raw.githubusercontent.com/entermedia-community/eme-plugin-system/refs/heads/main/resources/docker/scripts/eme-docker-init.sh | sudo bash -s -- "$SERVERNAME" "$NODENUMBER" "$OWNEDBY"
   ;;
 
   dockerstart)
