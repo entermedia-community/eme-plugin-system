@@ -27,20 +27,22 @@ if [ -z "$JAVA_HOME" ]; then
 fi  
 
 case "$CMD" in
-  clone | developer | dockerinit)
+  clone | developer | dockercreate)
+    #Clone the eme-server-client repo to the specified path
     SERVERHOME="$2"
     SERVERNAME="$(basename "$SERVERHOME")"
     git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
     cd $SERVERNAME
     git submodule update --init --recursive --depth 1
   ;;
+  
   developer)
-    
+    ## Opens default workspace in VS Code for development
     code eme-server.code-workspace
 
   ;;
-  dockerinit)
-    ## eme.sh dockerinit <server-path> <nodenumber>
+  dockercreate)
+    ## eme.sh dockercreate <server-path> <nodenumber>
 
     SERVERHOME="$2"
     SERVERNAME="$(basename "$SERVERHOME")"
@@ -55,7 +57,6 @@ case "$CMD" in
     echo "NODENUMBER=$NODENUMBER" >> "$SERVERHOME/.env"
     ##echo "IP_ADDR=$IP_ADDR" >> "$SERVERHOME/.env"
     sudo chown -R "$OWNEDBY:$OWNEDBY" "$SERVERHOME"
-
     
     curl -s https://raw.githubusercontent.com/entermedia-community/eme-server/refs/heads/main/plugins/system/resources/docker/scripts/eme-docker-init.sh | sudo bash -s -- "$SERVERNAME" "$NODENUMBER" "$OWNEDBY"
   ;;
