@@ -35,6 +35,7 @@ case "$CMD" in
     
     git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
     cd $SERVERHOME
+    git config --global init.defaultBranch main
     git submodule update --init --recursive --depth 1
   
   ;;&
@@ -45,6 +46,15 @@ case "$CMD" in
     code eme-server.code-workspace
 
   ;;
+
+  developerupdate)
+    ## Updates the eme-server-client repo to the latest version
+    echo "Updating eme-server-client repo to the latest version"
+    SERVERHOME="$2"
+    cd $SERVERHOME
+    git pull origin main --depth 1
+    git submodule update --init --recursive --depth 1
+   ;;
   
   dockercreate)
     ## eme.sh dockercreate <server-path> <nodenumber>
