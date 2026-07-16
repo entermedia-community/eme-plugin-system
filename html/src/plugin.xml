@@ -504,4 +504,11 @@
 	<bean id="dateStorageUtil" class="org.openedit.util.DateStorageUtil" scope="prototype">
 	</bean>
 
+
+	<bean id="siteSnapshotManager" class="org.entermediadb.manager.SiteSnapshotManager">
+		<property name="moduleManager">
+			<ref bean="moduleManager"/>
+		</property>
+	</bean>
+
 </beans>

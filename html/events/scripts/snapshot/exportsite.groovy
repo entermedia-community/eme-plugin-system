@@ -110,15 +110,6 @@ public void export(MediaArchive mediaarchive,Data inSite, Data inSnap, boolean c
 		Page target = mediaarchive.getPageManager().getPage(rootfolder + "/views/");
 		mediaarchive.getPageManager().copyPage(views, target);
 	}
-	String rootpath = inSite.get("rootpath");
-	Page site = mediaarchive.getPageManager().getPage(rootpath);
-	if (site.exists())
-	{
-		Page target = mediaarchive.getPageManager().getPage(rootfolder + "/site");
-		mediaarchive.getPageManager().copyPage(site, target);
-	}
-	log.info("Manager Exporting " + mediaarchive.getCatalogId() + " folder: " + folder + " path:" + site.getContentItem().getAbsolutePath());
-	
 	
 
 	//	Collection apps = mediaarchive.getList("app");

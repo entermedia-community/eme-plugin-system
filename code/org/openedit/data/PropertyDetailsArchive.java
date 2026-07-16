@@ -367,17 +367,16 @@ public class PropertyDetailsArchive implements CatalogEnabled
 				}
 
 			}
-			else
-				if (!basesettingsdefaults.isExist())
+			else if (!basesettingsdefaults.isExist())
+			{
+				String beanname = dataxmlfile.getRoot().attributeValue("beanname");
+				if (beanname == null || beanname.equals("listSearcher"))
 				{
-					String beanname = dataxmlfile.getRoot().attributeValue("beanname");
-					if (beanname == null || beanname.equals("listSearcher"))
-					{
-						String listpath = findConfigurationFile("/fields/default.xml");
-						basesettingsdefaults = getXmlArchive().getXml(listpath);
+					String listpath = findConfigurationFile("/fields/default.xml");
+					basesettingsdefaults = getXmlArchive().getXml(listpath);
 
-					}
 				}
+			}
 
 			details = new PropertyDetails(this, inType); // Start fresh
 
@@ -469,11 +468,10 @@ public class PropertyDetailsArchive implements CatalogEnabled
 		{
 			beanName = inSearchtype + "Searcher";
 		}
-		else
-			if (getModuleManager().contains(inSearchtype + "Searcher"))
-			{
-				beanName = inSearchtype + "Searcher";
-			}
+		else if (getModuleManager().contains(inSearchtype + "Searcher"))
+		{
+			beanName = inSearchtype + "Searcher";
+		}
 		if (beanName == null)
 		{
 			beanName = settings.getRoot().attributeValue("beanname");
@@ -497,34 +495,30 @@ public class PropertyDetailsArchive implements CatalogEnabled
 		{
 			beanName = "dynamicLogSearcher";
 		}
+		else if (getPageManager().getPage(isfolder).exists())
+		{
+			beanName = "folderSearcher";
+		}
+		else if (getPageManager().getPage(isDatafolder).exists())
+		{
+			beanName = "folderSearcher";
+		}
+		else if (getPageManager().getPage(islists).exists())
+		{
+			beanName = "listSearcher";
+		}
+		else if (getPageManager().getPage(isDatalists).exists())
+		{
+			beanName = "listSearcher";
+		}
 		else
-			if (getPageManager().getPage(isfolder).exists())
+		{
+			beanName = basesettings.getRoot().attributeValue("beanname");
+			if (beanName == null)
 			{
-				beanName = "folderSearcher";
+				beanName = "dataSearcher";
 			}
-			else
-				if (getPageManager().getPage(isDatafolder).exists())
-				{
-					beanName = "folderSearcher";
-				}
-				else
-					if (getPageManager().getPage(islists).exists())
-					{
-						beanName = "listSearcher";
-					}
-					else
-						if (getPageManager().getPage(isDatalists).exists())
-						{
-							beanName = "listSearcher";
-						}
-						else
-						{
-							beanName = basesettings.getRoot().attributeValue("beanname");
-							if (beanName == null)
-							{
-								beanName = "dataSearcher";
-							}
-						}
+		}
 		inDetails.setBeanName(beanName);
 	}
 
@@ -1001,7 +995,9 @@ public class PropertyDetailsArchive implements CatalogEnabled
 		if (fieldChildTableNames == null)
 		{
 			fieldChildTableNames = new ArrayList();
+			log.info("List search types");
 			List searchtypes = listSearchTypes();
+			log.info(searchtypes.size());
 			for (Iterator iterator = searchtypes.iterator(); iterator.hasNext();)
 			{
 				String type = (String) iterator.next();
@@ -1011,6 +1007,8 @@ public class PropertyDetailsArchive implements CatalogEnabled
 				{
 					fieldChildTableNames.add(type);
 				}
+
+				log.info("Child table found: " + type);
 			}
 
 			return fieldChildTableNames;
@@ -1088,14 +1086,13 @@ public class PropertyDetailsArchive implements CatalogEnabled
 				PropertyDetail prop = (PropertyDetail) object;
 				child.addAttribute("id", prop.getId());
 			}
-			else
-				if (object instanceof ViewFieldList)
-				{
-					Element child = inRoot.addElement("section");
-					ViewFieldList view = (ViewFieldList) object;
-					child.addAttribute("title", view.getTitle());
-					appendValues(child, view);
-				}
+			else if (object instanceof ViewFieldList)
+			{
+				Element child = inRoot.addElement("section");
+				ViewFieldList view = (ViewFieldList) object;
+				child.addAttribute("title", view.getTitle());
+				appendValues(child, view);
+			}
 
 		}
 
