@@ -1,4 +1,6 @@
-#!/bin/bash -x -e
+#!/bin/bash -x 
+
+set -e
 
 ## Download and run this script to create a new eme server instance
 ## curl -o eme.sh -jL get-eme.eme.world
@@ -33,15 +35,16 @@ case "$CMD" in
         exit 1
     fi
     
-    ##git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
-    mkdir -p $SERVERHOME
+    git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
     cd $SERVERHOME
-    git init
     git remote add upstream https://github.com/entermedia-community/eme-server.git
     git config --global init.defaultBranch main
     git pull upstream main
 
     git submodule update --init --recursive --remote
+
+    git push -u origin main
+
   
   ;;&
 
@@ -52,7 +55,7 @@ case "$CMD" in
 
   ;;
 
-  branchupdate)
+  branchupdate | branchpush)
     ## Updates the eme-server-client repo to the latest version
     echo "Updating eme-server-client repo to the latest version"
     SERVERHOME="$2"
@@ -69,8 +72,20 @@ case "$CMD" in
     git rebase upstream/main
     git stash pop
     
+   ;;&
 
-   ;;
+  branchpush)
+    ## Pushes the eme-server-client repo to the remote repository
+    echo "Pushing eme-server-client repo to the remote repository"
+    SERVERHOME="$2"
+    cd $SERVERHOME
+    COMMITMESSAGE="${3:-Update from Client}"
+   
+    git add -A .
+    git commit -m "$COMMITMESSAGE" || true
+    git pull
+    git push
+  ;;
   
   dockercreate)
     ## eme.sh dockercreate <server-path> <nodenumber>
