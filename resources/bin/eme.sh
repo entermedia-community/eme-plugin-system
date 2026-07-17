@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -x -e
 
 ## Download and run this script to create a new eme server instance
 ## curl -o eme.sh -jL get-eme.eme.world
@@ -16,7 +16,7 @@ if [ "$CMD" = "version" ]; then
 fi
 
 case "$CMD" in
-  clone | developer | dockercreate)
+  branchinit | developer | dockercreate)
     #Clone the eme-server-client repo to the specified path
 
     #verify is not running as root
@@ -33,10 +33,15 @@ case "$CMD" in
         exit 1
     fi
     
-    git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
+    ##git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
+    mkdir -p $SERVERHOME
     cd $SERVERHOME
+    git init
+    git remote add upstream https://github.com/entermedia-community/eme-server.git
     git config --global init.defaultBranch main
-    git submodule update --init --recursive --depth 1
+    git pull upstream main
+
+    git submodule update --init --recursive --remote
   
   ;;&
 
@@ -47,13 +52,24 @@ case "$CMD" in
 
   ;;
 
-  developerupdate)
+  branchupdate)
     ## Updates the eme-server-client repo to the latest version
     echo "Updating eme-server-client repo to the latest version"
     SERVERHOME="$2"
     cd $SERVERHOME
-    git pull origin main --depth 1
-    git submodule update --init --recursive --depth 1
+
+    git stash
+    #git submodule foreach 'git pull origin main'
+    git submodule update --remote --merge
+    git add -A .
+    git commit -m "Update submodules" || true
+    git pull
+    git push
+    git fetch upstream
+    git rebase upstream/main
+    git stash pop
+    
+
    ;;
   
   dockercreate)
@@ -331,7 +347,7 @@ case "$CMD" in
         echo "Update complete."
         ;;
 
-  help | *)
+  help)
         echo -e "Eme Server Management Script\n"
         echo "Setup local dev environment: "
         echo " eme.sh developer <server-path>"
