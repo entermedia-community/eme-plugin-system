@@ -62,14 +62,13 @@ case "$CMD" in
     cd $SERVERHOME
 
     git stash
-    #git submodule foreach 'git pull origin main'
     git submodule update --remote --merge
     git add -A .
-    git commit -m "Update submodules" || true
+    git commit -m "Update submodules"
     git pull
     git push
-    git fetch upstream
-    git rebase upstream/main
+    #git fetch upstream
+    #git rebase upstream/main
     git stash pop
     
    ;;&
