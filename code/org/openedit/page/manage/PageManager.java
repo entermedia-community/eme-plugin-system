@@ -906,11 +906,13 @@ public class PageManager
 			if (styles != null)
 			{
 				Set canceled = new HashSet();
+				Map remaining = new HashMap();
 				paths = new ArrayList(styles.size());
 
 				for (Iterator iterator = styles.iterator(); iterator.hasNext();)
 				{
 					Style style = (Style) iterator.next();
+
 					if (style.isCancel())
 					{
 						canceled.add(style.getId());
@@ -919,6 +921,7 @@ public class PageManager
 					{
 						canceled.remove(style.getId()); // Last one wins
 					}
+					remaining.put(style.getId(), style);
 				}
 
 				for (Iterator iterator = styles.iterator(); iterator.hasNext();)
@@ -928,6 +931,13 @@ public class PageManager
 					{
 						continue;
 					}
+					Style found = (Style) remaining.get(style.getId());
+					if (found == null)
+					{
+						continue;
+					}
+					style = found; // Use the last one
+					remaining.remove(found.getId());
 
 					String value = style.getHref();
 					value = startingfrom.replaceProperty(value);
@@ -935,7 +945,7 @@ public class PageManager
 					{
 						if (paths.contains(value))
 						{
-							continue;
+							throw new OpenEditException("Duplicate style path " + value + " #" + style.getId() + " Path: " + style.getConfiguration());
 						}
 						// throw new OpenEditException("src value cannot be null " + style.getHref() + " #" +
 						// style.getId());
