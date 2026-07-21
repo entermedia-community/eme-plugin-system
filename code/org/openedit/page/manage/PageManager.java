@@ -183,15 +183,14 @@ public class PageManager
 				}
 			}
 		}
-		else
-			if (multipleLang)
+		else if (multipleLang)
+		{
+			Page translated = getPage(rootdir + inPath, inCheckCurrent);
+			if (translated.exists())
 			{
-				Page translated = getPage(rootdir + inPath, inCheckCurrent);
-				if (translated.exists())
-				{
-					foundPage = translated;
-				}
+				foundPage = translated;
 			}
+		}
 		if (foundPage == null)
 		{
 			return inPage;
@@ -242,16 +241,15 @@ public class PageManager
 				// if the fullpath alternative has been added then we need to blow away this page and its settings
 				reloadPage = true;
 			}
+			else if (!inCheckDates)
+			{
+				firePageRequested(page);
+				return page;
+			}
 			else
-				if (!inCheckDates)
-				{
-					firePageRequested(page);
-					return page;
-				}
-				else
-				{
-					reloadPage = true;
-				}
+			{
+				reloadPage = true;
+			}
 		}
 		synchronized (getCacheManager())
 		{ // lock down the config until we can configure the thing
@@ -305,21 +303,20 @@ public class PageManager
 		{
 			path = inPage.getAlternateContentPath();
 		}
-		else
-			if (inPage.getPath().endsWith("/"))
+		else if (inPage.getPath().endsWith("/"))
+		{
+			// Check all the fallback dirs
+			Collection<PageSettings> fallbacks = inPage.getPageSettings().getFallbackParents();
+			for (PageSettings fallback : fallbacks)
 			{
-				// Check all the fallback dirs
-				Collection<PageSettings> fallbacks = inPage.getPageSettings().getFallbackParents();
-				for (PageSettings fallback : fallbacks)
+				String dirparent = PathUtilities.extractDirectoryPath(fallback.getPath());
+				if (getRepository().doesExist(dirparent))
 				{
-					String dirparent = PathUtilities.extractDirectoryPath(fallback.getPath());
-					if (getRepository().doesExist(dirparent))
-					{
-						path = dirparent;
-						break;
-					}
+					path = dirparent;
+					break;
 				}
 			}
+		}
 		ContentItem revision = getRepository().getStub(path);
 		return revision;
 	}
@@ -931,10 +928,15 @@ public class PageManager
 					{
 						continue;
 					}
+
 					String value = style.getHref();
 					value = startingfrom.replaceProperty(value);
 					if (value != null)
 					{
+						if (paths.contains(value))
+						{
+							continue;
+						}
 						// throw new OpenEditException("src value cannot be null " + style.getHref() + " #" +
 						// style.getId());
 						paths.add(value);
