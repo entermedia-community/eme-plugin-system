@@ -4,44 +4,68 @@ public class Style
 {
 	protected String fieldHref;
 	protected String fieldId;
+	protected String fieldConfiguration;
+
 	protected boolean fieldCancel;
 	protected boolean fieldPreload;
-	
+
 	public boolean isPreload()
 	{
 		return fieldPreload;
 	}
+
+	public String getConfiguration()
+	{
+		return fieldConfiguration;
+	}
+
+	public void setConfiguration(String inConfiguration)
+	{
+		fieldConfiguration = inConfiguration;
+	}
+
 	public void setPreload(boolean inPreload)
 	{
 		fieldPreload = inPreload;
 	}
+
 	public String getHref()
 	{
 		return fieldHref;
 	}
+
 	public void setHref(String inSrc)
 	{
 		fieldHref = inSrc;
 	}
+
 	public String getId()
 	{
 		return fieldId;
 	}
+
 	public void setId(String inId)
 	{
 		fieldId = inId;
 	}
+
 	protected Boolean fieldExternal;
-	
-	public Boolean getExternal() {
+
+	public Boolean getExternal()
+	{
 		return fieldExternal;
 	}
-	public void setExternal(Boolean fieldExternal) {
+
+	public void setExternal(Boolean fieldExternal)
+	{
 		this.fieldExternal = fieldExternal;
 	}
-	public boolean isCancel() {
+
+	public boolean isCancel()
+	{
 		return fieldCancel;
 	}
+
 	public void setCancel(boolean inCancel)
 	{
 		fieldCancel = inCancel;

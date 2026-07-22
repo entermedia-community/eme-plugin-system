@@ -16,7 +16,7 @@ COPY limits.conf /etc/security/limits.conf
 COPY nproc.conf /etc/security/limits.d/20-nproc.conf
 
 ARG CACHE_BREAKER
-RUN wget -O - https://raw.githubusercontent.com/entermedia-community/eme-server/refs/heads/main/plugins/system/resources/bin/eme.sh >> /usr/bin/eme  && chmod +x /usr/bin/eme
+RUN mkdir -p /home/entermedia/eme-server/plugins/system/resources/bin && wget -O - https://raw.githubusercontent.com/entermedia-community/eme-server/refs/heads/main/plugins/system/resources/bin/eme.sh >> /home/entermedia/eme-server/plugins/system/resources/bin/eme.sh && chmod +x /home/entermedia/eme-server/plugins/system/resources/bin/eme.sh && ln -s /home/entermedia/eme-server/plugins/system/resources/bin/eme.sh /usr/bin/eme
 
 
 #RUN rm -rf /tmp/* && \

@@ -134,9 +134,11 @@ public class XConfToPageSettingsConverter
 
 	protected Style createStyle(PageSettings inSettings, Configuration inConfigElement)
 	{
+
 		Style style = new Style();
 		style.setId(inConfigElement.get("id"));
 		style.setHref(inConfigElement.get("href"));
+		style.setConfiguration(inSettings.getPath());
 		style.setExternal(Boolean.parseBoolean(inConfigElement.get("external")));
 		style.setPreload(Boolean.parseBoolean(inConfigElement.get("preload")));
 		style.setCancel(Boolean.parseBoolean(inConfigElement.get("cancel")));
