@@ -1,10 +1,27 @@
 <?xml version="1.0"?>
 
 <page>
-	<property name="title">OpenEdit</property>
 
+	<property name="catalogid">system</property>
+
+	<property name="title">OpenEdit</property>
 	<property name="productName">OpenEdit</property>
 	<property name="productUrl">http://www.openedit.org</property>
+
+	<property name="oe_edit_directedits">true</property>
+	<property name="showadmintoolbar">true</property>
+
+	<generator name="velocityGenerator" mimetypes="text/html"/>
+	<generator name="fileGenerator" />
+
+	<property name="makeversion">false</property>
+	
+	<property name="oeplugintype">openedit-editor</property>
+	<property name="oeplugintitle">
+		<value>Content</value>
+	</property>
+	<property name="oepluginbean">EditModule</property>
+	<property name="editable">false</property>
 
 	<permission name="view">
 		<or>
@@ -18,26 +35,8 @@
 	</permission>
 
 	<path-action name="Admin.allowViewing">
-		<!-- This is the path to which to redirect if the user does not have the
-	         appropriate view permission.  Defaults to /openedit/authentication/logon.html.			
-		-->
 		<login-path>/${applicationid}/authentication/logon.html</login-path>
 	</path-action>
 
-	<property name="oe_edit_directedits">true</property>
-	<property name="showadmintoolbar">true</property>
-
-	<generator name="velocityGenerator" mimetypes="text/html"/>
-	<generator name="fileGenerator" />
-
-	<property name="makeversion">false</property>
-
-	<property name="catalogid">system</property>
-	<property name="oeplugintype">openedit-editor</property>
-	<property name="oeplugintitle">
-		<value>Content</value>
-		<value locale="es">Contenido</value>
-	</property>
-	<property name="oepluginbean">EditModule</property>
-	<property name="editable">false</property>
+	
 </page>
