@@ -141,29 +141,9 @@ case "$CMD" in
 
     CATALINA_BASE="$SERVERHOME/tomcat"
     export CATALINA_BASE
-    #SIGTERM-handler
-    term_handler() {
-        
-        pid=$(pgrep -f "$CATALINA_BASE/conf/logging.properties")
-        echo "SIGTERM received, shutting down Tomcat (PID: $pid)"
-        if [[ ! -z $pid ]]; then
-            if [ $pid -ne 0 ]; then
-                echo "Deployment shutdown start"
-                 sh -c "$SERVERHOME/tomcat/bin/catalina.sh stop"
-                kill -SIGTERM "$catalinapid"
-                while [ -e /proc/$pid ]; do
-                    printf .
-                    sleep 1
-                done
-            fi
-        fi
-        echo "Tomcat shutdown complete, exiting (143)"
-        exit 143 # 128 + 15 -- SIGTERM
-    }
 
-    #Send SIGTERM to the PID of the most recently started background job
+
     echo "Starting Tomcat in foreground (PID: $$)"
-    trap 'kill $$; term_handler' SIGTERM
 
     sudo -u entermedia /usr/bin/eme start "$2" &
 
@@ -174,6 +154,32 @@ case "$CMD" in
         echo "Catalina PID: $catalinapid"
         sleep 1
     done
+
+    #SIGTERM-handler
+    term_handler() {
+        
+        #pid=$(pgrep -f "$CATALINA_BASE/conf/logging.properties")
+        pid=$catalinapid
+        echo "SIGTERM received, shutting down Tomcat (PID: $pid)"
+        if [[ ! -z $pid ]]; then
+            if [ $pid -ne 0 ]; then
+                echo "Deployment shutdown start"
+                sh -c "$SERVERHOME/tomcat/bin/catalina.sh stop"
+                kill -SIGTERM "$pid"
+                while [ -e /proc/$pid ]; do
+                    printf .
+                    sleep 1
+                done
+            fi
+        fi
+        echo "Tomcat shutdown complete, exiting (143)"
+        exit 143 # 128 + 15 -- SIGTERM
+    }
+
+    
+    #Send SIGTERM to the PID of the most recently started background job
+    #trap 'kill $$; term_handler' SIGTERM
+    trap 'term_handler' SIGTERM
 
     wait $catalinapid
     echo "Tomcat process $catalinapid exited"
