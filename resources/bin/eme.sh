@@ -64,7 +64,7 @@ case "$CMD" in
     git stash
     git submodule update --remote --merge
     git add -A .
-    git commit -m "Update submodules"
+    git commit -a -m "Update submodules"
     git pull
     git push
     #git fetch upstream
