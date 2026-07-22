@@ -1,4 +1,3 @@
--Dappname=$SERVERHOME
 -XX:+ShowCodeDetailsInExceptionMessages
 -Dcatalina.home=$SERVERHOME/tomcat/
 -Dcatalina.base=$SERVERHOME/tomcat

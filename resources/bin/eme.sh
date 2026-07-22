@@ -1,4 +1,4 @@
-#!/bin/bash -x 
+#!/bin/bash 
 
 set -e
 
@@ -30,21 +30,20 @@ case "$CMD" in
     SERVERHOME="$2"
     SERVERNAME="$(basename "$SERVERHOME")"
 
-    if [ -d "$SERVERHOME" ]; then
-        echo "Server path already exists: ${SERVERHOME}"
-        exit 1
+    if [ ! -d "$SERVERHOME" ]; then
+        echo "Server path does not exist: ${SERVERHOME}"
+        
+        git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
+        
+        cd $SERVERHOME
+        git remote add upstream https://github.com/entermedia-community/eme-server.git
+        git config --global init.defaultBranch main
+        git pull upstream main
+
+        git submodule update --init --recursive --remote
+
+        git push -u origin main
     fi
-    
-    git clone https://github.com/entermedia-community/${SERVERNAME}.git ${SERVERHOME}
-    cd $SERVERHOME
-    git remote add upstream https://github.com/entermedia-community/eme-server.git
-    git config --global init.defaultBranch main
-    git pull upstream main
-
-    git submodule update --init --recursive --remote
-
-    git push -u origin main
-
   
   ;;&
 
@@ -136,7 +135,49 @@ case "$CMD" in
     echo 'nameserver 8.8.8.8' >>/etc/resolv.conf
     echo 'options ndots:0' >>/etc/resolv.conf
 
-    sudo -u entermedia /usr/bin/eme start "$2"
+    
+
+    SERVERHOME="$2"
+
+    CATALINA_BASE="$SERVERHOME/tomcat"
+    export CATALINA_BASE
+    #SIGTERM-handler
+    term_handler() {
+        
+        pid=$(pgrep -f "$CATALINA_BASE/conf/logging.properties")
+        echo "SIGTERM received, shutting down Tomcat (PID: $pid)"
+        if [[ ! -z $pid ]]; then
+            if [ $pid -ne 0 ]; then
+                echo "Deployment shutdown start"
+                 sh -c "$SERVERHOME/tomcat/bin/catalina.sh stop"
+                kill -SIGTERM "$catalinapid"
+                while [ -e /proc/$pid ]; do
+                    printf .
+                    sleep 1
+                done
+            fi
+        fi
+        echo "Tomcat shutdown complete, exiting (143)"
+        exit 143 # 128 + 15 -- SIGTERM
+    }
+
+    #Send SIGTERM to the PID of the most recently started background job
+    echo "Starting Tomcat in foreground (PID: $$)"
+    trap 'kill $$; term_handler' SIGTERM
+
+    sudo -u entermedia /usr/bin/eme start "$2" &
+
+    catalinapid=0
+    while [ $catalinapid -eq 0 ]; do
+        catalinapid=$(pgrep -f "eme start")
+        catalinapid=$(echo "$catalinapid" | awk '{print int($0)}')
+        echo "Catalina PID: $catalinapid"
+        sleep 1
+    done
+
+    wait $catalinapid
+    echo "Tomcat process $catalinapid exited"
+
     ;;
 
   init | start)    
@@ -268,60 +309,19 @@ case "$CMD" in
     mkdir -p "$SERVERHOME/tomcat/work"
     EXPANDED_ARGS=$( mktemp $SERVERHOME/tomcat/work/tomcat-args.XXXXXX)
     sudo chmod 600 "$EXPANDED_ARGS"
-    trap " rm -f $EXPANDED_ARGS" EXIT
+#    trap " rm -f $EXPANDED_ARGS" EXIT
     sed -e "s|\$SERVERHOME|$SERVERHOME|g" "$ARGS_TEMPLATE" > "$EXPANDED_ARGS"
 
+    echo "Starting Tomcat (PID: $$) ${!}"
+
     JAVA="$JAVA_HOME/bin/java"
-
-    echo "$JAVA $(cat "$EXPANDED_ARGS") org.apache.catalina.startup.Bootstrap start"
-
+    SERVERNAME="$(basename "$SERVERHOME")"
+  
     #Run Tomcat as entermedia user
-    #  "$JAVA" "@$EXPANDED_ARGS" org.apache.catalina.startup.Bootstrap start 
+    echo "$JAVA -Dappname=$SERVERNAME $(cat "$EXPANDED_ARGS") org.apache.catalina.startup.Bootstrap start"
+    "$JAVA" -Dappname="$SERVERNAME" "@$EXPANDED_ARGS" org.apache.catalina.startup.Bootstrap start
+    rm -f "$EXPANDED_ARGS"
 
-    
-    CATALINA_BASE="$SERVERHOME/tomcat"
-    export CATALINA_BASE
-    #SIGTERM-handler
-    term_handler() {
-        
-        pid=$(pgrep -f "$CATALINA_BASE/conf/logging.properties")
-        echo "SIGTERM received, shutting down Tomcat (PID: $pid)"
-        if [[ ! -z $pid ]]; then
-            if [ $pid -ne 0 ]; then
-                echo "Deployment shutdown start"
-                 sh -c "$SERVERHOME/tomcat/bin/catalina.sh stop"
-                kill -SIGTERM "$catalinapid"
-                while [ -e /proc/$pid ]; do
-                    printf .
-                    sleep 1
-                done
-            fi
-        fi
-        echo "Tomcat shutdown complete, exiting (143)"
-        exit 143 # 128 + 15 -- SIGTERM
-    }
-
-    #SIGKILL
-    # setup handlers
-    # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
-    trap 'kill ${!}; term_handler' SIGTERM
-
-    #Run application
-    # sh -c "$EMTARGET/tomcat/bin/catalina.sh run" &
-
-    "$JAVA" "@$EXPANDED_ARGS" org.apache.catalina.startup.Bootstrap start 
-    
-    catalinapid=0
-    while [ $catalinapid -eq 0 ]; do
-        catalinapid=$(pgrep -f "eme start")
-        ##make sure its an integer not a string
-        catalinapid=$(echo "$catalinapid" | awk '{print int($0)}')
-        echo "Catalina PID: $catalinapid"
-        sleep 1
-    done
-
-    wait $catalinapid
-    echo "Tomcat process $catalinapid exited"
     ;;
 
     update)
