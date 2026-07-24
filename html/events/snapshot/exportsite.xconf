@@ -2,9 +2,7 @@
 	<path-action name="PageValue.loadPageVariable"  bean="searcherManager" alltypes="true"/>
 	<property name="eventname">Export Pending Snapshots</property>	
 	
-	<path-action name="Script.run" alltypes="true" >
-		<script>/${catalogid}/events/scripts/snapshot/exportsite.groovy</script>
-	</path-action>
+	<path-action name="MediaAdminModule.createSiteSnapshot" alltypes="true" />
 
 	
 </page>
