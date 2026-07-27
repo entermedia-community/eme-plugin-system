@@ -2,7 +2,7 @@
 	<path-action name="PageValue.loadPageVariable"  bean="searcherManager" alltypes="true"/>
 	<property name="eventname">Restore Pending Snapshots</property>	
 	
-	<path-action name="MediaAdminModule.restoreSiteSnapshot" alltypes="true" />
+	<path-action name="MediaAdminModule.runRestore" alltypes="true" />
 
 	
 </page>
