@@ -25,7 +25,7 @@ $text.replaceAll("(\r\n|\n)", "<br />")
 #end
 #end
 #macro( translate $text )
-$!translations.getEntryForLocale($context.getLocale(), $text, $content.isPropertyTrue("auto_translate_${context.getLocale()}"))
+$!page.getText($text, $context.locale)
 #end
 #macro(makeid $invalue)$!url_util.getPathUtilities().extractId($invalue)#end
 #macro(debug $invalue)
