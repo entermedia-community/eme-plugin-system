@@ -18,7 +18,7 @@ public class EMediaTranslator implements Translator
 	private static final Log log = LogFactory.getLog(EMediaTranslator.class);
 	protected HttpSharedConnection fieldConnection;
 	protected String fieldApiKey;
-	
+
 	public HttpSharedConnection getConnection()
 	{
 		if (fieldConnection == null)
@@ -28,19 +28,19 @@ public class EMediaTranslator implements Translator
 		}
 		return fieldConnection;
 	}
-	
+
 	protected String getApiKey()
 	{
-	  	if( fieldApiKey == null)
-	  	{
-	    	SearcherManager searchermanager = (SearcherManager)getModuleManager().getBean("system", "searcherManager");
+		if (fieldApiKey == null)
+		{
+			SearcherManager searchermanager = (SearcherManager) getModuleManager().getBean("system", "searcherManager");
 			Data translatekey = searchermanager.getCachedData("system", "systemsettings", "translatekey");
-			fieldApiKey = "4b37163c-11dd-4a14-be24-f8fc318f703e"; //Old
-			if( translatekey  != null && translatekey.get("value") != null && !translatekey .get("value").isEmpty())
+			fieldApiKey = "4b37163c-11dd-4a14-be24-f8fc318f703e"; // Old
+			if (translatekey != null && translatekey.get("value") != null && !translatekey.get("value").isEmpty())
 			{
 				fieldApiKey = translatekey.get("value");
-	    	}
-	  	}
+			}
+		}
 		return fieldApiKey;
 	}
 
@@ -49,16 +49,16 @@ public class EMediaTranslator implements Translator
 		fieldConnection = inConnection;
 	}
 
-	//TODO Support an array of translations
+	// TODO Support an array of translations
 	@Override
 	public String webTranslate(String inText, String inSourcelang, String inTargetLang)
 	{
 		long start = System.currentTimeMillis();
 		HttpClient client = URLUtilities.createTrustingHttpClient().setUserAgent("Mozilla/5.0 (Mobile; rv:14.0) Gecko/14.0 Firefox/14.0").build();
 		JSONObject payload = new JSONObject();
-		
+
 		payload.put("source", inSourcelang);
-		
+
 		JSONArray targets = new JSONArray();
 		targets.add(inTargetLang);
 		payload.put("target", targets);
@@ -67,17 +67,19 @@ public class EMediaTranslator implements Translator
 		q.add(inText);
 		payload.put("q", q);
 		String url = "https://translate.emediaworkspace.com/translate";
-		
+
 		CloseableHttpResponse resp = getConnection().sharedPostWithJson(url, payload);
 		StatusLine filestatus = resp.getStatusLine();
 		if (filestatus.getStatusCode() != 200)
 		{
-			//Problem
-			log.info( filestatus.getStatusCode() + " URL issue " + " " + url);
+			// Problem
+			log.info(filestatus.getStatusCode() + " URL issue " + " " + url);
+			getConnection().release(resp);
 			return null;
 		}
-		JSONObject translations = getConnection().parseMap(resp);
+		JSONObject translations = getConnection().parseMap(resp); // This releases the connection
 		JSONObject fieldTranslations = (JSONObject) translations.get("translatedText");
+<<<<<<< HEAD
 		if (fieldTranslations == null)
 		{
 			log.info("No translations returned for " + inText);
@@ -85,16 +87,19 @@ public class EMediaTranslator implements Translator
 		}
 		JSONArray inorder = (JSONArray)fieldTranslations.get(inTargetLang);
 		String translatedText = (String)inorder.get(0); //Only one for now
+=======
+		JSONArray inorder = (JSONArray) fieldTranslations.get(inTargetLang);
+		String translatedText = (String) inorder.get(0); // Only one for now
+>>>>>>> e5ae3a5 (error handling)
 		translatedText = translatedText.trim();
 		long end = System.currentTimeMillis();
-		log.info("Translated: [[" + inText + "]] to: [[" + translatedText  + "]] in " + inTargetLang + " time: " + (end - start) + "ms");
+		log.info("Translated: [[" + inText + "]] to: [[" + translatedText + "]] in " + inTargetLang + " time: " + (end - start) + "ms");
 
 		return translatedText;
 	}
 
 	protected ModuleManager fieldModuleManager;
-	
-	
+
 	public ModuleManager getModuleManager()
 	{
 		return fieldModuleManager;
