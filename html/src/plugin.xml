@@ -456,25 +456,6 @@
 		</property>
 	</bean>
 
-	<bean id="userSearcher" class="org.openedit.users.filesystem.FileUserSearcher" scope="prototype">
-		<property name="searcherManager">
-			<ref bean="searcherManager" />
-		</property>
-
-		<property name="moduleManager">
-			<ref bean="moduleManager" />
-		</property>
-	</bean>
-	<bean id="groupSearcher" class="org.openedit.users.filesystem.FileGroupSearcher" scope="prototype">
-		<property name="searcherManager">
-			<ref bean="searcherManager" />
-		</property>
-		<property name="moduleManager">
-			<ref bean="moduleManager" />
-		</property>
-
-	</bean>
-
 	<bean id="geoCoder" class="org.entermediadb.location.GeoCoder" scope="prototype">
 		<property name="moduleManager">
 			<ref bean="moduleManager" />
