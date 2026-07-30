@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
@@ -437,10 +435,10 @@ public class XConfToPageSettingsConverter
 			}
 			inPageSetting.setOriginalyExistedContentPath(false);
 		}
-		if (!inUrlPath.startsWith("/catalog") && inUrlPath.endsWith(".html"))
-		{
-			log.info("Content not found " + inUrlPath);
-		}
+		// if (!inUrlPath.startsWith("/catalog") && inUrlPath.endsWith(".html"))
+		// {
+		// log.info("Content not found " + inUrlPath);
+		// }
 	}
 
 	/**
@@ -463,29 +461,6 @@ public class XConfToPageSettingsConverter
 		PageProperty nextfallBackDir = findFallbackDirectory(inPageSetting);
 		addFallBackParents(inPageSetting, inPageSetting, nextfallBackDir, fallBackParents);
 		sortByFolderName(fallBackParents);
-
-		// Collections.sort(fallBackParents, new XConfToPageSettingsConverter.PageSettingsPathComparator());
-
-		// for (PageSettings setting : fallBackParents)
-		// {
-
-		// String alternativepath = findAlternativePath(inPageSetting, setting, inUrlPath);
-		// if (alternativepath != null)
-		// {
-		// PageSettings otherxconf = getPageSettingsManager().getPageSettings(alternativepath);
-		// inPageSetting.setFallBack(otherxconf);
-		// break;
-		// }
-		// }
-
-		// if (fallBackParents.size() > 1)
-		// {
-		// PageSettings first = fallBackParents.get(1);
-		// inPageSetting.setFallBack(first);
-		// }
-
-		// PageSettings first = fallBackParents.get(0);
-		// inPageSetting.setFallBack(first);
 	}
 
 	public void sortByFolderName(List<PageSettings> fallBackParents)
@@ -496,140 +471,11 @@ public class XConfToPageSettingsConverter
 		}
 		PageSettings first = fallBackParents.get(0);
 
-		// Make ones that have no fallback directory go to the bottom of the list
-		// Loop over the list and see who falls back to who. If one falls back to another then it should be
-		// higher in the list. If one has no fallback directory then it should be at the bottom of the list.
-		// Set<PageSettings> remainingFallbacks = new HashSet<PageSettings>(fallBackParents);
-		// remainingFallbacks.remove(first);
-		// while( remainingFallbacks.size() > 1)
-		// {
-		// PageSettings testing = remainingFallbacks.iterator().next();
-		// for (PageSettings remaining: remainingFallbacks)
-		// {
-		// PageProperty fallBackDir = findFallbackDirectory(testing);
-		// if (fallBackDir == null)
-		// {
-		// remainingFallbacks.remove(testing);
-		// }
-		// }
-
-		// }
-
-		// Collections.sort(fallBackParents, new PageSettingsPathComparator(first.getPath()));
-
 		Collections.sort(fallBackParents, new FallBackRootsComparator(first));
 
 		Collections.reverse(fallBackParents);
 
 	}
-
-	// public String findAlternativePath(PageSettings inCurrentFallback, PageSettings
-	// inAlternativeFallback, PageSettings inCurrentPath)
-	// {
-	// try
-	// {
-	// String alt = findAlternativePath(inCurrentFallback, inAlternativeFallback,
-	// inCurrentPath.getPath());
-	// if (alt != null)
-	// {
-	// log.info("inCurrentPath: " + inCurrentPath.getPath() + " inCurrentFallback: " +
-	// inCurrentFallback.getPath() + " inAlternativeFallback: " + inAlternativeFallback.getPath()
-	// + " --> Alternative path: " + alt);
-	// log.info("done");
-	// }
-
-	// return alt;
-	// }
-	// catch (Throwable e)
-	// {
-	// log.error("ERRRRRRROR: inCurrentPath: " + inCurrentPath.getPath() + " inCurrentFallback: " +
-	// inCurrentFallback.getPath() + " inAlternativeFallback: " + inAlternativeFallback.getPath());
-	// return null;
-	// }
-	// }
-
-	// public String findAlternativePath(PageSettings inOriginal, PageSettings inPageSetting, String
-	// inUrlPath)
-	// {
-	// // if (inUrlPath.indexOf(".") == -1)
-	// // {
-	// // log.info("inOriginal: " + inOriginal.getPath() + " inPageSetting: " + inPageSetting.getPath()
-	// +
-	// // " inUrlPath: " + inUrlPath);
-	// // log.info("+++++++++" + inUrlPath);
-	// // log.info("+++++++++");
-	// // return null;
-	// // }
-	// String fallBackValue = null;
-	// // this is a catch 22. If we don't have a 1st level fallback set it might not look for second
-	// level
-	// PageProperty fallBackDir = inPageSetting.getProperty("fallbackdirectory");
-	// String alternativepath = null;
-	// if (fallBackDir != null && fallBackDir.getValue() != null)
-	// {
-	// String fallbacksetpath = fallBackDir.getPath();
-	// fallBackValue = fallBackDir.getValue();
-	// // 1. First is looks in mattcatalog. But there we want to use another fallback
-	// // this might be using a variable. The value for this comes from the parent
-	// fallBackValue = inOriginal.replaceProperty(fallBackValue);
-	// fallBackValue = inOriginal.getParent().replaceProperty(fallBackValue);
-	// if (fallBackValue.equals("/"))
-	// {
-	// fallBackValue = "";
-	// }
-	// if (fallBackValue.endsWith("/"))
-	// {
-	// throw new OpenEditException("Fall back setting must not end in slash for " + inUrlPath);
-	// }
-	// if (fallBackValue.equals("NO_FALLBACK"))
-	// {
-	// return null;
-	// }
-	// // Lets support relative paths ../A -> ../B
-	// if (fallBackValue.contains(".."))
-	// {
-	// // Need to make sure we add back in the extra stuff
-	// String fbthisdir = PathUtilities.extractDirectoryPath(fallbacksetpath); // what level the path
-	// was defined
-	// String newfallBackValue = PathUtilities.buildRelative(fallBackValue, fbthisdir);
-	// // Need to add on any extra subdirectories or file parts
-	// String filepart = inUrlPath.substring(fbthisdir.length(), inUrlPath.length()); // Just want the
-	// end part
-	// if (!filepart.endsWith(".xconf"))
-	// {
-	// filepart = PathUtilities.extractPagePath(filepart) + ".xconf"; // Take off the index.html... Use
-	// index.xconf?
-	// }
-	// alternativepath = newfallBackValue + filepart; // end part might be a file name or _site.xconf
-	// }
-	// else
-	// {
-	// String thisdir = PathUtilities.extractDirectoryPath(fallbacksetpath); // what level the path was
-	// defined
-	// String filepart = inUrlPath.substring(thisdir.length(), inUrlPath.length());
-	// alternativepath = fallBackValue + filepart; // end part might be a file name or _site.xconf
-	// if (alternativepath.equals(inUrlPath))
-	// {
-	// // Now sure why this happens
-	// // log.debug(inUrlPath + " Cannot specify self as fallback directory");
-	// return null;
-	// }
-	// }
-	// // Only default the site.xconf May get infinite loops
-	// // if( inUrlPath.equals("/_site.xconf") || inUrlPath.startsWith("/system/") ||
-	// // inUrlPath.startsWith("/openedit/") )
-	// // if (inUrlPath.startsWith("/WEB-INF/base"))
-	// // {
-	// // // No fallback found.
-	// // return null;
-	// // }
-	// // else
-	// // {
-	// // alternativepath = "/WEB-INF/base" + inUrlPath;
-	// // }
-	// }
-	// return alternativepath;
-	// }
 
 	/**
 	 * These are xconfs that are found in various places in the fallback chain. They are used to find
@@ -753,39 +599,6 @@ public class XConfToPageSettingsConverter
 			}
 			return false;
 		}
-		/*
-		 * class PageSettingsPathComparator implements java.util.Comparator<PageSettings> { private String
-		 * basePath; private String rootfolder;;
-		 * 
-		 * public PageSettingsPathComparator(String basePath) { this.basePath = basePath; rootfolder =
-		 * PathUtilities.extractRootDirectory(basePath);
-		 * 
-		 * }
-		 * 
-		 * protected String makePath(String[] paths, int i) { StringBuffer sb = new StringBuffer(); for (int
-		 * j = 0; j <= i; j++) { sb.append(paths[j]); if (j < i) { sb.append("/"); } } return sb.toString();
-		 * }
-		 * 
-		 * public int compare(PageSettings inOne, PageSettings inTwo) { // weight the paths that are closer
-		 * to the current path higher. So if the base path is /a/b/c/d and // we have fallbacks of /a/b/c,
-		 * /a/b, and /a then we want to weight them in that order. We also want // to weight any paths with
-		 * the word default higher than those without it. So if we have
-		 * 
-		 * // openedit/ sub1 -> finder -> default // openedit/ sub2 - > community
-		 * 
-		 * int weightOne = getWeight(inOne.getPath()); int weightTwo = getWeight(inTwo.getPath()); if
-		 * (weightOne > weightTwo) { return 1; } if (weightOne < weightTwo) { return -1; } return 0; }
-		 * 
-		 * private int getWeight(String path) { if (path.equals(basePath)) { return 0; // same path should
-		 * be lowest weight } int weight = 0; if (path.startsWith("/finder")) // TODO: Change this to look
-		 * in plugins or some xml file for the weighting { weight = 1000; // push it down } if
-		 * (path.startsWith("/community")) { weight = 2000; // push it down }
-		 * 
-		 * int countdefaults = path.split("default").length - 1; weight += countdefaults * 1000; // default
-		 * gets a big boost
-		 * 
-		 * // int distance = getPathDistance(basePath, path); // weight += (100 - distance); // closer paths
-		 * get a higher weight return weight; } }
-		 */
+
 	}
 }
