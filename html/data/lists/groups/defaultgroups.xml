@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+    <row id="administrators" name="Administrators" /> 
+    <row id="users" name="Users" />
+    <row id="guests" name="Guests" />
+</data>

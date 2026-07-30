@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+    <row id="admin" email="support@entermediadb.org" enabled="true" firstName="The" lastName="Administrator" password="DES:2JPGMLB8Y60=" screenname="Admin" groups="administrators">The Admin</row>
+    <row id="agent" email="tech@entermediadb.org" enabled="true" firstName="AI" lastName="Guide" password="DES:rDpdaQNtmOQ47RMMVoR5Tg==" screenname="AI Guide" groups="users">AI Guide</row>
+</data>
