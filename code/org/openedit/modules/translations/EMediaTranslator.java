@@ -78,6 +78,11 @@ public class EMediaTranslator implements Translator
 		}
 		JSONObject translations = getConnection().parseMap(resp);
 		JSONObject fieldTranslations = (JSONObject) translations.get("translatedText");
+		if (fieldTranslations == null)
+		{
+			log.info("No translations returned for " + inText);
+			return null;
+		}
 		JSONArray inorder = (JSONArray)fieldTranslations.get(inTargetLang);
 		String translatedText = (String)inorder.get(0); //Only one for now
 		translatedText = translatedText.trim();
