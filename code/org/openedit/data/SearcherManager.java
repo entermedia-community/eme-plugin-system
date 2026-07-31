@@ -543,16 +543,14 @@ public class SearcherManager
 			{
 				sortfield = "ordering";
 			}
-			else
-				if (searcher.getPropertyDetails().getDetail("numberval") != null)
-				{
-					sortfield = "numberval";
-				}
-				else
-					if (searcher.getPropertyDetails().getDetail("name") != null)
-					{
-						sortfield = "name";
-					}
+			else if (searcher.getPropertyDetails().getDetail("numberval") != null)
+			{
+				sortfield = "numberval";
+			}
+			else if (searcher.getPropertyDetails().getDetail("name") != null)
+			{
+				sortfield = "name";
+			}
 			found = searcher.query().all().sort(sortfield).search();
 			found.setHitsPerPage(100);
 			getCacheManager().put("sm" + inCatalogId, inFieldName, found);
@@ -746,7 +744,7 @@ public class SearcherManager
 
 				if (searchtype != null && !searchtype.startsWith("$"))
 				{
-					searcher.reIndexAll();
+					searcher.resetData();
 
 					types.add(searcher.getSearchType());
 				}
@@ -769,7 +767,7 @@ public class SearcherManager
 			{
 				if (!searcher.getSearchType().contains("$searcher.getSearchType()"))
 				{
-					searcher.reloadSettings();
+					searcher.refreshMappings();
 
 					types.add(searcher.getSearchType());
 				}

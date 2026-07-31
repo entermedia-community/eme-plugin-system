@@ -62,14 +62,14 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	protected ModuleManager fieldModuleManager;
 	protected String fieldNewDataName;
 	protected boolean fieldForceBulk = false;
-	
+
 	protected CacheManager fieldCacheManager;
 
 	public CacheManager getCacheManager()
 	{
-		if( fieldCacheManager == null)
+		if (fieldCacheManager == null)
 		{
-			fieldCacheManager = (CacheManager)getModuleManager().getBean(getCatalogId(), "cacheManager",true);
+			fieldCacheManager = (CacheManager) getModuleManager().getBean(getCatalogId(), "cacheManager", true);
 		}
 		return fieldCacheManager;
 	}
@@ -154,8 +154,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		fieldNewDataName = inDataClassName;
 	}
 
-	public BaseSearcher()
-	{
+	public BaseSearcher() {
 		super();
 	}
 
@@ -179,13 +178,14 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		{
 			log.debug("checking: " + getCatalogId() + " " + inQuery.toFriendly());
 		}
-		
+
 		String searchtype = getSearchType();
-		
+
 		addShowOnly(inPageRequest, inQuery);
 		String clear = inPageRequest.getRequestParameter(searchtype + "clearresults");
-		if (clear == null) {
-			clear = (String)inPageRequest.findValue(searchtype + "clearresults");
+		if (clear == null)
+		{
+			clear = (String) inPageRequest.findValue(searchtype + "clearresults");
 		}
 		inPageRequest.putPageValue("searcher", this);
 		HitTracker tracker = null;
@@ -196,28 +196,29 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 
 		if (inQuery.getHitsName() == null)
-		{			
-			String sessionid = inPageRequest.getRequestParameter(getSearchType() + "hitssessionid"); ///--Not always true (entityhits)
-			if( sessionid != null)
+		{
+			String sessionid = inPageRequest.getRequestParameter(getSearchType() + "hitssessionid"); /// --Not always true (entityhits)
+			if (sessionid != null)
 			{
-			//	String name = sessionid.substring(0,sessionid.length() - getSearchType().length() - getCatalogId().length() );
-			//	inQuery.setHitsName(name);
+				// String name = sessionid.substring(0,sessionid.length() - getSearchType().length() -
+				// getCatalogId().length() );
+				// inQuery.setHitsName(name);
 				tracker = (HitTracker) inPageRequest.getSessionValue(sessionid);
 				if (tracker != null)
 				{
 					inQuery.setHitsName(tracker.getSearchQuery().getHitsName());
 				}
 			}
-		} 
-		
-		if(tracker == null)
+		}
+
+		if (tracker == null)
 		{
 			if (inQuery.getHitsName() == null)
 			{
 				String hitsname = inPageRequest.findValue(searchtype + "hitsname");
 				if (hitsname == null)
 				{
-					hitsname = inPageRequest.findValue( "hitsname");
+					hitsname = inPageRequest.findValue("hitsname");
 				}
 				if (hitsname == null)
 				{
@@ -225,10 +226,10 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				}
 				inQuery.setHitsName(hitsname);
 			}
-	
+
 			tracker = (HitTracker) inPageRequest.getSessionValue(inQuery.getSessionId());
 		}
-		
+
 		boolean runsearch = true;
 		if (tracker != null)
 		{
@@ -243,25 +244,29 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			{
 				runsearch = true;
 			}
-			if(clear == null) 
+			if (clear == null)
 			{
 				clear = inPageRequest.getRequestParameter(searchtype + "clearselection");
-				if (clear == null) {
-					clear = (String)inPageRequest.findPathValue(searchtype + "clearselection");
+				if (clear == null)
+				{
+					clear = (String) inPageRequest.findPathValue(searchtype + "clearselection");
 				}
-				if (clear == null) {
-					clear = (String)inPageRequest.getPageValue(searchtype + "clearselection");
+				if (clear == null)
+				{
+					clear = (String) inPageRequest.getPageValue(searchtype + "clearselection");
 				}
-				if (clear == null) {
-					String clearsearchtype = (String)inPageRequest.findPathValue("clearselection");
-					if(searchtype.equals(clearsearchtype)) {
+				if (clear == null)
+				{
+					String clearsearchtype = (String) inPageRequest.findPathValue("clearselection");
+					if (searchtype.equals(clearsearchtype))
+					{
 						clear = "true";
 					}
 				}
 			}
 			if (Boolean.parseBoolean(clear))
 			{
-				if( tracker.hasSelections() )
+				if (tracker.hasSelections())
 				{
 					tracker.deselectAll();
 					tracker.setShowOnlySelected(false);
@@ -275,30 +280,30 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				if (showonly != null)
 				{
 					boolean issshowonly = Boolean.parseBoolean(showonly);
-					if( issshowonly != tracker.isShowOnlySelected())
+					if (issshowonly != tracker.isShowOnlySelected())
 					{
-						tracker.setShowOnlySelected(issshowonly );
+						tracker.setShowOnlySelected(issshowonly);
 						runsearch = true;
 					}
 				}
 			}
-			
+
 			if (!runsearch && hasChanged(tracker))
 			{
-				//do we want to cache queries a little longer?
+				// do we want to cache queries a little longer?
 				runsearch = true;
 				startingpage = tracker.getPage();
 			}
-			String setpage = inPageRequest.findPathValue(getSearchType()+ "setpage");
-			if( setpage != null)
+			String setpage = inPageRequest.findPathValue(getSearchType() + "setpage");
+			if (setpage != null)
 			{
 				startingpage = Integer.parseInt(setpage);
-				if(tracker != null) 
+				if (tracker != null)
 				{
 					tracker.setPage(startingpage);
 				}
 			}
-			
+
 			if (!runsearch && !inQuery.equalTerms(tracker.getSearchQuery()))
 			{
 				runsearch = true;
@@ -321,79 +326,80 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		{
 			try
 			{
-				
+
 				if (inQuery.getSortBy() == null)
 				{
 					String sort = inPageRequest.findValue("sortby");
 					inQuery.setSortBy(sort);
 				}
-				
-				if (inQuery.getSortBy() == null) {
-					String sort = inPageRequest.findValue(getSearchType()+"sortby");
+
+				if (inQuery.getSortBy() == null)
+				{
+					String sort = inPageRequest.findValue(getSearchType() + "sortby");
 					inQuery.setSortBy(sort);
 				}
-				
-				if(userprofile != null) {
-				
+
+				if (userprofile != null)
+				{
+
 					if (inQuery.getSortBy() == null)
 					{
 						String sort = userprofile.getSortForSearchType(inQuery.getResultType());
 						inQuery.setSortBy(sort);
 					}
 					Collection<PropertyDetail> details = findSummaryFields(inQuery, userprofile);
-					if( details != null )
+					if (details != null)
 					{
 						for (Iterator iterator = details.iterator(); iterator.hasNext();)
 						{
 							PropertyDetail propertyDetail = (PropertyDetail) iterator.next();
-							//if( propertyDetail.getSearchType().equals(getSearchType())) //Cant hurt much
+							// if( propertyDetail.getSearchType().equals(getSearchType())) //Cant hurt much
 							{
 								inQuery.addAggregation(propertyDetail);
 							}
 						}
 					}
 				}
-				
+
 				if (inQuery.getSortBy() == null)
 				{
-					String sort = (String) inPageRequest.getPageValue(getSearchType()+"sortby");
+					String sort = (String) inPageRequest.getPageValue(getSearchType() + "sortby");
 					inQuery.setSortBy(sort);
 				}
 				oldtracker = tracker;
-			
-				
-				
+
 				if (oldtracker != null)
 				{
 					if (oldtracker.getSearchQuery().hasFilters())
 					{
 						String clearfilters = inPageRequest.getRequestParameter(getSearchType() + "clearfilters");
-						if(clearfilters == null )
+						if (clearfilters == null)
 						{
 							clearfilters = inPageRequest.findValue("clearfilters");
 						}
-						if(clearfilters== null) {
+						if (clearfilters == null)
+						{
 							clearfilters = (String) inPageRequest.findValue(getSearchType() + "clearfilters");
 						}
 						String removeterm = inPageRequest.getRequestParameter("removeterm");
-						
+
 						if (!Boolean.parseBoolean(clearfilters))
 						{
-							//This is the old way
+							// This is the old way
 							inQuery.setFilters(oldtracker.getSearchQuery().getFilters());
-							
-							//This is the new way
+
+							// This is the new way
 							for (Iterator iterator = oldtracker.getSearchQuery().getUserFilters().iterator(); iterator.hasNext();)
 							{
 								Term term = (Term) iterator.next();
-								//see if it's already in there
-								if( inQuery.getTermByDetailId(term.getDetail().getId()) == null )
+								// see if it's already in there
+								if (inQuery.getTermByDetailId(term.getDetail().getId()) == null)
 								{
 									inQuery.addTerm(term);
 								}
 							}
 						}
-						if(removeterm != null) 
+						if (removeterm != null)
 						{
 							inQuery.removeTerm(removeterm);
 						}
@@ -409,18 +415,19 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					inQuery.setEndUserSearch(Boolean.parseBoolean(endusersearch));
 				}
 
-//				String applydontshow = inPageRequest.findValue("applydontshow");
-//				if(Boolean.parseBoolean(applydontshow)) 
-//				{
-//					if(inQuery.getFacets().isEmpty()) 
-//					{
-//						List facets = getDetailsForView(getSearchType() + "/" + getSearchType() + "advancedfilter", inPageRequest.getUserProfile());
-//						if(!( facets == null || facets.isEmpty()) )
-//						{
-//							inQuery.setFacets(facets);
-//						}
-//					}
-//				}
+				// String applydontshow = inPageRequest.findValue("applydontshow");
+				// if(Boolean.parseBoolean(applydontshow))
+				// {
+				// if(inQuery.getFacets().isEmpty())
+				// {
+				// List facets = getDetailsForView(getSearchType() + "/" + getSearchType() + "advancedfilter",
+				// inPageRequest.getUserProfile());
+				// if(!( facets == null || facets.isEmpty()) )
+				// {
+				// inQuery.setFacets(facets);
+				// }
+				// }
+				// }
 
 				String hitsperpage = inPageRequest.getRequestParameter("hitsperpage");
 				if (hitsperpage == null)
@@ -431,25 +438,24 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				{
 					hitsperpage = String.valueOf(inPageRequest.getPageValue("hitsperpage"));
 				}
-				if (hitsperpage == null && inPageRequest.getPageValue(getSearchType()+ "hitsperpage") != null)
+				if (hitsperpage == null && inPageRequest.getPageValue(getSearchType() + "hitsperpage") != null)
 				{
-					hitsperpage = String.valueOf(inPageRequest.getPageValue(getSearchType()+ "hitsperpage"));
+					hitsperpage = String.valueOf(inPageRequest.getPageValue(getSearchType() + "hitsperpage"));
 				}
 				if (hitsperpage == null)
 				{
-					hitsperpage = inPageRequest.findValue(getSearchType()+ "hitsperpage");
+					hitsperpage = inPageRequest.findValue(getSearchType() + "hitsperpage");
 				}
 
-				if (hitsperpage == null && userprofile != null) 
+				if (hitsperpage == null && userprofile != null)
 				{
 					int count = userprofile.getHitsPerPageForSearchType(inQuery.getResultType(), inPageRequest);
 					hitsperpage = String.valueOf(count);
 				}
-				
-				
-				if( hitsperpage == null && oldtracker != null)
+
+				if (hitsperpage == null && oldtracker != null)
 				{
-					//oldtracker may be different result type
+					// oldtracker may be different result type
 					inQuery.setHitsPerPage(oldtracker.getHitsPerPage());
 				}
 				else
@@ -458,44 +464,49 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					{
 						inQuery.setHitsPerPage(Integer.parseInt(hitsperpage));
 					}
-					
+
 				}
 				inQuery = getSearchSecurity().attachSecurity(inPageRequest, this, inQuery);
-				if(inQuery.isForceEmpty()) {
+				if (inQuery.isForceEmpty())
+				{
 					tracker = new EmptyHitTracker();
-				} else {
-				
-					tracker = search(inQuery); //search here <----!!!!!
 				}
-				
+				else
+				{
+
+					tracker = search(inQuery); // search here <----!!!!!
+				}
+
 				tracker.setPage(startingpage);
-				
+
 				tracker.setSearchQuery(inQuery);
 
 				if (oldtracker != null && oldtracker.hasSelections())
 				{
-					
+
 					clear = inPageRequest.getRequestParameter(searchtype + "clearselection");
-					if (clear == null) {
-						clear = (String)inPageRequest.findPathValue(searchtype + "clearselection");
+					if (clear == null)
+					{
+						clear = (String) inPageRequest.findPathValue(searchtype + "clearselection");
 					}
-					if (clear == null) {
+					if (clear == null)
+					{
 						Object val = inPageRequest.getPageValue(searchtype + "clearselection");
-						if( val != null)
+						if (val != null)
 						{
 							clear = val.toString();
 						}
 					}
 					if (Boolean.parseBoolean(clear))
 					{
-							tracker.deselectAll();
-							tracker.setShowOnlySelected(false);
+						tracker.deselectAll();
+						tracker.setShowOnlySelected(false);
 					}
-					else 
+					else
 					{
 						tracker.loadPreviousSelections(oldtracker);
 						tracker.setShowOnlySelected(oldtracker.isShowOnlySelected());
-					//	tracker.setSharedFilters(oldtracker.getSharedFilters());
+						// tracker.setSharedFilters(oldtracker.getSharedFilters());
 					}
 				}
 
@@ -518,16 +529,16 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			{
 				String fullq = inQuery.toQuery();
 				inPageRequest.putPageValue("error", "Invalid search input. " + URLUtilities.xmlEscape(fullq));
-				log.error(ex + " on " + fullq,ex);
+				log.error(ex + " on " + fullq, ex);
 				inQuery.setProperty("error", "Invalid search " + URLUtilities.xmlEscape(fullq));
-				//					if( ex instanceof OpenEditException)
-				//					{
-				//						throw (OpenEditException)ex;
-				//					}
-				//					else
-				//					{
-				//						throw new OpenEditException(ex);
-				//					}	
+				// if( ex instanceof OpenEditException)
+				// {
+				// throw (OpenEditException)ex;
+				// }
+				// else
+				// {
+				// throw new OpenEditException(ex);
+				// }
 			}
 		}
 		if (tracker != null)
@@ -540,9 +551,9 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					hitsperpage = inPageRequest.getPageProperty("hitsperpage");
 				}
 
-				if (hitsperpage == null && inPageRequest.getPageValue(getSearchType()+ "hitsperpage") != null)
+				if (hitsperpage == null && inPageRequest.getPageValue(getSearchType() + "hitsperpage") != null)
 				{
-					hitsperpage = String.valueOf(inPageRequest.getPageValue(getSearchType()+ "hitsperpage"));
+					hitsperpage = String.valueOf(inPageRequest.getPageValue(getSearchType() + "hitsperpage"));
 				}
 				if (hitsperpage == null)
 				{
@@ -550,9 +561,9 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				}
 				if (hitsperpage == null)
 				{
-					hitsperpage = inPageRequest.findValue(getSearchType()+ "hitsperpage");
+					hitsperpage = inPageRequest.findValue(getSearchType() + "hitsperpage");
 				}
-				if (hitsperpage == null && userprofile != null) 
+				if (hitsperpage == null && userprofile != null)
 				{
 					int count = userprofile.getHitsPerPageForSearchType(inQuery.getResultType(), inPageRequest);
 					hitsperpage = String.valueOf(count);
@@ -564,7 +575,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			}
 			int totalPages = tracker.getTotalPages();
 
-			String pagenumber = extractPageNumber(inPageRequest,tracker);
+			String pagenumber = extractPageNumber(inPageRequest, tracker);
 
 			if (pagenumber != null)
 			{
@@ -589,7 +600,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					}
 					catch (NumberFormatException e)
 					{
-						//log.error("Unable to parse pagenumber", e);
+						// log.error("Unable to parse pagenumber", e);
 					}
 				}
 			}
@@ -597,7 +608,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			{
 				if (tracker.size() > oldtracker.getPage() * tracker.getHitsPerPage())
 				{
-					//Make sure it has not changed
+					// Make sure it has not changed
 					tracker.setPage(oldtracker.getPage());
 				}
 			}
@@ -614,15 +625,15 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					tracker.setHitsName("hits");
 				}
 			}
-			//We only want to reload this search if we are on the first page and they are refreshing?
-			//This is because sometimes we are just clicking the next page link
+			// We only want to reload this search if we are on the first page and they are refreshing?
+			// This is because sometimes we are just clicking the next page link
 
-			//Why should we refresh anyways... We already checked for cache and it was fine 
-//			if (!runsearch && tracker.getPage() == 1)
-//			{
-//				tracker.refresh();
-//			}
-			
+			// Why should we refresh anyways... We already checked for cache and it was fine
+			// if (!runsearch && tracker.getPage() == 1)
+			// {
+			// tracker.refresh();
+			// }
+
 			inPageRequest.putPageValue(tracker.getHitsName(), tracker);
 			inPageRequest.putSessionValue(tracker.getSessionId(), tracker);
 		}
@@ -630,14 +641,13 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		return tracker;
 	}
 
-	
 	public Collection<PropertyDetail> findSummaryFields(SearchQuery inQuery, UserProfile userprofile)
 	{
 		String issummaryminimized = userprofile.get("minimize" + getSearchType() + "summary");
-		if( issummaryminimized  == null || !Boolean.parseBoolean(issummaryminimized ) )
+		if (issummaryminimized == null || !Boolean.parseBoolean(issummaryminimized))
 		{
-			List<PropertyDetail> details = getDetailsForView(getSearchType() + "advancedsearch", userprofile); 
-			if( details != null && !details.isEmpty())
+			List<PropertyDetail> details = getDetailsForView(getSearchType() + "advancedsearch", userprofile);
+			if (details != null && !details.isEmpty())
 			{
 				return details;
 			}
@@ -652,22 +662,22 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		String searchtype = getSearchType();
 		String cache = inPageRequest.getRequestParameter(searchtype + "cache");
 
-		if( cache == null)
+		if (cache == null)
 		{
 			cache = inPageRequest.findActionValue("forcesearch");
-			if( cache != null && Boolean.parseBoolean(cache) )
+			if (cache != null && Boolean.parseBoolean(cache))
 			{
 				runsearch = true;
 			}
-		}	
-		if( cache == null)
+		}
+		if (cache == null)
 		{
 			cache = inPageRequest.findValue(searchtype + "cache");
 		}
-		if( cache == null)
+		if (cache == null)
 		{
 			cache = inPageRequest.getRequestParameter("cache");
-		}	
+		}
 		if (cache != null && !Boolean.parseBoolean(cache))
 		{
 			runsearch = true;
@@ -691,13 +701,12 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	/**
 	 * @deprecated Use loadHits which checks hitssessionid
 	 * 
-	 * @see org.openedit.data.Searcher#loadHits(org.openedit.WebPageRequest,
-	 *      java.lang.String)
+	 * @see org.openedit.data.Searcher#loadHits(org.openedit.WebPageRequest, java.lang.String)
 	 */
 	public HitTracker loadHits(WebPageRequest inReq, String hitsname) throws OpenEditException
 	{
 		HitTracker otracker = (HitTracker) inReq.getSessionValue(hitsname + getCatalogId());
-		
+
 		if (otracker == null)
 		{
 			otracker = (HitTracker) inReq.getSessionValue(hitsname + getSearchType() + getCatalogId());
@@ -727,7 +736,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			tracker = checkCurrent(inReq, tracker);
 			if (tracker != null)
 			{
-				//TODO: Remove this code, is not a good policy
+				// TODO: Remove this code, is not a good policy
 				String hitsname = inReq.findValue("hitsname");
 				if (hitsname == null)
 				{
@@ -757,8 +766,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.openedit.data.Searcher#setDefaultDateFormat(java.text.DateFormat)
+	 * @see org.openedit.data.Searcher#setDefaultDateFormat(java.text.DateFormat)
 	 */
 	public void setDefaultDateFormat(DateFormat inDefaultDateFormat)
 	{
@@ -797,7 +805,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		{
 			PropertyDetail detail = getPropertyDetails().createDetail(attr);
 			detail.setCatalogId(getCatalogId());
-			query.addExact(detail, value); //this is addMatches and not addExact so that we can handle wildcards
+			query.addExact(detail, value); // this is addMatches and not addExact so that we can handle wildcards
 		}
 		if (orderby != null)
 		{
@@ -816,7 +824,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	{
 		SearchQuery query = createSearchQuery();
 
-		query.addExact(attr, value); //this is addMatches and not addExact so that we can handle wildcards
+		query.addExact(attr, value); // this is addMatches and not addExact so that we can handle wildcards
 
 		if (orderby != null)
 		{
@@ -870,8 +878,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.openedit.data.Searcher#addStandardSearchTerms(org.openedit.
-	 * WebPageRequest )
+	 * @see org.openedit.data.Searcher#addStandardSearchTerms(org.openedit. WebPageRequest )
 	 */
 
 	public SearchQuery addStandardSearchTerms(WebPageRequest inPageRequest) throws OpenEditException
@@ -900,7 +907,8 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		search.setResultType(resultype);
 
 		String includeDescription = inPageRequest.findValue("includeDescription");
-		if(Boolean.parseBoolean(includeDescription)) {
+		if (Boolean.parseBoolean(includeDescription))
+		{
 			search.setIncludeDescription(true);
 		}
 
@@ -912,60 +920,61 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		{
 			for (int i = 0; i < custom.length; i++)
 			{
-				String value = findValueParameter(inPageRequest,custom[i]);
+				String value = findValueParameter(inPageRequest, custom[i]);
 				search.setProperty(custom[i], value);
 			}
 		}
-		
+
 		return search;
 	}
 
 	protected String findValueParameter(WebPageRequest inPageRequest, String inParam)
 	{
 		String value = inPageRequest.getRequestParameter(inParam + "value");
-		if( value == null)
-		{ 
-			//old style
+		if (value == null)
+		{
+			// old style
 			value = inPageRequest.getRequestParameter(inParam + ".value");
 		}
 		return value;
 	}
-	
+
 	protected String[] findValueParameters(WebPageRequest inPageRequest, String inParam)
 	{
 		String[] value = inPageRequest.getRequestParameters(inParam + "values");
 
-		//old style
-		if( value == null)
-		{ 
+		// old style
+		if (value == null)
+		{
 			value = inPageRequest.getRequestParameters(inParam + ".values");
 		}
-		if( value == null || (value.length == 1 && value[0] == null) || value[0].trim().isEmpty() )
-		{ 
+		if (value == null || (value.length == 1 && value[0] == null) || value[0].trim().isEmpty())
+		{
 			value = inPageRequest.getRequestParameters(inParam + "value");
 		}
-		if( value == null)
-		{ 
+		if (value == null)
+		{
 			value = inPageRequest.getRequestParameters(inParam + ".value");
 		}
-		if( value == null || (value.length == 1 && value[0] == null) || value[0].trim().isEmpty() )
+		if (value == null || (value.length == 1 && value[0] == null) || value[0].trim().isEmpty())
 		{
 			return null;
 		}
 		return value;
 	}
-	
-	protected void addAggregations(WebPageRequest inPageRequest, SearchQuery inSearch) {
+
+	protected void addAggregations(WebPageRequest inPageRequest, SearchQuery inSearch)
+	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	protected void addSorts(WebPageRequest inPageRequest, SearchQuery search)
 	{
-		String	sort = inPageRequest.getRequestParameter(getSearchType() +"sortby");
-		if (sort == null && inPageRequest.getUserProfile()!=null)
+		String sort = inPageRequest.getRequestParameter(getSearchType() + "sortby");
+		if (sort == null && inPageRequest.getUserProfile() != null)
 		{
-			sort = inPageRequest.getUserProfile().get(getSearchType() +"sort");
+			sort = inPageRequest.getUserProfile().get(getSearchType() + "sort");
 		}
 		if (sort == null)
 		{
@@ -977,31 +986,31 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 	}
 
-	//	public void addFacets(WebPageRequest inReq, SearchQuery inSearch)
-	//	{
+	// public void addFacets(WebPageRequest inReq, SearchQuery inSearch)
+	// {
 	//
-	//		//Grab from userprofile.
-	//		UserProfile profile = inReq.getUserProfile();
-	//		List details = getPropertyDetails().getDetailsByProperty("filter", "true");
-	//		
-	//		//assettype, color, 
-	//		
-	//		for (Iterator iterator = details.iterator(); iterator.hasNext();)
-	//		{
-	//			PropertyDetail detail = (PropertyDetail) iterator.next();
-	//			HitTracker selected = profile.getFacetsForType(detail.getId());
-	//			
-	//			//Collection filters = inReq.getUserProfile().getValues(detail.getId() + "selectedfacets");
-	//			
-	//		}
-	//		
+	// //Grab from userprofile.
+	// UserProfile profile = inReq.getUserProfile();
+	// List details = getPropertyDetails().getDetailsByProperty("filter", "true");
 	//
-	//		
-	//		
-	//		
-	//		// TODO Auto-generated method stub
-	//		
-	//	}
+	// //assettype, color,
+	//
+	// for (Iterator iterator = details.iterator(); iterator.hasNext();)
+	// {
+	// PropertyDetail detail = (PropertyDetail) iterator.next();
+	// HitTracker selected = profile.getFacetsForType(detail.getId());
+	//
+	// //Collection filters = inReq.getUserProfile().getValues(detail.getId() + "selectedfacets");
+	//
+	// }
+	//
+	//
+	//
+	//
+	//
+	// // TODO Auto-generated method stub
+	//
+	// }
 
 	protected SearchQuery addOrGroups(SearchQuery inSearch, WebPageRequest inPageRequest)
 	{
@@ -1055,9 +1064,9 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				search.setAndTogether(false);
 			}
 		}
-//		else if( "json".equals(type) )
-//		{
-//		}
+		// else if( "json".equals(type) )
+		// {
+		// }
 
 		String[] operations = inPageRequest.getRequestParameters("operation");
 		if (operations == null)
@@ -1080,7 +1089,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		Map valuecounter = new HashMap(fieldid.length);
 		for (int i = 0; i < fieldid.length; i++)
 		{
-			//String id = termids[i];
+			// String id = termids[i];
 
 			String field = fieldid[i];
 			PropertyDetail detail = getDetail(field, inPageRequest);
@@ -1089,11 +1098,10 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			{
 				continue;
 			}
-			//the values are a counter. So each time we get a duplicate we inc the counter of values
+			// the values are a counter. So each time we get a duplicate we inc the counter of values
 
 			Integer count = (Integer) valuecounter.get(detail.getId());
-			
-			
+
 			if (count == null)
 			{
 				count = 0;
@@ -1104,7 +1112,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			}
 			valuecounter.put(detail.getId(), count);
 
-			String[] vals =  findValueParameters(inPageRequest,detail.getId());
+			String[] vals = findValueParameters(inPageRequest, detail.getId());
 			String val = null;
 			if (vals != null && vals.length == 1 && vals[0] != null && vals[0].length() == 0)
 			{
@@ -1113,11 +1121,11 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 
 			if (vals != null && vals.length > count.intValue())
 			{
-				val = vals[count.intValue()]; //We should not get array out of bounds
+				val = vals[count.intValue()]; // We should not get array out of bounds
 			}
 			if (val == null || val.equals(""))
 			{
-				val = findValueParameter(inPageRequest,field);
+				val = findValueParameter(inPageRequest, field);
 			}
 			if (val != null && val.contains("|"))
 			{
@@ -1126,7 +1134,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			}
 			else if (val == null)
 			{
-				vals = findValueParameters(inPageRequest,detail.getId());
+				vals = findValueParameters(inPageRequest, detail.getId());
 				if (vals != null && vals.length == 1 && (vals[0] == null || vals[0].length() == 0))
 				{
 					vals = null;
@@ -1157,7 +1165,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 							t = addPosition(inPageRequest, search, detail, val, op);
 							if (t == null)
 							{
-								//This is for lobpicker and primaryproductpicker and maybe other ones
+								// This is for lobpicker and primaryproductpicker and maybe other ones
 								addPicker(inPageRequest, search, detail, val, op, count.intValue());
 							}
 						}
@@ -1176,83 +1184,83 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	{
 		String json = inPageRequest.getRequestParameter(getSearchType() + "_jsonquery");
 		Map jsonRequest = null;
-		if( json != null )
+		if (json != null)
 		{
-			
+
 			try
 			{
 				Collection fields = null;
-				if( json != null)
+				if (json != null)
 				{
 					JSONParser parser = new JSONParser();
-					jsonRequest = (Map)parser.parse(json); //this is real, the other way is just for t
-					fields = (Collection)jsonRequest.get("fields");
+					jsonRequest = (Map) parser.parse(json); // this is real, the other way is just for t
+					fields = (Collection) jsonRequest.get("fields");
 				}
-//				else
-//				{
-//					jsonRequest = inPageRequest.getJsonRequest();
-//					fields =  (Collection)((Map)jsonRequest.get("query")).get("terms");
-//				}
-				if( jsonRequest == null)
+				// else
+				// {
+				// jsonRequest = inPageRequest.getJsonRequest();
+				// fields = (Collection)((Map)jsonRequest.get("query")).get("terms");
+				// }
+				if (jsonRequest == null)
 				{
 					return;
 				}
-				 //Loop over the fields and add them as values
-				 for (Iterator iterator = fields.iterator(); iterator.hasNext();)
-	 			 {
+				// Loop over the fields and add them as values
+				for (Iterator iterator = fields.iterator(); iterator.hasNext();)
+				{
 					Map field = (Map) iterator.next();
-					String name = (String)field.get("field");
-					if( name == null )
+					String name = (String) field.get("field");
+					if (name == null)
 					{
-						name = (String)field.get("name"); //legacy
+						name = (String) field.get("name"); // legacy
 					}
-					if( name != null)
+					if (name != null)
 					{
 						inPageRequest.addRequestParameter("field", name);
 					}
 
-					String operation = (String)field.get("operation");
-					if( operation == null )
+					String operation = (String) field.get("operation");
+					if (operation == null)
 					{
-						operation = (String)field.get("operator"); //legacy
+						operation = (String) field.get("operator"); // legacy
 					}
-					
-					if( operation != null)
+
+					if (operation != null)
 					{
 						inPageRequest.addRequestParameter("operation", operation);
 					}
-					String value = (String)field.get("value");
-					if( value != null)
+					String value = (String) field.get("value");
+					if (value != null)
 					{
-						inPageRequest.addRequestParameter(name  + "value", value);
-						inPageRequest.addRequestParameter(name  + ".value", value); //Old style
+						inPageRequest.addRequestParameter(name + "value", value);
+						inPageRequest.addRequestParameter(name + ".value", value); // Old style
 					}
 
-					Collection values = (Collection)field.get("values");
-					if( values != null)
+					Collection values = (Collection) field.get("values");
+					if (values != null)
 					{
-						inPageRequest.setRequestParameter(name  + "values", (String[])values.toArray(new String[values.size()]));
-						inPageRequest.setRequestParameter(name  + ".values", (String[])values.toArray(new String[values.size()]));
+						inPageRequest.setRequestParameter(name + "values", (String[]) values.toArray(new String[values.size()]));
+						inPageRequest.setRequestParameter(name + ".values", (String[]) values.toArray(new String[values.size()]));
 					}
-					
-					String before = (String)field.get("beforeDate");
-					inPageRequest.addRequestParameter(name  + ".before", before);
 
-					String after = (String)field.get("afterDate");
-					inPageRequest.addRequestParameter(name  + ".after", after);
+					String before = (String) field.get("beforeDate");
+					inPageRequest.addRequestParameter(name + ".before", before);
 
-	 			 }
+					String after = (String) field.get("afterDate");
+					inPageRequest.addRequestParameter(name + ".after", after);
+
+				}
 			}
-			catch ( Throwable ex)
+			catch (Throwable ex)
 			{
-				log.error("Could not parse " +json , ex);
+				log.error("Could not parse " + json, ex);
 			}
 		}
 	}
 
 	protected void loadLanguageValues(WebPageRequest inPageRequest, SearchQuery search, PropertyDetail detail, String val, String op)
 	{
-		//Could still be some more values we need to add....
+		// Could still be some more values we need to add....
 		String[] language = inPageRequest.getRequestParameters(detail.getId() + ".language");
 		if (language != null)
 		{
@@ -1299,14 +1307,14 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					{
 						search.addOrsGroup(lid, langval);
 					}
-					//					search.setProperty(detail.getId(), langval);
-					//					search.setProperty(detail.getId() + ".language", lang);
+					// search.setProperty(detail.getId(), langval);
+					// search.setProperty(detail.getId() + ".language", lang);
 					map.setText(lang, langval);
 				}
 			}
 		}
 		else
-		{ //Why do we have similar code here?
+		{ // Why do we have similar code here?
 			if (val != null)
 			{
 				HitTracker languages = getSearcherManager().getList(getCatalogId(), "locale");
@@ -1358,16 +1366,16 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		String querystring = inPageRequest.findValue(getSearchType() + "showonly");
 		if (querystring == null)
 		{
-			//Legacy check. Remove this line after Feb 15 2013
+			// Legacy check. Remove this line after Feb 15 2013
 			querystring = inPageRequest.findValue("showonly");
 		}
 		if (querystring != null)
 		{
-			//Shoud we run a replace on this filter? So that user and groups roles can be put in here?
-			//regionid:	${user.regionid}
+			// Shoud we run a replace on this filter? So that user and groups roles can be put in here?
+			// regionid: ${user.regionid}
 			if (querystring.contains("$"))
 			{
-				//	String result = getReplacer().replace(format, tmp);
+				// String result = getReplacer().replace(format, tmp);
 			}
 			addShowOnlyFilter(inPageRequest, querystring, search);
 		}
@@ -1383,8 +1391,8 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			{
 				child = createSearchQuery(querystring, inPageRequest);
 				child.setFilter(true);
-				child.setId(querystring); //unique
-				//make sure we dont have a conflict of fields? i.e. already searching by a certain term
+				child.setId(querystring); // unique
+				// make sure we dont have a conflict of fields? i.e. already searching by a certain term
 				for (int i = 0; i < search.getTerms().size(); i++)
 				{
 					Term existingterm = (Term) search.getTerms().get(i);
@@ -1417,34 +1425,29 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	}
 
 	/*
-	 * public void addUserProfileSearchFilters(WebPageRequest inReq, SearchQuery
-	 * search) { if (inReq.getUserProfile() == null) { return; } Collection
-	 * filters = inReq.getUserProfile().getValues("profilesearchfilters");
-	 * //hideassettype //String profileid = inReq.findValue("profilevalues");
-	 * //String field = inReq.findValue("field"); if (filters == null) { return;
-	 * } for (Iterator iter = filters.iterator(); iter.hasNext();) { String
-	 * filter = (String) iter.next(); Collection values =
-	 * inReq.getUserProfile().getValues(filter); if (values != null) { String[]
-	 * terms = new String[values.size()]; Iterator iterator = values.iterator();
-	 * String term = null; String field = filter.substring(4); SearchQuery child
-	 * = search.getChildQuery(filter); if (child != null) {
-	 * search.getChildren().remove(child); }
+	 * public void addUserProfileSearchFilters(WebPageRequest inReq, SearchQuery search) { if
+	 * (inReq.getUserProfile() == null) { return; } Collection filters =
+	 * inReq.getUserProfile().getValues("profilesearchfilters"); //hideassettype //String profileid =
+	 * inReq.findValue("profilevalues"); //String field = inReq.findValue("field"); if (filters == null)
+	 * { return; } for (Iterator iter = filters.iterator(); iter.hasNext();) { String filter = (String)
+	 * iter.next(); Collection values = inReq.getUserProfile().getValues(filter); if (values != null) {
+	 * String[] terms = new String[values.size()]; Iterator iterator = values.iterator(); String term =
+	 * null; String field = filter.substring(4); SearchQuery child = search.getChildQuery(filter); if
+	 * (child != null) { search.getChildren().remove(child); }
 	 * 
-	 * if (filter.startsWith("hide")) { term = "-" + field; } else if
-	 * (filter.startsWith("show")) { term = "+" + field; }
+	 * if (filter.startsWith("hide")) { term = "-" + field; } else if (filter.startsWith("show")) { term
+	 * = "+" + field; }
 	 * 
-	 * for (int i = 0; i < terms.length; i++) { terms[i] = term + ":" +
-	 * iterator.next(); }
+	 * for (int i = 0; i < terms.length; i++) { terms[i] = term + ":" + iterator.next(); }
 	 * 
-	 * SearchQuery newchild = createSearchQuery(terms, inReq);
-	 * newchild.setId(filter); newchild.setFilter(true);
-	 * search.addChildQuery(newchild); } else { SearchQuery child =
-	 * search.getChildQuery(filter); if (child != null) {
-	 * search.getChildren().remove(child); } } } }
+	 * SearchQuery newchild = createSearchQuery(terms, inReq); newchild.setId(filter);
+	 * newchild.setFilter(true); search.addChildQuery(newchild); } else { SearchQuery child =
+	 * search.getChildQuery(filter); if (child != null) { search.getChildren().remove(child); } } } }
 	 */
 	protected PropertyDetail getDetail(String inTermId, WebPageRequest inReq)
 	{
-		if (inTermId == null) {
+		if (inTermId == null)
+		{
 			return null;
 		}
 
@@ -1453,7 +1456,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		String view = null;
 		String[] splits = inTermId.split(BaseSearcher.delim);
 
-		String propertyid = inTermId; //this is for backward compatability
+		String propertyid = inTermId; // this is for backward compatability
 		if (splits.length > 2)
 		{
 			catalogid = splits[0];
@@ -1476,13 +1479,13 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		{
 			catalogid = getCatalogId();
 		}
-		//		Searcher remoteSearcher = getSearcherManager().getSearcher(catalogid, searchtype);
-		//		if (remoteSearcher != null)
-		//		{
-		//			detail = remoteSearcher.getDetailForView(view, propertyid, inReq.getUser());
-		//		}
-		//		if (detail == null)
-		//		{
+		// Searcher remoteSearcher = getSearcherManager().getSearcher(catalogid, searchtype);
+		// if (remoteSearcher != null)
+		// {
+		// detail = remoteSearcher.getDetailForView(view, propertyid, inReq.getUser());
+		// }
+		// if (detail == null)
+		// {
 		if (searchtype.equals(getSearchType()))
 		{
 			detail = getPropertyDetailsArchive().getDetail(searchtype, view, propertyid, inReq.getUserProfile());
@@ -1491,11 +1494,11 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		{
 			detail = getPropertyDetailsArchive().getPropertyDetailsCached(searchtype).getDetail(propertyid);
 		}
-		//		}
-		//		if (detail == null)
-		//		{
-		//			detail = getDetail(propertyid);
-		//		}
+		// }
+		// if (detail == null)
+		// {
+		// detail = getDetail(propertyid);
+		// }
 		if (detail == null)
 		{
 			// continue;
@@ -1503,11 +1506,11 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			detail = getPropertyDetailsArchive().getPropertyDetailsCached(searchtype).createDetail(propertyid);
 			detail.setCatalogId(catalogid);
 		}
-		//Needed?
-		//		if( detail.getSearchType() == null)
-		//		{
-		//			detail.setSearchType(searchtype);
-		//		}
+		// Needed?
+		// if( detail.getSearchType() == null)
+		// {
+		// detail.setSearchType(searchtype);
+		// }
 
 		return detail;
 	}
@@ -1522,7 +1525,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		Term t = null;
 		if (detail.isDataType("number") || detail.isDataType("double") || detail.isDataType("float") || detail.isDataType("geo_point") || detail.isDate())
 		{
-			//this is handled in else statement
+			// this is handled in else statement
 			return null;
 		}
 		if ((val != null && val.length() > 0 && (vals == null || vals.length < 2)))
@@ -1668,7 +1671,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			{
 				String highval = null;
 				String lowval = null;
-				//see if we have a range
+				// see if we have a range
 				if (!val.contains("-"))
 				{
 					t = search.addExact(field, Long.parseLong(val));
@@ -1750,8 +1753,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.openedit.data.Searcher#deselect(java.lang.String,
-	 * java.lang.String[])
+	 * @see org.openedit.data.Searcher#deselect(java.lang.String, java.lang.String[])
 	 */
 	public List deselect(String inField, String[] toremove) throws OpenEditException
 	{
@@ -1822,16 +1824,16 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			if (op.equals("beforedate"))
 			{
 				String beforeString = inPageRequest.getRequestParameter(field.getId() + ".before");
-				if( beforeString == null)
+				if (beforeString == null)
 				{
 					beforeString = val;
 				}
-				if( beforeString != null)
+				if (beforeString != null)
 				{
 					Date before = formater.parse(beforeString);
 					t = search.addBefore(field, before);
 					search.setProperty(t.getId() + ".before", beforeString);
-					t.setOperation(op);				
+					t.setOperation(op);
 				}
 			}
 			else if (op.startsWith("before"))
@@ -1860,16 +1862,16 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			else if (op.equals("afterdate"))
 			{
 				String afterString = inPageRequest.getRequestParameter(field.getId() + ".after");
-				if( afterString == null)
+				if (afterString == null)
 				{
 					afterString = val;
 				}
-				if( afterString != null)
+				if (afterString != null)
 				{
 					Date after = formater.parse(afterString);
 					t = search.addAfter(field, after);
 					search.setProperty(t.getId() + ".after", afterString);
-					t.setOperation(op);				
+					t.setOperation(op);
 				}
 			}
 			else if (op.startsWith("after"))
@@ -1927,7 +1929,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				if (beforeStrings != null && beforeStrings.length > count)
 				{
 					beforeString = beforeStrings[count];
-					afterString = afterStrings[count]; //We should not get array out of bounds
+					afterString = afterStrings[count]; // We should not get array out of bounds
 				}
 				if (beforeString == null)
 				{
@@ -1944,7 +1946,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				}
 				if (beforeString == null && afterString == null)
 				{
-					//?
+					// ?
 				}
 				else if (beforeString == null)
 				{
@@ -1976,18 +1978,19 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					search.setProperty(t.getId() + ".after", afterString);
 				}
 			}
-			
-//			<option value="ytd" #if( $op && $op == "ytd" )selected #end>[[Year To Date]]</option>
-//			<option value="previousyear" #if( $op && $op == "previousyear" )selected #end>[[Previous Year]]</option>				
-//			<option value="after" #if( $op && $op == "after" )selected #end>[[After Date]]</option>
-//			<option value="before" #if( $op && $op == "before" )selected #end >[[Before Date]]</option>
-//			<option value="betweendates" #if( $op && $op == "betweendates" )selected #end >[[Between]]</option>
-//			<option value="before1" #if( $op && $op == "before1" )selected #end>[[Past 24 hours]]</option>
-//			<option value="before7" #if( $op && $op == "before7" )selected #end>[[Past week]]</option>
-//			<option value="before30" #if( $op && $op == "before30" )selected #end>[[Past month]]</option>
-//			<option value="before365" #if( $op && $op == "before365" )selected #end>[[Past year]]</option>
 
-			
+			// <option value="ytd" #if( $op && $op == "ytd" )selected #end>[[Year To Date]]</option>
+			// <option value="previousyear" #if( $op && $op == "previousyear" )selected #end>[[Previous
+			// Year]]</option>
+			// <option value="after" #if( $op && $op == "after" )selected #end>[[After Date]]</option>
+			// <option value="before" #if( $op && $op == "before" )selected #end >[[Before Date]]</option>
+			// <option value="betweendates" #if( $op && $op == "betweendates" )selected #end
+			// >[[Between]]</option>
+			// <option value="before1" #if( $op && $op == "before1" )selected #end>[[Past 24 hours]]</option>
+			// <option value="before7" #if( $op && $op == "before7" )selected #end>[[Past week]]</option>
+			// <option value="before30" #if( $op && $op == "before30" )selected #end>[[Past month]]</option>
+			// <option value="before365" #if( $op && $op == "before365" )selected #end>[[Past year]]</option>
+
 			else if ("ytd".equals(op))
 			{
 				Calendar c = new GregorianCalendar();
@@ -1999,7 +2002,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				c.set(Calendar.MINUTE, 0);
 				// add search term
 				Date from = c.getTime();
-				c.set(Calendar.YEAR,c.get(Calendar.YEAR) + 1);
+				c.set(Calendar.YEAR, c.get(Calendar.YEAR) + 1);
 				Date to = c.getTime();
 				t = search.addBetween(field, from, to);
 				search.setProperty(t.getId() + ".after", DateStorageUtil.getStorageUtil().formatForStorage(from));
@@ -2014,10 +2017,10 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				c.set(Calendar.SECOND, 0);
 				c.set(Calendar.MILLISECOND, 0);
 				c.set(Calendar.MINUTE, 0);
-				c.set(Calendar.YEAR,c.get(Calendar.YEAR) - 1);
+				c.set(Calendar.YEAR, c.get(Calendar.YEAR) - 1);
 				// add search term
 				Date from = c.getTime();
-				c.set(Calendar.YEAR,c.get(Calendar.YEAR) + 1);
+				c.set(Calendar.YEAR, c.get(Calendar.YEAR) + 1);
 				Date to = c.getTime();
 				t = search.addBetween(field, from, to);
 				search.setProperty(t.getId() + ".after", DateStorageUtil.getStorageUtil().formatForStorage(from));
@@ -2076,7 +2079,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 		if (t != null)
 		{
-			t.addValue("op", op); //TODO make these match with standard operations?
+			t.addValue("op", op); // TODO make these match with standard operations?
 		}
 		return t;
 	}
@@ -2084,8 +2087,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.openedit.data.Searcher#addActionFilters(org.openedit.WebPageRequest,
+	 * @see org.openedit.data.Searcher#addActionFilters(org.openedit.WebPageRequest,
 	 * org.openedit.hittracker.SearchQuery)
 	 */
 
@@ -2147,14 +2149,15 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 		if (hitsperpage == null)
 		{
-			Integer hitsperpageint = (Integer) inPageRequest.getPageValue(getSearchType()+ "hitsperpage");
-			if(hitsperpageint != null) {
+			Integer hitsperpageint = (Integer) inPageRequest.getPageValue(getSearchType() + "hitsperpage");
+			if (hitsperpageint != null)
+			{
 				hitsperpage = hitsperpageint.toString();
 			}
 		}
 		if (hitsperpage == null)
 		{
-			hitsperpage = inPageRequest.findValue(getSearchType()+ "hitsperpage");
+			hitsperpage = inPageRequest.findValue(getSearchType() + "hitsperpage");
 		}
 		if (tracker != null)
 		{
@@ -2163,8 +2166,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				int numhitsperpage = Integer.parseInt(hitsperpage);
 				tracker.setHitsPerPage(numhitsperpage);
 			} /*
-				 * else if (usersettings != null) {
-				 * tracker.setHitsPerPage(usersettings.
+				 * else if (usersettings != null) { tracker.setHitsPerPage(usersettings.
 				 * getHitsPerPageForSearchType(searcher.getSearchType()));
 				 * 
 				 * }
@@ -2172,7 +2174,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 		int totalPages = tracker.getTotalPages();
 
-		String page = extractPageNumber(inPageRequest,tracker);
+		String page = extractPageNumber(inPageRequest, tracker);
 
 		if (page != null)
 		{
@@ -2216,73 +2218,67 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	protected String extractPageNumber(WebPageRequest inPageRequest, HitTracker inHits)
 	{
 		String page = inPageRequest.getRequestParameter(getSearchType() + "page");
-		if( page == null)
+		if (page == null)
 		{
 			page = inPageRequest.getRequestParameter("page");
 		}
-		if("NaN".equals(page) || (page != null && page.startsWith("http")) ) 
+		if ("NaN".equals(page) || (page != null && page.startsWith("http")))
 		{
 			page = null;
 		}
 		if (page == null)
 		{
 			String position = inPageRequest.getRequestParameter(getSearchType() + "pageposition");
-			if( position == null)
+			if (position == null)
 			{
 				position = inPageRequest.getRequestParameter("pageposition");
 			}
-			if( position != null)
+			if (position != null)
 			{
 				int positionint = Integer.parseInt(position);
-				Integer  totalPages = inHits.getTotalPages();
-				
-				if( inHits.isAscending() ) //This is newsest stuff on left side. Label
+				Integer totalPages = inHits.getTotalPages();
+
+				if (inHits.isAscending()) // This is newsest stuff on left side. Label
 				{
 					/*
-					When sorting Old-New Accending
-					pageposition = 1 = The odest stuff
-					pageposition = 100 = The newest stuff
-					1 2 3 ... 100
-					1 == page 1 of results
-
-					When sorting New-Old Descending
-					pageposition = 1 = The odest stuff
-					pageposition = 100 = The newest stuff
-					100 . . . 3 2 1
-					100 == page 1 of results
-					*/
-					if( positionint < 1)
+					 * When sorting Old-New Accending pageposition = 1 = The odest stuff pageposition = 100 = The newest
+					 * stuff 1 2 3 ... 100 1 == page 1 of results
+					 * 
+					 * When sorting New-Old Descending pageposition = 1 = The odest stuff pageposition = 100 = The
+					 * newest stuff 100 . . . 3 2 1 100 == page 1 of results
+					 */
+					if (positionint < 1)
 					{
-						page =  "1";
+						page = "1";
 					}
-					if( positionint > totalPages)
+					if (positionint > totalPages)
 					{
-						positionint =  totalPages;
+						positionint = totalPages;
 					}
-					else 
+					else
 					{
 						page = String.valueOf(positionint);
 					}
 				}
-				else 
+				else
 				{
-					if( positionint > totalPages)
+					if (positionint > totalPages)
 					{
-						positionint = totalPages; //will never happen
+						positionint = totalPages; // will never happen
 					}
 					int pageis = totalPages - positionint + 1;
-					
+
 					page = String.valueOf(pageis);
 				}
-				
+
 			}
-			
+
 		}
 		if (Boolean.parseBoolean(inPageRequest.findValue("alwaysresetpage")))
 		{
 			page = "1";
 		}
-		//resettopageone
+		// resettopageone
 		if (Boolean.parseBoolean(inPageRequest.findValue("resettopageone")))
 		{
 			page = "1";
@@ -2316,11 +2312,12 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	{
 		HitTracker hits = loadHits(inReq);
 		String sort = inReq.getRequestParameter("sortby");
-		if (sort == null) {
+		if (sort == null)
+		{
 			String searchtype = hits.getSearchType();
 			sort = inReq.getRequestParameter(searchtype + "sortby");
 		}
-		
+
 		if (hits != null && sort != null)
 		{
 			SearchQuery group = hits.getSearchQuery();
@@ -2338,7 +2335,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			if (!sort.equals(group.getSortBy()))
 			{
 				group.setSortBy(sort);
-				hits.setIndexId(hits.getIndexId() + sort); // Causes the hits to be	rerun													// reloaded
+				hits.setIndexId(hits.getIndexId() + sort); // Causes the hits to be rerun // reloaded
 				cachedSearch(inReq, group);
 				UserProfile pref = (UserProfile) inReq.getUserProfile();
 				if (pref != null)
@@ -2355,24 +2352,25 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		String toremove = inReq.getRequestParameter("removefilter");
 		String removeterm = inReq.getRequestParameter("removeterm");
 
-		if( toadd != null || toremove != null || removeterm != null)
+		if (toadd != null || toremove != null || removeterm != null)
 		{
 			HitTracker hits = loadHits(inReq);
-			if (hits == null) {
+			if (hits == null)
+			{
 				return;
 			}
-			if( removeterm != null && removeterm.equals("*") )
+			if (removeterm != null && removeterm.equals("*"))
 			{
-				//Remove all the view terms
+				// Remove all the view terms
 				SearchQuery query = hits.getSearchQuery();
 				Collection<PropertyDetail> details = findSummaryFields(query, inReq.getUserProfile());
-				if(details != null)
-				{					
+				if (details != null)
+				{
 					for (Iterator iterator = details.iterator(); iterator.hasNext();)
 					{
 						PropertyDetail detail = (PropertyDetail) iterator.next();
 						Term term = query.getTermByDetailId(detail.getId());
-						if( term != null)
+						if (term != null)
 						{
 							query.removeTerm(term);
 						}
@@ -2385,13 +2383,12 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					query.setShowAll(true);
 				}
 				hits.invalidate(); // Causes the hits to
-				
+
 				hits = cachedSearch(inReq, query);
 				inReq.putPageValue("hits", hits);
 				return;
 			}
-			
-	
+
 			if (hits != null)
 			{
 				SearchQuery query = hits.getSearchQuery();
@@ -2404,7 +2401,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				}
 				else
 				{
-					if( toremove != null)
+					if (toremove != null)
 					{
 						String asterisk = "*";
 						if (toremove.equals(asterisk))
@@ -2419,13 +2416,12 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 						}
 					}
 				}
-				if( removeterm != null)
+				if (removeterm != null)
 				{
 					hits.getSearchQuery().removeTerm(removeterm);
 					hits.invalidate(); // Causes the hits to
 				}
-				
-				
+
 				// be // reloaded
 				if (query.getTerms().isEmpty())
 				{
@@ -2447,7 +2443,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		newq.copyTerms(terms);
 		return newq;
 	}
-	
+
 	protected SearchQuery createSearchQuery(String inQueryString, WebPageRequest inPageRequest)
 	{
 		String[] array = inQueryString.split(";");
@@ -2557,8 +2553,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.openedit.data.Searcher#setPropertyDetailsArchive(org.openedit.data
+	 * @see org.openedit.data.Searcher#setPropertyDetailsArchive(org.openedit.data
 	 * .PropertyDetailsArchive)
 	 */
 	public void setPropertyDetailsArchive(PropertyDetailsArchive inPropertyDetailsArchive)
@@ -2579,8 +2574,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seeorg.openedit.data.Searcher#setSearcherManager(org.openedit.data.
-	 * SearcherManager)
+	 * @seeorg.openedit.data.Searcher#setSearcherManager(org.openedit.data. SearcherManager)
 	 */
 	public void setSearcherManager(SearcherManager inSearcherManager)
 	{
@@ -2710,6 +2704,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 		return details.findRequiredProperties();
 	}
+
 	public List getKeywordProperties()
 	{
 		PropertyDetails details = getPropertyDetailsArchive().getPropertyDetailsCached(getSearchType());
@@ -2767,71 +2762,74 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 		return (Data) getModuleManager().getBean(getCatalogId(), getNewDataName(), false);
 	}
-	
-	//Prefered API
+
+	// Prefered API
 	public ViewFieldList getDetailsForView(Data inViewData, UserProfile inProfile)
 	{
-		if( inViewData == null)
+		if (inViewData == null)
 		{
-			log.error("No viewdata passed in: " + getSearchType() );
+			log.error("No viewdata passed in: " + getSearchType());
 			return null;
 		}
-		if( inProfile != null)
+		if (inProfile != null)
 		{
 			String saveforall = inProfile.get("view_saveforallenabled");
-			if( Boolean.parseBoolean(saveforall) )
+			if (Boolean.parseBoolean(saveforall))
 			{
 				ViewFieldList fields = getPropertyDetailsArchive().getViewFields(getPropertyDetails(), inViewData, null);
 				return fields;
 			}
 		}
-		
+
 		ViewFieldList fields = getPropertyDetailsArchive().getViewFields(getPropertyDetails(), inViewData, inProfile);
 		return fields;
 	}
+
 	public ViewFieldList getDetailsForView(String inViewId, UserProfile inProfile)
 	{
 		Data viewdata = getSearcherManager().getCachedData(getCatalogId(), "view", inViewId);
-		ViewFieldList fields = getDetailsForView(viewdata,inProfile);
+		ViewFieldList fields = getDetailsForView(viewdata, inProfile);
 		return fields;
 	}
+
 	public ViewFieldList getDetailsForView(Data inViewData)
 	{
-		ViewFieldList fields = getDetailsForView(inViewData,null);
-		
+		ViewFieldList fields = getDetailsForView(inViewData, null);
+
 		return fields;
 	}
+
 	public ViewFieldList getDetailsForView(String inViewId)
 	{
-		ViewFieldList fields = getDetailsForView(inViewId,null);
+		ViewFieldList fields = getDetailsForView(inViewId, null);
 		return fields;
 	}
-	
+
 	/**
 	 * This is old code and should not be used any more
 	 */
 	public PropertyDetail getDetailForView(String inView, String inFieldName, User inUser)
 	{
 		return getDetail(inFieldName);
-		//		PropertyDetails details = getPropertyDetailsArchive().getPropertyDetailsCached(getSearchType());
-		//		if (details == null)
-		//		{
-		//			return null;
-		//		}
+		// PropertyDetails details = getPropertyDetailsArchive().getPropertyDetailsCached(getSearchType());
+		// if (details == null)
+		// {
+		// return null;
+		// }
 
-		//		getPropertyDetailsArchive().getDetails(details,inView,inUser);
+		// getPropertyDetailsArchive().getDetails(details,inView,inUser);
 		//
-		//		
-		//		PropertyDetail detail = null;
-		//		if( inView != null )
-		//		{
-		//			detail = getPropertyDetailsArchive().getDetail(details, inView, inFieldName, inUser);
-		//		}
-		//		if (detail == null)
-		//		{
-		//			detail = details.getDetail(inFieldName);
-		//		}
-		//		return detail;
+		//
+		// PropertyDetail detail = null;
+		// if( inView != null )
+		// {
+		// detail = getPropertyDetailsArchive().getDetail(details, inView, inFieldName, inUser);
+		// }
+		// if (detail == null)
+		// {
+		// detail = details.getDetail(inFieldName);
+		// }
+		// return detail;
 	}
 
 	public List getDetailsForFields(String[] headers)
@@ -2875,6 +2873,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 		return sublist;
 	}
+
 	public Collection<PropertyDetail> getActivePropertyDetails()
 	{
 		PropertyDetails details = getPropertyDetails();
@@ -2882,10 +2881,10 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		for (Iterator iterator = details.iterator(); iterator.hasNext();)
 		{
 			PropertyDetail detail = (PropertyDetail) iterator.next();
-				if (!detail.isDeleted())
-				{
-					sublist.addDetail(detail);
-				}
+			if (!detail.isDeleted())
+			{
+				sublist.addDetail(detail);
+			}
 		}
 		return sublist;
 	}
@@ -2928,7 +2927,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		if (inReq != null)
 		{
 			addSorts(inReq, q);
-			
+
 			return cachedSearch(inReq, q);
 		}
 		else
@@ -2941,6 +2940,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 
 	}
+
 	public String lookupValue(String val, WebPageRequest inReq, Data data)
 	{
 		String value = inReq.getRequestParameter(val);
@@ -2959,8 +2959,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	/*
 	 * Check for a more recent index
 	 * 
-	 * @see org.openedit.data.Searcher#checkCurrent(org.openedit.hittracker.
-	 * HitTracker )
+	 * @see org.openedit.data.Searcher#checkCurrent(org.openedit.hittracker. HitTracker )
 	 */
 	public HitTracker checkCurrent(WebPageRequest inReq, HitTracker tracker) throws OpenEditException
 	{
@@ -2987,12 +2986,12 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					runsearch = true;
 				}
 			}
-			//TODO: Check for new sorting
+			// TODO: Check for new sorting
 			if (runsearch || hasChanged(tracker))
 			{
 				if (tracker.isAllSelected() || tracker.isUseServerCursor())
 				{
-					return tracker; //Ignore the change because we are in a cursor and dont want new results
+					return tracker; // Ignore the change because we are in a cursor and dont want new results
 				}
 				int oldNum = tracker.getPage();
 				SearchQuery newQuery = tracker.getSearchQuery().copy();
@@ -3008,98 +3007,129 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		return tracker;
 	}
 
-	public void updateData(Data inChild, JSONObject inUpdate) {
-	    for (Object keyObj : inUpdate.keySet()) {
-	        String key = (String) keyObj;
-	        Object value = inUpdate.get(key);
+	public void updateData(Data inChild, JSONObject inUpdate)
+	{
+		for (Object keyObj : inUpdate.keySet())
+		{
+			String key = (String) keyObj;
+			Object value = inUpdate.get(key);
 
-	        PropertyDetail detail = getDetail(key);
-	        if (detail == null) {
-	            log.warn("No PropertyDetail found for key: " + key);
-	            continue; // Skip if there's no detail available
-	        }
+			PropertyDetail detail = getDetail(key);
+			if (detail == null)
+			{
+				log.warn("No PropertyDetail found for key: " + key);
+				continue; // Skip if there's no detail available
+			}
 
-	        Object result = null;
+			Object result = null;
 
-	        // Handle multi-language fields
-	        if (detail.isMultiLanguage()) {
-	            LanguageMap map = null;
-	            Object existingValue = inChild.getValue(detail.getId());
-	            if (existingValue instanceof Map) {
-	                map = new LanguageMap((Map<String, String>) existingValue);
-	            } else {
-	                map = new LanguageMap();
-	                if (existingValue != null) {
-	                    map.setText("en", existingValue.toString());
-	                }
-	            }
+			// Handle multi-language fields
+			if (detail.isMultiLanguage())
+			{
+				LanguageMap map = null;
+				Object existingValue = inChild.getValue(detail.getId());
+				if (existingValue instanceof Map)
+				{
+					map = new LanguageMap((Map<String, String>) existingValue);
+				}
+				else
+				{
+					map = new LanguageMap();
+					if (existingValue != null)
+					{
+						map.setText("en", existingValue.toString());
+					}
+				}
 
-	            if (value instanceof JSONObject) {
-	                JSONObject langValues = (JSONObject) value;
-	                for (Object langKey : langValues.keySet()) {
-	                    String lang = (String) langKey;
-	                    String langValue = langValues.get(lang).toString();
-	                    map.setText(lang, langValue);
-	                }
-	            }
+				if (value instanceof JSONObject)
+				{
+					JSONObject langValues = (JSONObject) value;
+					for (Object langKey : langValues.keySet())
+					{
+						String lang = (String) langKey;
+						String langValue = langValues.get(lang).toString();
+						map.setText(lang, langValue);
+					}
+				}
 
-	            result = map;
-	        }
-	        // Handle multi-value fields
-	        else if (detail.isMultiValue()) {
-	            if (value instanceof JSONArray) {
-	                JSONArray array = (JSONArray) value;
-	                List<String> values = new ArrayList<>();
-	                for (Object obj : array) {
-	                    values.add(obj.toString());
-	                }
-	                result = values;
-	            }
-	        }
-	        // Handle nested or object-array fields (skip for now)
-	        else if (detail.isDataType("nested") || detail.isDataType("objectarray")) {
-	            continue;
-	        }
-	        // Handle other types
-	        else {
-	            if (value instanceof String) {
-	                String val = (String) value;
+				result = map;
+			}
+			// Handle multi-value fields
+			else if (detail.isMultiValue())
+			{
+				if (value instanceof JSONArray)
+				{
+					JSONArray array = (JSONArray) value;
+					List<String> values = new ArrayList<>();
+					for (Object obj : array)
+					{
+						values.add(obj.toString());
+					}
+					result = values;
+				}
+			}
+			// Handle nested or object-array fields (skip for now)
+			else if (detail.isDataType("nested") || detail.isDataType("objectarray"))
+			{
+				continue;
+			}
+			// Handle other types
+			else
+			{
+				if (value instanceof String)
+				{
+					String val = (String) value;
 
-	                if (detail.isDate()) {
-	                    result = parseDateValue(val, detail);
-	                } else if (detail.isBoolean()) {
-	                    result = Boolean.parseBoolean(val);
-	                } else {
-	                    result = val;
-	                }
-	            } else {
-	                result = value; // Directly assign non-string values
-	            }
-	        }
+					if (detail.isDate())
+					{
+						result = parseDateValue(val, detail);
+					}
+					else if (detail.isBoolean())
+					{
+						result = Boolean.parseBoolean(val);
+					}
+					else
+					{
+						result = val;
+					}
+				}
+				else
+				{
+					result = value; // Directly assign non-string values
+				}
+			}
 
-	        // Update the Data object
-	        if (result == null && detail.isBoolean()) {
-	            inChild.setValue(key, false);
-	        } else {
-	            inChild.setValue(key, result);
-	        }
-	    }
+			// Update the Data object
+			if (result == null && detail.isBoolean())
+			{
+				inChild.setValue(key, false);
+			}
+			else
+			{
+				inChild.setValue(key, result);
+			}
+		}
 	}
 
-	protected Date parseDateValue(String val, PropertyDetail detail) {
-	    try {
-	        if (val.length() == 10) { // Assuming date format 'yyyy-MM-dd'
-	            return DateStorageUtil.getStorageUtil().parse(val, "yyyy-MM-dd");
-	        } else {
-	            return DateStorageUtil.getStorageUtil().parseFromStorage(val);
-	        }
-	    } catch (Exception e) {
-	        log.error("Failed to parse date value: " + val, e);
-	        return null;
-	    }
+	protected Date parseDateValue(String val, PropertyDetail detail)
+	{
+		try
+		{
+			if (val.length() == 10)
+			{ // Assuming date format 'yyyy-MM-dd'
+				return DateStorageUtil.getStorageUtil().parse(val, "yyyy-MM-dd");
+			}
+			else
+			{
+				return DateStorageUtil.getStorageUtil().parseFromStorage(val);
+			}
+		}
+		catch (Exception e)
+		{
+			log.error("Failed to parse date value: " + val, e);
+			return null;
+		}
 	}
-	
-	
 
 	public Data updateData(WebPageRequest inReq, String[] fields, Data data)
 	{
@@ -3115,14 +3145,14 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			String field = null;
 			if (detail != null)
 			{
-				field = detail.getId(); //Why this?
+				field = detail.getId(); // Why this?
 			}
 			else
 			{
 				field = fields[i];
 			}
 
-			String[] values = findValueParameters(inReq, field );
+			String[] values = findValueParameters(inReq, field);
 			if (values == null)
 			{
 				values = findValueParameters(inReq, fields[i]);
@@ -3132,7 +3162,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			{
 				log.error("No detail " + fields[i]);
 				detail = getPropertyDetails().createDetail(field);
-				//This way code relying on this setting values will still work
+				// This way code relying on this setting values will still work
 
 			}
 
@@ -3147,7 +3177,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					if (oldval instanceof Map)
 					{
 						map = new LanguageMap((Map) oldval);
-						//map = (LanguageMap)oldval;
+						// map = (LanguageMap)oldval;
 					}
 					else
 					{
@@ -3170,27 +3200,27 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					String[] language = inReq.getRequestParameters(field + ".language");
 					if (language != null)
 					{
-						//Load new values
+						// Load new values
 						for (int j = 0; j < language.length; j++)
 						{
 							String lang = language[j];
 							String langval = inReq.getRequestParameter(field + "." + lang + ".value");
 							if (langval == null)
 							{
-								langval = inReq.getRequestParameter(field + ".language." + (j + 1)); //legacy
+								langval = inReq.getRequestParameter(field + ".language." + (j + 1)); // legacy
 							}
 
-//							if (langval == null)  //Should not blank out values that dont match
-//							{
-//								langval = "";
-//							}
+							// if (langval == null) //Should not blank out values that dont match
+							// {
+							// langval = "";
+							// }
 							map.setText(lang, langval);
 						}
 					}
 					else if (values != null && values.length > 0)
 					{
 						String val = values[0];
-						if ("multilanguage".equals(language)) //Well, this will never work language is an array
+						if ("multilanguage".equals(language)) // Well, this will never work language is an array
 						{
 							JsonSlurper parser = new JsonSlurper();
 							Map vals = (Map) parser.parseText(val);
@@ -3206,12 +3236,12 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			}
 			else if (detail.isDataType("nested") || detail.isDataType("objectarray"))
 			{
-				//TODO: Look for sub objects?
+				// TODO: Look for sub objects?
 				continue;
 			}
 			else if (detail.isMultiValue())
 			{
-				if( values != null )
+				if (values != null)
 				{
 					if (values.length == 1 && values[0].contains("|"))
 					{
@@ -3223,23 +3253,23 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				{
 					String toadd = inReq.getRequestParameter(field + ".add");
 					String toremove = inReq.getRequestParameter(field + ".remove");
-					
-					if( toadd != null || toremove != null)
+
+					if (toadd != null || toremove != null)
 					{
 						Collection all = data.getValues(field);
-						if( all == null)
+						if (all == null)
 						{
 							all = new ArrayList();
 						}
-						else 
+						else
 						{
 							all = new ArrayList(all);
 						}
-						if( toadd != null)
+						if (toadd != null)
 						{
 							all.add(toadd);
 						}
-						if( toremove != null)
+						if (toremove != null)
 						{
 							all.remove(toremove);
 						}
@@ -3248,24 +3278,24 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 					else
 					{
 						String[] hasvalues = findValueParameters(inReq, field);
-						if( hasvalues == null )
+						if (hasvalues == null)
 						{
 							result = null;
 						}
 						else
-						{					
-							result = Arrays.asList( hasvalues);
+						{
+							result = Arrays.asList(hasvalues);
 						}
 					}
 				}
 			}
 			else if (detail.isDataType("objectarray"))
 			{
-				//do nothing
-				//if( values instanceof String)
-				//{
-				//if ((String) values).startsWith("{")
-				//}
+				// do nothing
+				// if( values instanceof String)
+				// {
+				// if ((String) values).startsWith("{")
+				// }
 				continue;
 			}
 			else if (values != null && values.length > 0)
@@ -3283,7 +3313,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 						result = DateStorageUtil.getStorageUtil().parse(val, "yyyy-MM-dd HH:mm");
 
 					}
-					else if (val.length() == 10) //We assume US format or Storage Format
+					else if (val.length() == 10) // We assume US format or Storage Format
 					{
 						String format = "yyyy-MM-dd";
 						if (val.matches("[0-9]{2}/[0-9]{2}/[0-9]{4}"))
@@ -3307,8 +3337,8 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				}
 				else if (detail != null && detail.isNumber())
 				{
-					//clean non numeric chrs
-			    	result = val.replaceAll("[^0-9.\\-]", "");
+					// clean non numeric chrs
+					result = val.replaceAll("[^0-9.\\-]", "");
 				}
 				else
 				{
@@ -3322,10 +3352,10 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			}
 			else
 			{
-//				if( result != null && result instanceof String && result.toString().trim().isEmpty())
-//				{
-//					result = null;
-//				}
+				// if( result != null && result instanceof String && result.toString().trim().isEmpty())
+				// {
+				// result = null;
+				// }
 				data.setValue(field, result);
 			}
 		}
@@ -3334,31 +3364,29 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 
 	}
 
-	
 	/*
 	 * public EventManager getEventManager() { return fieldEventManager; }
 	 * 
-	 * public void setEventManager(EventManager inEventManager) {
-	 * fieldEventManager = inEventManager; }
+	 * public void setEventManager(EventManager inEventManager) { fieldEventManager = inEventManager; }
 	 */
 	public void saveDetails(WebPageRequest inReq, String[] fields, Data data, String id)
 	{
 		if (data instanceof CompositeData)
 		{
-//			CompositeData target = (CompositeData) data;
-//			for (Iterator iterator = target.iterator(); iterator.hasNext();)
-//			{
-//				Data real = (Data) iterator.next();
-//				fireDataEditEvent(inReq, real);
-//				data = updateData(inReq, fields, real);
-//				saveData(real, inReq.getUser());
-//			}
+			// CompositeData target = (CompositeData) data;
+			// for (Iterator iterator = target.iterator(); iterator.hasNext();)
+			// {
+			// Data real = (Data) iterator.next();
+			// fireDataEditEvent(inReq, real);
+			// data = updateData(inReq, fields, real);
+			// saveData(real, inReq.getUser());
+			// }
 			throw new OpenEditException("Must call DataEditModule.saveData");
 		}
-		
+
 		getEventManager().fireDataEditEvent(inReq, this, data);
 		updateData(inReq, fields, data);
-		if( data.getId() == null && id != null)
+		if (data.getId() == null && id != null)
 		{
 			data.setId(id);
 		}
@@ -3371,16 +3399,16 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		inReq.putPageValue("message", data.getId() + " is saved");
 		inReq.putPageValue("data", data);
 	}
-	
+
 	public String nextId()
 	{
 		throw new IllegalAccessError("nextId Not implemented");
 	}
-//
-//	public String getViewLabel(String inView)
-//	{
-//		return getPropertyDetailsArchive().getViewLabel(inView);
-//	}
+	//
+	// public String getViewLabel(String inView)
+	// {
+	// return getPropertyDetailsArchive().getViewLabel(inView);
+	// }
 
 	public Data uniqueResult(SearchQuery inQ)
 	{
@@ -3412,10 +3440,10 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	{
 		throw new OpenEditException("Save not implemented for " + getSearchType());
 	}
-	//	public Data loadData(String inId)
-	//	{
-	//		
-	//	}
+	// public Data loadData(String inId)
+	// {
+	//
+	// }
 
 	@Override
 	public Data loadData(Data inHit)
@@ -3424,11 +3452,11 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		{
 			return null;
 		}
-		
-		if( getNewDataName() != null)
+
+		if (getNewDataName() != null)
 		{
-			//We have Order or Asset... so if we 
-			if(  inHit instanceof DataLoaded)
+			// We have Order or Asset... so if we
+			if (inHit instanceof DataLoaded)
 			{
 				return inHit;
 			}
@@ -3439,8 +3467,8 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 		else
 		{
-			//Was not DataLoaded and does have a specific type it should be 
-			//so Converting to that type
+			// Was not DataLoaded and does have a specific type it should be
+			// so Converting to that type
 			Data data = (Data) createNewData();
 			ValuesMap fields = inHit.getProperties();
 			fields = checkTypes(fields);
@@ -3449,7 +3477,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			return data;
 		}
 	}
-	
+
 	@Override
 	public Data cloneData(Data inHit)
 	{
@@ -3477,17 +3505,26 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 	}
 
 	@Override
-	public void restoreSettings()
+	public void resetMappings()
 	{
 		getPropertyDetailsArchive().clearCustomSettings(getSearchType());
 
 	}
 
-	@Override
-	public void reloadSettings()
+	/**
+	 * puts current mappings into the index
+	 */
+	public void refreshMappings()
 	{
 		getPropertyDetailsArchive().reloadSettings(getSearchType());
+		putMappings();
 
+	}
+
+	@Override
+	public void resetData()
+	{
+		// Do nothing
 	}
 
 	@Override
@@ -3498,9 +3535,9 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 
 	public void reindexInternal() throws OpenEditException
 	{
-		//do nothing?
+		// do nothing?
 		throw new OpenEditException("Not implemented " + getSearchType() + " " + getClass().getName());
-		//reIndexAll();
+		// reIndexAll();
 	}
 
 	public Term addPosition(WebPageRequest inReq, SearchQuery search, PropertyDetail field, String val, String op)
@@ -3510,15 +3547,15 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			return null;
 		}
 
-		String rangeString = inReq.getRequestParameter("maprange" + field.getId()); //distance in meters
+		String rangeString = inReq.getRequestParameter("maprange" + field.getId()); // distance in meters
 		if (rangeString == null)
 		{
-			rangeString = "5000000"; //default.  
+			rangeString = "5000000"; // default.
 		}
 
-		//rangeString = rangeString + "000";
-		double range = Double.parseDouble(rangeString); //meters
-		range = range / 157253.2964;//convert to decimal degrees (FROM Meters)
+		// rangeString = rangeString + "000";
+		double range = Double.parseDouble(rangeString); // meters
+		range = range / 157253.2964;// convert to decimal degrees (FROM Meters)
 		Position p = (Position) getGeoCoder().findFirstPosition(val);
 		GeoFilter filter = new GeoFilter();
 
@@ -3535,7 +3572,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		{
 			log.error("No location found " + search.hashCode());
 			filter.addValue("maperror", "No results");
-			//filter.setCenter(p);
+			// filter.setCenter(p);
 		}
 
 		filter.setDistance(Long.parseLong(rangeString));
@@ -3561,18 +3598,18 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 
 	public String getConfigValue(String inKey)
 	{
-		//look up values in db
+		// look up values in db
 		return null;
 	}
 
 	public Object createValue(String inDetailId, String inVal)
 	{
 		PropertyDetail detail = getDetail(inDetailId);
-		if( inVal == null || inVal.isEmpty())
+		if (inVal == null || inVal.isEmpty())
 		{
 			return null;
 		}
-		Object result = inVal;  //defaulted
+		Object result = inVal; // defaulted
 		if (detail == null)
 		{
 			return inVal;
@@ -3602,7 +3639,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			}
 			else
 			{
-				vals = new String[] { inVal };
+				vals = new String[] {inVal};
 			}
 			Collection collection = Arrays.asList(vals);
 			return collection;
@@ -3610,9 +3647,9 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 		else if (detail.isNumber())
 		{
-			//make sure its a number?
+			// make sure its a number?
 		}
-		else if( detail.isDataType("nested") && inVal.startsWith("{"))
+		else if (detail.isDataType("nested") && inVal.startsWith("{"))
 		{
 			JSONParser parser = new JSONParser();
 			try
@@ -3624,9 +3661,9 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 				}
 				else
 				{
-					vals = new String[] { inVal };
+					vals = new String[] {inVal};
 				}
-				List all = new ArrayList(vals.length); 
+				List all = new ArrayList(vals.length);
 				for (int i = 0; i < vals.length; i++)
 				{
 					String val = vals[i];
@@ -3653,18 +3690,18 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		}
 
 	}
+
 	@Override
 	public void saveJson(Collection inJsonArray)
 	{
 		// TODO Auto-generated method stub
 
 	}
-	
-	
-	public void saveJson(String inId, JSONObject object) {
-		
+
+	public void saveJson(String inId, JSONObject object)
+	{
+
 	}
-	
 
 	@Override
 	public String getFulltext(Data inSearchHitData)
@@ -3672,10 +3709,10 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		return null;
 	}
 
-	public Data loadData(WebPageRequest inReq,String dataid)
+	public Data loadData(WebPageRequest inReq, String dataid)
 	{
 		Data data = null;
-		if( dataid == null)
+		if (dataid == null)
 		{
 			return null;
 		}
@@ -3684,7 +3721,7 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 			CompositeData compositeasset = (CompositeData) inReq.getSessionValue(dataid);
 			String hitssessionid = dataid.substring("multiedit".length() + 1);
 			HitTracker hits = (HitTracker) inReq.getSessionValue(hitssessionid);
-			if (compositeasset!= null && !compositeasset.getSelectedResults().hasChanged(hits)) 
+			if (compositeasset != null && !compositeasset.getSelectedResults().hasChanged(hits))
 			{
 				data = compositeasset;
 			}
@@ -3712,38 +3749,38 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 
 	protected BaseCompositeData createCompositeData(HitTracker hits)
 	{
-		return new BaseCompositeData(this,getEventManager(), hits);
+		return new BaseCompositeData(this, getEventManager(), hits);
 	}
 
 	public Data loadData(String inDataid)
 	{
-		Data data = (Data)searchById(inDataid);
+		Data data = (Data) searchById(inDataid);
 		data = loadData(data);
 		return data;
 	}
 
 	public Data loadCachedData(String inId)
 	{
-		if( inId == null)
+		if (inId == null)
 		{
 			return null;
 		}
-		Data data = (Data)getCacheManager().get("data" + getSearchType(), inId);
-		
-		if( data == BaseData.NULL )
+		Data data = (Data) getCacheManager().get("data" + getSearchType(), inId);
+
+		if (data == BaseData.NULL)
 		{
 			return null;
 		}
-		
-		if( data == null && inId != null)
+
+		if (data == null && inId != null)
 		{
-			data = (Data)searchById(inId);
-			if( data == null)
+			data = (Data) searchById(inId);
+			if (data == null)
 			{
-				data =  BaseData.NULL;
+				data = BaseData.NULL;
 			}
 			getCacheManager().put("data" + getSearchType(), inId, data);
-			if( data == BaseData.NULL)
+			if (data == BaseData.NULL)
 			{
 				return null;
 			}
@@ -3751,40 +3788,39 @@ public abstract class BaseSearcher implements Searcher, DataFactory
 		return data;
 	}
 
-
 	@Override
-	public HitTracker getCachedSearch(QueryBuilder inQ) 
+	public HitTracker getCachedSearch(QueryBuilder inQ)
 	{
 		String query = inQ.getQuery().toQuery();
-		CacheEntry entry = (CacheEntry)getCacheManager().get(getSearchType() + ".cachedsearch" , query);
-		if( entry == null )
+		CacheEntry entry = (CacheEntry) getCacheManager().get(getSearchType() + ".cachedsearch", query);
+		if (entry == null)
 		{
 			entry = new CacheEntry();
 		}
-		if( !getIndexId().equals( entry.getIndexId() ) )
+		if (!getIndexId().equals(entry.getIndexId()))
 		{
 			entry.setIndexId(getIndexId());
 			HitTracker tracker = inQ.search();
 			entry.setHits(tracker);
-			getCacheManager().put(getSearchType() + ".cachedsearch" , query,entry);
+			getCacheManager().put(getSearchType() + ".cachedsearch", query, entry);
 		}
 		return entry.getHits();
 	}
-	
-//	public ViewFieldList loadViewFields(ViewDa)
-//	{
-//		ViewFieldList details = (ViewFieldList)inReq.getPageValue("details");
-//		if( details == null)
-//		{
-//			String viewid = (String)inReq.getPageValue("viewid");
-//			details = 
-//			#if( $context.getUserProfile() )
-//					#set ($details = $searcher.getDetailsForView($view, $context.getUserProfile()))
-//				#else
-//					#set ($details = $searcher.getDetailsForView($view))
-//				#end
-//			#end	
-//		}	
-//	}
-	
+
+	// public ViewFieldList loadViewFields(ViewDa)
+	// {
+	// ViewFieldList details = (ViewFieldList)inReq.getPageValue("details");
+	// if( details == null)
+	// {
+	// String viewid = (String)inReq.getPageValue("viewid");
+	// details =
+	// #if( $context.getUserProfile() )
+	// #set ($details = $searcher.getDetailsForView($view, $context.getUserProfile()))
+	// #else
+	// #set ($details = $searcher.getDetailsForView($view))
+	// #end
+	// #end
+	// }
+	// }
+
 }

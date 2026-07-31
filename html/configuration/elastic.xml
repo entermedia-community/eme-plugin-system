@@ -23,7 +23,7 @@
 	<bean id="modulesearchSearcher" bean="elasticModuleSearchSearcher" />
 	<bean id="modulesearchkeywordSearcher" bean="elasticModuleSearchKeywordSearcher" />
 	<bean id="viewSearcher" bean="elasticViewSearcher" />
-
+	<bean id="settingsmenuSearcher" bean="elasticSettingsMenuSearcher" />
 
 	<!--  Little used -->
 	<bean id="uploadqueueSearcher" bean="elasticDataSearcher" />
