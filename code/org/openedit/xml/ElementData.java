@@ -14,8 +14,8 @@ import java.util.regex.Pattern;
 import org.dom4j.Attribute;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.openedit.MultiValued;
 import org.openedit.OpenEditException;
+import org.openedit.data.BaseData;
 import org.openedit.data.DataLoaded;
 import org.openedit.data.PropertyDetail;
 import org.openedit.data.PropertyDetails;
@@ -25,7 +25,7 @@ import org.openedit.data.ValuesMap;
 import org.openedit.modules.translations.LanguageMap;
 import org.openedit.util.DateStorageUtil;
 
-public class ElementData implements MultiValued, SaveableData, DataLoaded, Comparable, SearchDataEnabled
+public class ElementData extends BaseData implements SaveableData, DataLoaded, SearchDataEnabled // TODO: remove duplicate implementation methods from BaseData
 {
 	protected Element fieldElement;
 	protected String fieldVersion;
@@ -39,20 +39,19 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		}
 		return fieldMap;
 	}
+
 	protected static final Pattern INVALIDSTUFF = Pattern.compile("[\'\"\n<>&]");
 	protected PropertyDetails fieldPropertyDetails;
 
-	public ElementData(Element inHit, PropertyDetails inPropertyDetails)
-	{
+	public ElementData(Element inHit, PropertyDetails inPropertyDetails) {
 		setElement(inHit);
-		//setId(getSearchHit().getId());
+		// setId(getSearchHit().getId());
 		setPropertyDetails(inPropertyDetails);
 	}
 
-	public ElementData(Object inHit, PropertyDetails inPropertyDetails)
-	{
+	public ElementData(Object inHit, PropertyDetails inPropertyDetails) {
 		setElement((Element) inHit);
-		//setId(getSearchHit().getId());
+		// setId(getSearchHit().getId());
 		setPropertyDetails(inPropertyDetails);
 	}
 
@@ -76,17 +75,13 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		fieldVersion = inVersion;
 	}
 
-	public ElementData()
-	{
-	}
+	public ElementData() {}
 
-	public ElementData(Element inEl)
-	{
+	public ElementData(Element inEl) {
 		setElement(inEl);
 	}
 
-	public ElementData(Object inEl)
-	{
+	public ElementData(Object inEl) {
 		setElement((Element) inEl);
 	}
 
@@ -112,21 +107,20 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		{
 			return null;
 		}
-		if( !(obj instanceof String))
+		if (!(obj instanceof String))
 		{
 			return getMap().toString(obj);
 		}
 
-		return (String)obj;
+		return (String) obj;
 	}
 
 	/**
-	 * First we try the child node in case we have CDATA Then we try the
-	 * attributes
+	 * First we try the child node in case we have CDATA Then we try the attributes
 	 */
 	public Object getValue(String inId)
 	{
-		if( inId == null)
+		if (inId == null)
 		{
 			return null;
 		}
@@ -136,7 +130,7 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		}
 		else if (inId.equals(".version"))
 		{
-			return getVersion();//elastic search
+			return getVersion();// elastic search
 		}
 		else if (inId.equals("sourcepath"))
 		{
@@ -161,25 +155,25 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		if (value == null)
 		{
 			Element noderoot = getElement().element(inId);
-//			if( "defaultskilloverview".equals(inId) )
-//			{
-//				//Stop here
-//				System.out.println("Hey");
-//			}
+			// if( "defaultskilloverview".equals(inId) )
+			// {
+			// //Stop here
+			// System.out.println("Hey");
+			// }
 			if (noderoot != null)
 			{
-				PropertyDetails alldetails = getPropertyDetails(); //TODO: Move this to a new Subclass SearcherElementData 
+				PropertyDetails alldetails = getPropertyDetails(); // TODO: Move this to a new Subclass SearcherElementData
 				if (alldetails != null)
 				{
 					PropertyDetail detail = alldetails.getDetail(inId);
-					
-					if(detail != null && detail.isMultiLanguage() )
+
+					if (detail != null && detail.isMultiLanguage())
 					{
 						Object obj = getLanguageMap(inId);
 						return obj;
 					}
-						
-					if(detail != null && "nested".equals(detail.getDataType()) )
+
+					if (detail != null && "nested".equals(detail.getDataType()))
 					{
 						Collection<Map> children = new ArrayList();
 						for (Iterator iterator = noderoot.elements().iterator(); iterator.hasNext();)
@@ -188,12 +182,12 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 							ValuesMap map = new ValuesMap();
 							for (Iterator iteratork = child.attributeIterator(); iteratork.hasNext();)
 							{
-								org.dom4j.Attribute attr = (org.dom4j.Attribute)iteratork.next(); 
-								String key = attr.getName(); 
+								org.dom4j.Attribute attr = (org.dom4j.Attribute) iteratork.next();
+								String key = attr.getName();
 								String subvalue = child.attributeValue(key);
-								if( subvalue != null)
+								if (subvalue != null)
 								{
-									map.put(key,subvalue);
+									map.put(key, subvalue);
 								}
 							}
 							children.add(map);
@@ -241,6 +235,7 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		}
 		return 0;
 	}
+
 	public long getLong(String inId)
 	{
 		String val = get(inId);
@@ -282,8 +277,8 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		}
 		else
 		{
-			//synchronized (getElement())  //TODO: Remove this now that we have proper locking?
-			//{
+			// synchronized (getElement()) //TODO: Remove this now that we have proper locking?
+			// {
 			if (inValue == null)
 			{
 				removeValues(inId);
@@ -292,11 +287,11 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 			if (inId.equals("name"))
 			{
 				removeValues(inId);
-				//save in XML format all the time
+				// save in XML format all the time
 				Element child = getElement().addElement(inId);
 				if (inValue instanceof LanguageMap)
 				{
-					//loop over languages
+					// loop over languages
 					LanguageMap languages = (LanguageMap) inValue;
 					for (Iterator iterator = languages.keySet().iterator(); iterator.hasNext();)
 					{
@@ -311,11 +306,11 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 				}
 				return;
 			}
-			//always check for a child
+			// always check for a child
 			Element child = getElement().element(inId);
 			if (child != null)
 			{
-				//TODO: See if value changed?
+				// TODO: See if value changed?
 				getElement().remove(child);
 			}
 			inValue = getMap().toString(inValue);
@@ -352,6 +347,7 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 			}
 		}
 	}
+
 	protected void removeValues(String inId)
 	{
 		getMap().remove(inId);
@@ -367,7 +363,6 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 			getElement().remove(attr);
 		}
 	}
-	
 
 	public String getSourcePath()
 	{
@@ -387,9 +382,9 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		{
 			String key = (String) iterator.next();
 			Object value = getValue(key);
-			if( value != null)
+			if (value != null)
 			{
-				map.put(key,value);
+				map.put(key, value);
 			}
 		}
 		return map;
@@ -435,11 +430,11 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 
 	public Collection getValues(String inPreference)
 	{
-		
+
 		Object values = getValue(inPreference);
-		if( values != null && values instanceof Collection)
+		if (values != null && values instanceof Collection)
 		{
-			return (Collection)values;
+			return (Collection) values;
 		}
 		String val = get(inPreference);
 
@@ -454,11 +449,11 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		}
 		else
 		{
-			vals = val.split("\\s+"); //legacy
+			vals = val.split("\\s+"); // legacy
 		}
 
 		Collection collection = Arrays.asList(vals);
-		//if null check parent
+		// if null check parent
 		return collection;
 	}
 
@@ -492,7 +487,7 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 	@Override
 	public void setProperty(String inKey, String inValue)
 	{
-		if( inKey.equals("name"))
+		if (inKey.equals("name"))
 		{
 			setName(inValue);
 		}
@@ -562,68 +557,53 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		return keys;
 	}
 
-	public boolean getBoolean(String inString)
-	{
-		Object obj = getValue(inString);
-		if (obj instanceof Boolean)
-		{
-			return (boolean) obj;
-		}
-		if (obj instanceof String)
-		{
-			return Boolean.parseBoolean((String) obj);
-		}
-		return false;
-
-	}
-
 	public LanguageMap getLanguageMap(String inKey)
 	{
-		LanguageMap language = (LanguageMap)getMap().getValue(inKey);
-		if( language != null)
+		LanguageMap language = (LanguageMap) getMap().getValue(inKey);
+		if (language != null)
 		{
 			return language;
 		}
 		LanguageMap map = new LanguageMap();
 		String textvalue = getElement().attributeValue(inKey);
-		if( textvalue == null)
+		if (textvalue == null)
 		{
-			if( !getElement().hasMixedContent() )
+			if (!getElement().hasMixedContent())
 			{
 				textvalue = getElement().getTextTrim();
-			}	
+			}
 			else
 			{
 				textvalue = null;
 			}
-			if( textvalue != null && textvalue.trim().isEmpty())
+			if (textvalue != null && textvalue.trim().isEmpty())
 			{
 				textvalue = null;
 			}
-			if( textvalue == null)
+			if (textvalue == null)
 			{
 				Element langmaptop = getElement().element(inKey);
-				if( langmaptop != null)
+				if (langmaptop != null)
 				{
 					for (Iterator iterator = langmaptop.elementIterator("language"); iterator.hasNext();)
 					{
 						Element childlang = (Element) iterator.next();
-						map.put(childlang.attributeValue("id"),childlang.getTextTrim());
-					}					
-					if( map.isEmpty())
+						map.put(childlang.attributeValue("id"), childlang.getTextTrim());
+					}
+					if (map.isEmpty())
 					{
 						textvalue = langmaptop.getTextTrim();
-						if( textvalue != null && !textvalue.isEmpty())
-						map.put("en",textvalue);
+						if (textvalue != null && !textvalue.isEmpty())
+							map.put("en", textvalue);
 					}
-				}	
-			}	
+				}
+			}
 		}
-		if( textvalue != null)
+		if (textvalue != null)
 		{
 			map.setText("en", textvalue);
 		}
-		getMap().put(inKey,map);
+		getMap().put(inKey, map);
 		return map;
 	}
 
@@ -643,49 +623,40 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 	public Date getDate(String inField)
 	{
 		Object date = getValue(inField);
-		if(date == null){
+		if (date == null)
+		{
 			return null;
 		}
 
-		if(date instanceof Date){
+		if (date instanceof Date)
+		{
 			return (Date) date;
 		}
-		
-		return DateStorageUtil.getStorageUtil().parseFromStorage((String)date);
+
+		return DateStorageUtil.getStorageUtil().parseFromStorage((String) date);
 	}
 
 	@Override
-	public String getText(String inId, String inLocale) 
+	public String getText(String inId, String inLocale)
 	{
-		if( fieldMap == null)
+		if (fieldMap == null)
 		{
 			return null;
 		}
 		Object value = getValue(inId);
-		if( value instanceof LanguageMap )
+		if (value instanceof LanguageMap)
 		{
-			LanguageMap map = (LanguageMap)value;
+			LanguageMap map = (LanguageMap) value;
 			return map.getText(inLocale);
 		}
 		return getMap().toString(value);
 	}
 
-	@Override
-	public boolean containsValue(String inKey, Object inNewValue)
-	{
-		Collection values = getValues(inKey);
-		if( values != null && values.contains(inNewValue))
-		{
-			return true;
-		}
-		return false;
-	}
-	
 	public String toJsonString()
-	{		
+	{
 		throw new OpenEditException("NOT IMPLEMENTED");
 	}
-	
+
 	public void addValues(String inKey, Collection inNewValues)
 	{
 		if (inNewValues == null)
@@ -695,7 +666,7 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		for (Iterator iterator = inNewValues.iterator(); iterator.hasNext();)
 		{
 			Object value = (Object) iterator.next();
-				addValue(inKey, value);
+			addValue(inKey, value);
 		}
 	}
 
@@ -708,4 +679,5 @@ public class ElementData implements MultiValued, SaveableData, DataLoaded, Compa
 		}
 		return false;
 	}
+
 }
