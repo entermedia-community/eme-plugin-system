@@ -1,6 +1,14 @@
 <properties>
 	<property id="id" index="true" stored="true"  keyword="true" >Username</property>
 	<property id="name" index="true" stored="true" editable="false">Name</property>
+	  <property id="description" internalfield="false" defaultoperation="freeform" index="true" stored="true" editable="false" sortable="true">All Fields 
+    <name> 
+      <language id="en"><![CDATA[All Fields]]></language>  
+      <language id="de"><![CDATA[Alle Felder]]></language>
+      <language id="fr"><![CDATA[Tous les champs]]></language>
+      <language id="es"><![CDATA[Todos los campos]]></language>
+    </name> 
+  </property>
 	<property id="screenname" index="true" stored="true" keyword="true" editable="true">Screen Name</property>
 	<property id="firstName" index="true" stored="true" keyword="true" editable="true" >First Name</property>
 	<property id="lastName" index="true" stored="true" keyword="true" editable="true" >Last Name</property>
