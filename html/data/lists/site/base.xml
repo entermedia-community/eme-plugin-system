@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <properties>
-  <property id="profile" catalogid="catalog"  rootpath="/profile" domains="localhost|mywebsite.com">EME Profile</property>
+  <property id="profile" catalogid="site/catalog"  rootpath="/profile" domains="localhost|mywebsite.com">EME Profile</property>
+  <property id="system" catalogid="system"  rootpath="/system" domains="">System Catalog</property>
 </properties>

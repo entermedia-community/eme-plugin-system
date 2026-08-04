@@ -1,0 +1,7 @@
+<page>
+	<property name="eventname">Manager Snapshot</property>	
+	<path-action name="MediaAdminModule.catalogSnapshot" />
+	<property name="catalogid">system</property>
+	<property name="period">1d</property>
+	<property name="enabled">true</property>
+</page>

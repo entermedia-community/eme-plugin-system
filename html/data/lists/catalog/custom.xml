@@ -3,4 +3,7 @@
   <data id="catalog">
     <name><![CDATA[EME Catalog]]></name>
   </data>
+    <data id="system">
+    <name><![CDATA[System Catalog]]></name>
+  </data>
 </root>
