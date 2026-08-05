@@ -3,13 +3,17 @@
 <properties>
 
   	
-  	  <property id="demoallfinder" ordering="01"   
+  	<property id="defaultsite" ordering="01"   
+	username="admin" password="admin" 
+	caption="eMe Site"
+  	longdescription="eMe Server with default applications.">eMe Site</property>
+  	
+  <!--
+  <property id="demoallfinder" ordering="01"   
 	initurl="https://template10.entermediadb.org/manager/views/sites/snapshots/download/AXwKpKcqiNUnMdziqL9a/2021-09-21-19-15-35.zip?entermedia.key=1c0af185908a6c0c40d50fd5e3f16760d5580bc" 
 	username="admin" password="admin" 
 	caption="eMedia Finder"
   	longdescription="eMedia Finder App.">EnterMedia - Finder DAM</property>
-  	
-  <!--
 	  <property id="demoallasset" ordering="01"   
 	initurl="https://template10.entermediadb.org/manager/views/sites/snapshots/download/AXwKoq9xiNUnMdziqL9Z/2021-09-21-19-13-26.zip?entermedia.key=1c0af185908a6c0c40d50fd5e3f16760d5580bc" username="admin" password="admin" caption="Emshare2 sharing web site"
   	longdescription="EnterMedia Share is a media sharing website. It allows users to comment, share to Facebook, upload, view assets in galleries, and play videos. Starting with EMShare you can customize your own web site by changing the logo and color scheme.">EnterMedia - Emshare2 DAM</property>

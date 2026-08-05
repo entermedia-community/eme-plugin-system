@@ -3,7 +3,7 @@
 <page>
   <property name="siteid">site</property>
   <property name="catalogid">site/catalog</property>
-  <property name="applicationid">${siteid}/profile</property>
+  <property name="applicationid">site/profile</property>
 
   <property name="fallbackdirectory">/profile</property>
 </page>
