@@ -662,27 +662,18 @@ public class SearcherManager
 		{
 			return inCatalogId;
 		}
-		Searcher typeSearcher = getSearcher(inCatalogId, "searchtypes");
-		if (typeSearcher.getPropertyDetails().size() == 0) // Not used in the system catalog
+		if (inSearchType.equals("user") || inSearchType.equals("group") || inCatalogId.equals("system"))
 		{
-			if (inSearchType.equals("user") || inSearchType.equals("group"))
-			{
-				return "system";
-			}
-			return inCatalogId;
+			return "system";
 		}
+
+		Searcher typeSearcher = getSearcher(inCatalogId, "searchtypes");
 		Data catalogdata = (Data) typeSearcher.searchById(inSearchType);
 		if (catalogdata != null && catalogdata.get("catalogid") != null)
 		{
 			return catalogdata.get("catalogid");
 		}
-		else
-		{
-			if (inSearchType.equals("user") || inSearchType.equals("group"))
-			{
-				return "system";
-			}
-		}
+
 		return inCatalogId;
 
 	}
