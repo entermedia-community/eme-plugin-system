@@ -1,16 +1,15 @@
 /*
  * Created on Jul 28, 2003
  *
- /*
- Copyright (c) 2003 eInnovation Inc. All rights reserved
-
- This library is free software; you can redistribute it and/or modify it under the terms
- of the GNU Lesser General Public License as published by the Free Software Foundation;
- either version 2.1 of the License, or (at your option) any later version.
-
- This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- See the GNU Lesser General Public License for more details.
+ * /* Copyright (c) 2003 eInnovation Inc. All rights reserved
+ * 
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; either version
+ * 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
  */
 package org.openedit;
 
@@ -79,13 +78,13 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	protected LocaleManager fieldLocaleManager;
 	protected String fieldLocale;
 	protected TimeZone fieldTimeZone;
-	
+
 	public TimeZone getTimeZone()
 	{
-		if( fieldTimeZone == null )
+		if (fieldTimeZone == null)
 		{
-			fieldTimeZone = (TimeZone)getSessionValue("usertimezone");
-			if( fieldTimeZone == null)
+			fieldTimeZone = (TimeZone) getSessionValue("usertimezone");
+			if (fieldTimeZone == null)
 			{
 				fieldTimeZone = TimeZone.getDefault();
 			}
@@ -102,14 +101,13 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	protected boolean fieldHasForwarded;
 	protected boolean fieldHasCancelActions;
 	protected boolean fieldEditable;
-	
+
 	protected UserProfile fieldUserProfile;
-	
-	public BaseWebPageRequest(WebPageRequest parent)
-	{
+
+	public BaseWebPageRequest(WebPageRequest parent) {
 		fieldParent = parent;
 		setEditable(parent.isEditable());
-		while( parent != null)
+		while (parent != null)
 		{
 			if (parent == this)
 			{
@@ -119,34 +117,33 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		}
 	}
 
-	public BaseWebPageRequest()
-	{
-	}
+	public BaseWebPageRequest() {}
 
-	public Map configureFields() {
-		Map <String, Object>jsonRequest = getJsonRequest();
+	public Map configureFields()
+	{
+		Map<String, Object> jsonRequest = getJsonRequest();
 
 		String[] fields = jsonRequest.keySet().toArray(new String[jsonRequest.size()]);
-		for (int i = 0; i < fields.length; i++) {
+		for (int i = 0; i < fields.length; i++)
+		{
 			String field = fields[i];
 			String val = jsonRequest.get(field).toString();
 			setRequestParameter(field + ".value", val);
 		}
-		
+
 		setRequestParameter("field", fields);
 		return jsonRequest;
 
 	}
-	
-	
+
 	@Override
 	public Map getJsonRequest()
-	{	
-		Map jsonRequest = (Map)getPageValue("_jsonRequest");
-		if( jsonRequest == null && getRequest() != null)
+	{
+		Map jsonRequest = (Map) getPageValue("_jsonRequest");
+		if (jsonRequest == null && getRequest() != null)
 		{
 			String method = getRequest().getMethod();
-			if( "POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)  ||  "PATCH".equalsIgnoreCase(method) )
+			if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "PATCH".equalsIgnoreCase(method))
 			{
 				String type = getRequest().getContentType();
 				if (type == null || (!type.startsWith("application/json") && !type.startsWith("text/plain")))
@@ -157,34 +154,35 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 				try
 				{
 					Reader reader = getRequest().getReader();
-					
-					if(reader != null){
-						jsonRequest = (Map)parser.parse(reader); //this is real, the other way is just for t
-	//					StringWriter st = new StringWriter();
-	//					new OutputFiller().fill(reader, st);
-	//					log.info(st.toString());
-	//					jsonRequest = (Map)slurper.parseText(st.toString());
+
+					if (reader != null)
+					{
+						jsonRequest = (Map) parser.parse(reader); // this is real, the other way is just for t
+						// StringWriter st = new StringWriter();
+						// new OutputFiller().fill(reader, st);
+						// log.info(st.toString());
+						// jsonRequest = (Map)slurper.parseText(st.toString());
 						putPageValue("_jsonRequest", jsonRequest);
-						//log.info("JSON REQUEST BODY was: " + jsonRequest);
+						// log.info("JSON REQUEST BODY was: " + jsonRequest);
 					}
 				}
-				catch ( Throwable ex)
+				catch (Throwable ex)
 				{
-					log.error("Could not parse json " + getPathUrl(),ex);
+					log.error("Could not parse json " + getPathUrl(), ex);
 					jsonRequest = null;
 					putPageValue("_jsonRequest", jsonRequest);
-					//throw new OpenEditException(ex);
+					// throw new OpenEditException(ex);
 				}
 			}
 		}
-		
+
 		return jsonRequest;
 	}
-	
+
 	@Override
 	public void setJsonRequest(Map inMap)
 	{
-		if( getParent() != null)
+		if (getParent() != null)
 		{
 			getParent().putPageValue("_jsonRequest", inMap);
 		}
@@ -193,10 +191,10 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 			putPageValue("_jsonRequest", inMap);
 		}
 	}
-	
+
 	protected Set getProtectedFields()
 	{
-		if (fieldProtectedFields == null )
+		if (fieldProtectedFields == null)
 		{
 			fieldProtectedFields = new HashSet();
 		}
@@ -237,29 +235,31 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 
 	public void forward(String inUrl) throws OpenEditException
 	{
-		//fieldHasRedirected = true;
+		// fieldHasRedirected = true;
 		getPageStreamer().forward(inUrl, this);
 	}
+
 	public String getParam(String inKey)
 	{
 		String val = getRequestParameter(inKey);
-		if( val != null)
+		if (val != null)
 		{
 			val = URLUtilities.xmlEscape(val);
 		}
 		return val;
 	}
 
-	public String getReferringPage(){
-		String referringPage  = getRequest().getHeader("referer");
-		
+	public String getReferringPage()
+	{
+		String referringPage = getRequest().getHeader("referer");
+
 		return referringPage;
 	}
-	
+
 	public boolean getRequestParameterBoolean(String inKey, boolean inDefault)
 	{
 		String boolvalue = getRequestParameter(inKey);
-		if( boolvalue == null )
+		if (boolvalue == null)
 		{
 			return inDefault;
 		}
@@ -269,32 +269,33 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	public String getRequestParameter(String inKey)
 	{
 		String value = getLocalRequestParameter(inKey);
-		if( value == null)
+		if (value == null)
 		{
-			if( getRequest() != null )
+			if (getRequest() != null)
 			{
 				value = getRequest().getParameter(inKey);
 			}
-			
-			if( value == null && getVariables().containsKey("_jsonRequest"))
+
+			if (value == null && getVariables().containsKey("_jsonRequest"))
 			{
 				Object vals = getJsonRequest().get(inKey);
 				if (vals != null)
 				{
-					if (vals instanceof Collection )
+					if (vals instanceof Collection)
 					{
-						Collection array = (Collection)vals;
-						if( array.size() > 0)
+						Collection array = (Collection) vals;
+						if (array.size() > 0)
 						{
-							value = (String)array.iterator().next();
+							value = (String) array.iterator().next();
 						}
 					}
-					else if (vals instanceof Map) {
-		                // Convert the Map to a JSON string or handle it accordingly
-		                JSONObject jsonObject = new JSONObject((Map) vals);
+					else if (vals instanceof Map)
+					{
+						// Convert the Map to a JSON string or handle it accordingly
+						JSONObject jsonObject = new JSONObject((Map) vals);
 						value = jsonObject.toJSONString();
 					}
-					
+
 					else
 					{
 						value = String.valueOf(vals);
@@ -302,9 +303,9 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 				}
 			}
 		}
-		if ( value != null && value.length() == 0)
+		if (value != null && value.length() == 0)
 		{
-			value = null; //null out blank strings
+			value = null; // null out blank strings
 		}
 		return value;
 	}
@@ -312,19 +313,19 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	public String getLocalRequestParameter(String inKey)
 	{
 		String value = null;
-		if (getLocalParameters().containsKey(inKey) )
+		if (getLocalParameters().containsKey(inKey))
 		{
-			Object  val = getLocalParameters().get(inKey);
-			if( val != null)
+			Object val = getLocalParameters().get(inKey);
+			if (val != null)
 			{
-				if( val instanceof String)
+				if (val instanceof String)
 				{
-					value= (String)val;
+					value = (String) val;
 				}
 				else
 				{
-					String[] vals = (String[])val;
-					if( vals != null && vals.length > 0)
+					String[] vals = (String[]) val;
+					if (vals != null && vals.length > 0)
 					{
 						value = vals[0];
 					}
@@ -332,14 +333,14 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 				return value;
 			}
 		}
-		if( value == null && getParent() != null)
+		if (value == null && getParent() != null)
 		{
 			return getParent().getLocalRequestParameter(inKey);
 		}
 		return value;
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebAppContext#getParameterMap()
 	 */
 	public Map getParameterMap()
@@ -349,71 +350,71 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 			Map combinedparams = null;
 			String[] ordering = getRequest().getParameterValues("fieldorder");
 			Enumeration enumeration = getRequest().getParameterNames();
-			if( ordering == null)
+			if (ordering == null)
 			{
-				combinedparams = new HashMap(); //unsorted				
+				combinedparams = new HashMap(); // unsorted
 			}
 			else
 			{
-				combinedparams = ListOrderedMap.decorate(new HashMap());	
-				//replace the enumartion with a sorted one
+				combinedparams = ListOrderedMap.decorate(new HashMap());
+				// replace the enumartion with a sorted one
 				for (int i = 0; i < ordering.length; i++)
 				{
 					String[] allv = getRequest().getParameterValues(ordering[i]);
-					if( allv != null && allv.length == 1)
+					if (allv != null && allv.length == 1)
 					{
 						combinedparams.put(ordering[i], allv[0]);
 					}
-					else if( allv.length > 0 && allv[0] != null && !allv[0].isEmpty())
+					else if (allv.length > 0 && allv[0] != null && !allv[0].isEmpty())
 					{
-						combinedparams.put(ordering[i], allv);					
+						combinedparams.put(ordering[i], allv);
 					}
-					
+
 				}
 			}
 			while (enumeration.hasMoreElements())
 			{
 				String key = (String) enumeration.nextElement();
-				if( ordering != null && combinedparams.containsKey(key))
+				if (ordering != null && combinedparams.containsKey(key))
 				{
-					continue; //Skip if already in there
+					continue; // Skip if already in there
 				}
 				String[] allv = getRequest().getParameterValues(key);
-				if( allv != null && allv.length == 1 && allv[0] != null && !allv[0].isEmpty())
+				if (allv != null && allv.length == 1 && allv[0] != null && !allv[0].isEmpty())
 				{
 					combinedparams.put(key, allv[0]);
 				}
-				else if( allv.length > 0 && allv[0] != null && !allv[0].isEmpty())
+				else if (allv.length > 0 && allv[0] != null && !allv[0].isEmpty())
 				{
-					combinedparams.put(key, allv);					
+					combinedparams.put(key, allv);
 				}
 			}
-			if( ordering != null)
+			if (ordering != null)
 			{
 				combinedparams.remove("fieldorder");
 			}
-			
+
 			Map locals = getAllLocalParameters();
 			combinedparams.putAll(locals);
-			
-			//get json stuff
-			Map jsonRequest = (Map)getPageValue("_jsonRequest");
-			if( jsonRequest != null)
+
+			// get json stuff
+			Map jsonRequest = (Map) getPageValue("_jsonRequest");
+			if (jsonRequest != null)
 			{
-				combinedparams.putAll(jsonRequest); 
+				combinedparams.putAll(jsonRequest);
 			}
-			
+
 			return combinedparams;
-	
+
 		}
 		else
 		{
 			Map locals = getAllLocalParameters();
 			return locals;
 		}
-		
+
 	}
-	
+
 	/*
 	 * This request is at the end.
 	 */
@@ -421,14 +422,15 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	{
 		LinkedList parents = new LinkedList();
 		BaseWebPageRequest parent = this;
-		while( parent != null)
-		{					
+		while (parent != null)
+		{
 			parents.addFirst(parent);
-			parent = (BaseWebPageRequest)parent.getParent();
+			parent = (BaseWebPageRequest) parent.getParent();
 		}
 		return parents;
 	}
-	protected Map<String,Object> getLocalParameters()
+
+	protected Map<String, Object> getLocalParameters()
 	{
 		if (fieldParameters == null)
 		{
@@ -442,40 +444,41 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	 */
 	protected Map getAllLocalParameters()
 	{
-		Map<String,Object> params = new HashMap();
-			
-		for (Iterator iterator = getParentsAsList().iterator(); iterator.hasNext();) {
+		Map<String, Object> params = new HashMap();
+
+		for (Iterator iterator = getParentsAsList().iterator(); iterator.hasNext();)
+		{
 			BaseWebPageRequest req = (BaseWebPageRequest) iterator.next();
-			if( req.fieldParameters != null)
+			if (req.fieldParameters != null)
 			{
 				params.putAll(req.fieldParameters);
-			}	
+			}
 		}
 		return params;
 	}
-	
+
 	/*
 	 * Children have precedence
 	 */
 	protected Map getAllVariables()
 	{
 		Map vars = new HashMap();
-	
-		for (Iterator iterator = getParentsAsList().iterator(); iterator.hasNext();) 
+
+		for (Iterator iterator = getParentsAsList().iterator(); iterator.hasNext();)
 		{
 			BaseWebPageRequest req = (BaseWebPageRequest) iterator.next();
-			if( req.fieldVariables != null)
+			if (req.fieldVariables != null)
 			{
 				vars.putAll(req.fieldVariables);
-			}	
+			}
 		}
 		return vars;
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebAppContext#getRequiredParameter(java.lang.String)
 	 */
-	public String getRequiredParameter(String inParameterName)  throws OpenEditException
+	public String getRequiredParameter(String inParameterName) throws OpenEditException
 	{
 		String req = getRequestParameter(inParameterName);
 		if (req == null)
@@ -485,25 +488,24 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		return req;
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebAppContext#getVariable(java.lang.String)
 	 */
 	public void put(String inKey, Object inValue) throws OpenEditException
 	{
 		putPageValue(inKey, inValue);
 	}
-	
-	
+
 	public String getSiteUrl()
 	{
 		URLUtilities util = (URLUtilities) get(URL_UTILITIES);
 		String url = getSiteRoot() + util.getOriginalUrl();
 		return url;
 	}
-	
+
 	public String getSiteRoot()
 	{
-		String siteroot = (String)getPageValue(PageRequestKeys.SITEROOT);
+		String siteroot = (String) getPageValue(PageRequestKeys.SITEROOT);
 		return siteroot;
 	}
 
@@ -511,22 +513,23 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	{
 		return getPageValue(inKey);
 	}
+
 	public Object getPageValue(String inKey)
 	{
 		Object ret = getVariables().get(inKey);
 		if (ret == null && getParent() != null)
 		{
-			//log.info("Parent=" + getParent().hashCode() + "!=" + hashCode());
+			// log.info("Parent=" + getParent().hashCode() + "!=" + hashCode());
 			return getParent().getPageValue(inKey);
 		}
-		if( ret == null  && getParent() == null)
+		if (ret == null && getParent() == null)
 		{
 			ret = getSessionValue(inKey);
 		}
 		return ret;
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebAppContext#redirect(java.lang.String)
 	 */
 	public void redirect(String inUrl)
@@ -535,8 +538,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		String home = (String) getPageValue("home");
 		if (alreadyRedirected)
 		{
-			log.debug("Previous redirect to " + getPageValue("redirect")
-				+ " requested, cannot redirect to " + inUrl);
+			log.debug("Previous redirect to " + getPageValue("redirect") + " requested, cannot redirect to " + inUrl);
 			return;
 		}
 
@@ -546,9 +548,9 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 			{
 				if (!inUrl.startsWith("http"))
 				{
-					if( inUrl.contains("./"))
+					if (inUrl.contains("./"))
 					{
-						inUrl = PathUtilities.resolveRelativePath(inUrl, getPath() );
+						inUrl = PathUtilities.resolveRelativePath(inUrl, getPath());
 					}
 					inUrl = home + inUrl;
 				}
@@ -556,8 +558,8 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 				putPageValue("redirect", inUrl);
 				if (getResponse() != null)
 				{
-					//					getResponse().sendRedirect(inUrl);
-					getResponse().setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY); 
+					// getResponse().sendRedirect(inUrl);
+					getResponse().setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 					getResponse().setHeader("Location", inUrl);
 					getResponse().flushBuffer();
 				}
@@ -574,12 +576,14 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 			throw new OpenEditRuntimeException(e);
 		}
 	}
+
 	/**
-	 * This was added because a customer needed it for google indexes. 
-	 * I wonder if we can not just use permenanet redirects all the time?
+	 * This was added because a customer needed it for google indexes. I wonder if we can not just use
+	 * permenanet redirects all the time?
+	 * 
 	 * @param inPath
 	 */
-	public void redirectPermanently( String inPath)
+	public void redirectPermanently(String inPath)
 	{
 		String home = (String) getPageValue("home");
 		try
@@ -594,7 +598,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 				putPageValue("redirect", inPath);
 				if (getResponse() != null)
 				{
-					getResponse().setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY); 
+					getResponse().setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 					getResponse().setHeader("Location", inPath);
 					getResponse().flushBuffer();
 				}
@@ -609,8 +613,9 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		{
 			throw new OpenEditRuntimeException(e);
 		}
-		
+
 	}
+
 	protected Map getVariables()
 	{
 		if (fieldVariables == null)
@@ -621,14 +626,14 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		return fieldVariables;
 	}
 
-	/** 
+	/**
 	 * @see org.openedit.WebAppContext#setVariable(java.lang.String, java.lang.Object)
 	 */
 	public void putPageValue(String inKey, Object inObject)
 	{
-		if( "siteroot".equals(inKey) ||  getProtectedFields().contains(inKey) && getParent() != null)
+		if ("siteroot".equals(inKey) || getProtectedFields().contains(inKey) && getParent() != null)
 		{
-			if( get(inKey) != null )
+			if (get(inKey) != null)
 			{
 				log.error("Nobody change resticted variables! " + inObject);
 				return;
@@ -658,7 +663,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		getProtectedFields().add(inKey);
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebAppContext#removeVariable(java.lang.String)
 	 */
 	public void removePageValue(String inKey)
@@ -681,12 +686,12 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		fieldHttpSession = inS;
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebPageContext#setRequestParameter(java.lang.String, java.lang.String)
 	 */
 	public void setRequestParameter(String inKey, String inValue)
 	{
-		if( inValue == null)
+		if (inValue == null)
 		{
 			getLocalParameters().remove(inKey);
 		}
@@ -701,7 +706,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		getLocalParameters().put(inKey, inValue);
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebPageContext#getVariableMap()
 	 */
 	public Map getPageMap()
@@ -711,14 +716,14 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		{
 			combined.putAll(getParent().getPageMap());
 		}
-		if( fieldVariables != null)
+		if (fieldVariables != null)
 		{
 			combined.putAll(getVariables());
 		}
 		return combined;
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebPageContext#getRequestParameters(java.lang.String)
 	 */
 	public String[] getRequestParameters(String inKey)
@@ -728,24 +733,24 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		{
 			parameter = getLocalParameters().get(inKey);
 		}
-		if( parameter == null && getParent() != null)
+		if (parameter == null && getParent() != null)
 		{
-			parameter =  getParent().getRequestParameters(inKey);
+			parameter = getParent().getRequestParameters(inKey);
 		}
-		if ( parameter == null && getRequest() != null)
+		if (parameter == null && getRequest() != null)
 		{
 			parameter = getRequest().getParameterValues(inKey);
-			if(parameter == null)
+			if (parameter == null)
 			{
-				parameter = getRequest().getParameterValues(inKey + "[]"); 			//jQuery.ajaxSettings.traditional = true;
+				parameter = getRequest().getParameterValues(inKey + "[]"); // jQuery.ajaxSettings.traditional = true;
 			}
 		}
-		if( parameter == null && getVariables().containsKey("_jsonRequest"))
+		if (parameter == null && getVariables().containsKey("_jsonRequest"))
 		{
 			parameter = getJsonRequest().get(inKey);
-			if (parameter instanceof Collection )
+			if (parameter instanceof Collection)
 			{
-				Collection col = (Collection)parameter;
+				Collection col = (Collection) parameter;
 				return (String[]) col.toArray(new String[col.size()]);
 			}
 		}
@@ -754,13 +759,13 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		{
 			return (String[]) parameter;
 		}
-		return new String[]{(String) parameter};
+		return new String[] {(String) parameter};
 	}
-	
+
 	@Override
 	public Collection<String> getRequestCollection(String inKey)
 	{
-		
+
 		String[] values = getRequestParameters(inKey);
 		if (values != null)
 		{
@@ -769,20 +774,20 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		return null;
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebPageContext#getStoredVariable(java.lang.String)
 	 */
 	public Object getSessionValue(String inKey)
 	{
-		if( inKey == null)
+		if (inKey == null)
 		{
 			return null;
 		}
 		HttpSession session = getSession();
-		if ( session == null)
+		if (session == null)
 		{
 			Object found = getSessionValues().get(inKey);
-			if( found == null && getParent() != null)
+			if (found == null && getParent() != null)
 			{
 				return getParent().getSessionValue(inKey);
 			}
@@ -794,19 +799,19 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		}
 		catch (Exception ex)
 		{
-			log.error("Could not get attribute " + inKey + " on " + getPath(),ex);
+			log.error("Could not get attribute " + inKey + " on " + getPath(), ex);
 			return null;
 		}
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebPageContext#setStoredVariable(java.lang.String, java.lang.Object)
 	 */
 	public void putSessionValue(String inKey, Object inObject)
 	{
 		if (getSession() == null)
 		{
-			if( inObject == null)
+			if (inObject == null)
 			{
 				getSessionValues().remove(inKey);
 			}
@@ -816,7 +821,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 			}
 			return;
 		}
-		if( inObject == null)
+		if (inObject == null)
 		{
 			getSession().removeAttribute(inKey);
 		}
@@ -824,11 +829,11 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		{
 			getSession().setAttribute(inKey, inObject);
 		}
-		//All session values also go in page values
+		// All session values also go in page values
 		putPageValue(inKey, inObject);
 	}
 
-	/* 
+	/*
 	 * @see org.openedit.WebPageContext#removeStoredVariable(java.lang.String)
 	 */
 	public void removeSessionValue(String inKey)
@@ -845,7 +850,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 
 	public String getPath()
 	{
-		if ( getPage() == null)
+		if (getPage() == null)
 		{
 			return null;
 		}
@@ -854,6 +859,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 
 	/**
 	 * TODO: copy this to standard WebPageContext API
+	 * 
 	 * @param inMap
 	 */
 	public void putSessionValues(SessionMap inMap)
@@ -867,29 +873,41 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 
 	/**
 	 * TODO: copy this to standard WebPageContext API
+	 * 
 	 * @param inMap
 	 */
 	public void putPageValues(Map inMap)
 	{
+		for (Object key : inMap.keySet())
+		{
+			if (getProtectedFields().contains(key))
+			{
+				throw new IllegalArgumentException("Cannot put protected field: " + key);
+			}
+		}
 		getVariables().putAll(inMap);
 	}
 
-	/* (non-javadoc)
+	/*
+	 * (non-javadoc)
+	 * 
 	 * @see org.openedit.WebPageContext#getPathUrl()
 	 */
 	public String getPathUrl()
 	{
 		URLUtilities util = (URLUtilities) get(URL_UTILITIES);
-		if(util == null){
+		if (util == null)
+		{
 			return null;
 		}
 		return util.requestPathWithArguments();
 	}
-	
+
 	public String getPathUrlWithoutContext()
 	{
 		URLUtilities util = (URLUtilities) get(URL_UTILITIES);
-		if(util == null){
+		if (util == null)
+		{
 			return null;
 		}
 		return util.requestPathWithArgumentsNoContext();
@@ -920,9 +938,10 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		Page content = (Page) getPageValue(PAGE);
 		return content;
 	}
+
 	public void setPage(Page inPage)
 	{
-		putPageValue(PAGE,inPage);
+		putPageValue(PAGE, inPage);
 	}
 
 	public Page getContentPage()
@@ -933,6 +952,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 
 	/**
 	 * This is used only if getSession() is null
+	 * 
 	 * @return
 	 */
 	protected Map getSessionValues()
@@ -944,27 +964,30 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		return fieldBackUpSession;
 	}
 
-	/* (non-javadoc)
+	/*
+	 * (non-javadoc)
+	 * 
 	 * @see org.openedit.WebPageContext#hasRedirected()
 	 */
 	public boolean hasRedirected()
 	{
-		if( fieldHasRedirected)
+		if (fieldHasRedirected)
 		{
 			return true;
 		}
-		if( fieldParent != null)
+		if (fieldParent != null)
 		{
 			return fieldParent.hasRedirected();
 		}
 		return false;
 
 	}
-	public void setHasRedirected( boolean inBol)
+
+	public void setHasRedirected(boolean inBol)
 	{
 		fieldHasRedirected = inBol;
 	}
-	
+
 	/**
 	 * @param inOutputStream
 	 */
@@ -972,56 +995,52 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	{
 		putProtectedPageValue(OUTPUT_WRITER, inOutputStream);
 	}
-	
+
 	/**
-	 * Determine whether this page can be edited by the given user.  The page is editable if:
+	 * Determine whether this page can be edited by the given user. The page is editable if:
 	 * 
 	 * <ul>
-	 * <li>
-	 * the page's repository is not read-only;
-	 * </li>
-	 * <li>
-	 * the "editable" property is not present or equal to "true"; and
-	 * </li>
-	 * <li>
-	 * the edit filter is not present or passes the given user.
-	 * </li>
+	 * <li>the page's repository is not read-only;</li>
+	 * <li>the "editable" property is not present or equal to "true"; and</li>
+	 * <li>the edit filter is not present or passes the given user.</li>
 	 * </ul>
 	 * 
 	 *
 	 * @param inUser The user to query
 	 * @param inContext DOCME
 	 *
-	 * @return boolean  <code>true</code> if the page is editable by the user, <code>false</code>
-	 * 		   if not
+	 * @return boolean <code>true</code> if the page is editable by the user, <code>false</code> if not
 	 *
 	 * @throws OpenEditException DOCME
 	 */
-	public boolean isEditable() 
+	public boolean isEditable()
 	{
-//		Boolean canedit = (Boolean)getPageValue("canedit");
-//		if( canedit != null)
-//		{
-//			return canedit.booleanValue();
-//		}
+		// Boolean canedit = (Boolean)getPageValue("canedit");
+		// if( canedit != null)
+		// {
+		// return canedit.booleanValue();
+		// }
 		return fieldEditable;
 	}
-	public void setEditable( boolean inEditable)
+
+	public void setEditable(boolean inEditable)
 	{
 		fieldEditable = inEditable;
 	}
 
 	public String[] getRequestActions()
 	{
-		String[] actions = getRequestParameters( "oe-action" );
-//		if ( actions == null)
-//		{
-//			actions = getRequestParameters( "wsp-action" );  //to support OE 3.0
-//		}
+		String[] actions = getRequestParameters("oe-action");
+		// if ( actions == null)
+		// {
+		// actions = getRequestParameters( "wsp-action" ); //to support OE 3.0
+		// }
 		return actions;
 	}
 
-	/* (non-javadoc)
+	/*
+	 * (non-javadoc)
+	 * 
 	 * @see org.openedit.WebPageRequest#copy()
 	 */
 	public WebPageRequest copy()
@@ -1031,25 +1050,29 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		return copy;
 	}
 
-	/* (non-javadoc)
+	/*
+	 * (non-javadoc)
+	 * 
 	 * @see org.openedit.WebPageRequest#copy(org.openedit.page.Page)
 	 */
 	public WebPageRequest copy(Page inPage)
 	{
 		BaseWebPageRequest req = new BaseWebPageRequest(this);
-		req.putProtectedPageValue(PageRequestKeys.PAGE,inPage);
+		req.putProtectedPageValue(PageRequestKeys.PAGE, inPage);
 		req.setLocaleManager(getLocaleManager());
 		return req;
 	}
 
-	/* (non-javadoc)
+	/*
+	 * (non-javadoc)
+	 * 
 	 * @see org.openedit.WebPageRequest#setUser(org.openedit.users.User)
 	 */
 	public void setUser(User inUser)
 	{
-		if( inUser == null)
+		if (inUser == null)
 		{
-			getVariables().remove(USER); 
+			getVariables().remove(USER);
 			if (getParent() != null)
 			{
 				getParent().setUser(null);
@@ -1057,19 +1080,18 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		}
 		else
 		{
-			putPageValue(USER,inUser);
+			putPageValue(USER, inUser);
 		}
 	}
-
 
 	public User getUser()
 	{
 		User user = (User) getPageValue(USER);
-//		if( user == null)
-//		{
-//			String catalogid = findPathValue("catalogid");
-//			user = (User) getSessionValue(catalogid + "user");
-//		}
+		// if( user == null)
+		// {
+		// String catalogid = findPathValue("catalogid");
+		// user = (User) getSessionValue(catalogid + "user");
+		// }
 		return user;
 	}
 
@@ -1078,32 +1100,37 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	 */
 	public void setContentPage(Page inPage)
 	{
-		putPageValue(CONTENT,inPage);
+		putPageValue(CONTENT, inPage);
 	}
 
-	/* (non-javadoc)
+	/*
+	 * (non-javadoc)
+	 * 
 	 * @see org.openedit.WebPageRequest#setCurrentAction(org.openedit.page.PageAction)
 	 */
 	public void setCurrentAction(PageAction inAction)
 	{
-		putPageValue("exec-action",inAction);
+		putPageValue("exec-action", inAction);
 	}
 
-	/* (non-javadoc)
+	/*
+	 * (non-javadoc)
+	 * 
 	 * @see org.openedit.WebPageRequest#getCurrentAction()
 	 */
 	public PageAction getCurrentAction()
 	{
-		return (PageAction)getPageValue("exec-action");
+		return (PageAction) getPageValue("exec-action");
 	}
+
 	public String toString()
 	{
 		Object ret = getVariables().get("page");
-		if ( ret != null)
+		if (ret != null)
 		{
-			return "page="+ ret.toString();
+			return "page=" + ret.toString();
 		}
-		else if ( getParent() != null)
+		else if (getParent() != null)
 		{
 			return "child of " + getParent().toString();
 		}
@@ -1114,7 +1141,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	{
 		Page page = getContentPage();
 		String locale = getLocale();
-		String prop = page.getProperty(inKey, locale );
+		String prop = page.getProperty(inKey, locale);
 		return prop;
 	}
 
@@ -1122,36 +1149,36 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	{
 		Page page = getPage();
 		String locale = getLocale();
-		String prop = page.getProperty(inKey, locale );
+		String prop = page.getProperty(inKey, locale);
 		return prop;
 	}
 
 	public String getLocale()
 	{
-		String locale = (String)getPageValue("sessionlocale");
-//		if( locale == null || locale.length() == 0)
-//		{
-//			User user = getUser();
-//			if( user != null)
-//			{
-//				//locale = (String)user.get("locale");
-//			}
-//		}
-		//TODO Cache this
-		if( locale == null || locale.length() == 0)
+		String locale = (String) getPageValue("sessionlocale");
+		// if( locale == null || locale.length() == 0)
+		// {
+		// User user = getUser();
+		// if( user != null)
+		// {
+		// //locale = (String)user.get("locale");
+		// }
+		// }
+		// TODO Cache this
+		if (locale == null || locale.length() == 0)
 		{
-			if( fieldLocale != null)
+			if (fieldLocale != null)
 			{
 				return fieldLocale;
 			}
-			Browser browser = (Browser)getPageValue("browser");
-			if( browser != null && browser.getLocale() != null)
+			Browser browser = (Browser) getPageValue("browser");
+			if (browser != null && browser.getLocale() != null)
 			{
 				locale = browser.getLocale().toString();
 			}
 			fieldLocale = locale;
 		}
-		if( locale == null )
+		if (locale == null)
 		{
 			locale = "en_US";
 		}
@@ -1161,12 +1188,12 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	public String getLanguage()
 	{
 		String language = getLocale();
-		if( language != null)
+		if (language != null)
 		{
 			int unds = language.indexOf('_');
-			if( unds > -1)
+			if (unds > -1)
 			{
-				language = language.substring(0,unds);
+				language = language.substring(0, unds);
 			}
 		}
 		return language;
@@ -1181,72 +1208,78 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	{
 		fieldHasForwarded = inB;
 	}
+
 	/**
 	 * WARNING! does not return null
 	 */
 	public String getUserName()
 	{
 		User user = getUser();
-		if( user != null)
+		if (user != null)
 		{
 			return user.getUserName();
 		}
 		return "anonymous";
 	}
+
 	public String findValue(String inName)
 	{
 		String name = findPathValue(inName);
-		if( name == null)
+		if (name == null)
 		{
-			//TODO: use getPathValue for sensitive items 
-			name = getRequestParameter(inName);  //TODO: Be aware searchtype should not be loaded from request
+			// TODO: use getPathValue for sensitive items
+			name = getRequestParameter(inName); // TODO: Be aware searchtype should not be loaded from request
 		}
 		return name;
 	}
-	public String findPathValue(String inName) 
+
+	public String findPathValue(String inName)
 	{
 		String name = null;
-		SiteData sitedata = (SiteData)getPageValue("sitedata");
-		if( sitedata != null)
+		SiteData sitedata = (SiteData) getPageValue("sitedata");
+		if (sitedata != null)
 		{
 			name = sitedata.getSiteParameter(inName);
 		}
-		if( name == null)
+		if (name == null)
 		{
 			name = findActionValue(inName);
 		}
-		if( name == null)
+		if (name == null)
 		{
 			name = getPage().get(inName);
 		}
-		if( name == null)
+		if (name == null)
 		{
 			name = getContentPage().get(inName);
 		}
-		if(name == null) {
+		if (name == null)
+		{
 			String searchtypeFromRequest = getContentPage().get("searchtypeFromRequest");
-			if(Boolean.parseBoolean(searchtypeFromRequest)) {
+			if (Boolean.parseBoolean(searchtypeFromRequest))
+			{
 				name = getRequestParameter(inName);
-				if(name !=null)
+				if (name != null)
 				{
-					//log.info("Requestparameter called from: "+getPath());
+					// log.info("Requestparameter called from: "+getPath());
 				}
 			}
 		}
-		
+
 		name = getPage().getPageSettings().replaceProperty(name);
 		return name;
 	}
+
 	public String findActionValue(String inName)
 	{
 		String name = null;
 		PageAction inAction = getCurrentAction();
-		if( inAction != null && inAction.getConfig() != null)
+		if (inAction != null && inAction.getConfig() != null)
 		{
-			name = inAction.getChildValue( inName );
-			if( name == null)
+			name = inAction.getChildValue(inName);
+			if (name == null)
 			{
-				name = inAction.getProperty(inName);				
+				name = inAction.getProperty(inName);
 			}
 		}
 		name = getPage().getPageSettings().replaceProperty(name);
@@ -1254,14 +1287,13 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		return name;
 	}
 
-	
 	public boolean hasCancelActions()
 	{
-		if( fieldHasCancelActions)
+		if (fieldHasCancelActions)
 		{
 			return true;
 		}
-		if( fieldParent != null)
+		if (fieldParent != null)
 		{
 			return fieldParent.hasCancelActions();
 		}
@@ -1272,77 +1304,83 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	{
 		fieldHasCancelActions = inB;
 	}
-	
+
 	public String getRequestParamsAsList()
 	{
 		Map all = getParameterMap();
-		
+
 		StringBuffer list = new StringBuffer();
-		
-		for (Iterator iterator = all.keySet().iterator(); iterator.hasNext();) {
+
+		for (Iterator iterator = all.keySet().iterator(); iterator.hasNext();)
+		{
 			String name = (String) iterator.next();
 			Object vals = all.get(name);
-			if( vals instanceof String[])
+			if (vals instanceof String[])
 			{
-				String[] values = (String[])vals;
-				for (int i = 0; i < values.length; i++) {
-					list.append( name );
-					list.append( "=" );
-					list.append( values[i] );					
-					if( i < values.length -1)
+				String[] values = (String[]) vals;
+				for (int i = 0; i < values.length; i++)
+				{
+					list.append(name);
+					list.append("=");
+					list.append(values[i]);
+					if (i < values.length - 1)
 					{
-						list.append( "&");
+						list.append("&");
 					}
 				}
 			}
 			else
 			{
-				list.append( name );
-				list.append( "=" );
-				list.append( vals );
+				list.append(name);
+				list.append("=");
+				list.append(vals);
 			}
 			if (iterator.hasNext())
 			{
-				list.append( "&");
+				list.append("&");
 			}
 		}
 		return list.toString();
 	}
-	
+
 	public String getDate(Date inDate)
 	{
 		String format = getUserProfileValue("shortdateformat");
-		if( format != null)
+		if (format != null)
 		{
 			String value = getLocaleManager().getDateStorageUtil().formatDateObj(inDate, format);
 			return value;
 		}
-		return getLocaleManager().formatDateForDisplay( inDate, getLocale());
+		return getLocaleManager().formatDateForDisplay(inDate, getLocale());
 	}
-	
-	public String getDate(int inDate) {
-			SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
-			//format.setTimeZone(TimeZone.getTimeZone("GMT"));
-			format.setTimeZone(getTimeZone());
-			Date date = new Date(inDate * 1000L);
-			return format.format(date);
+
+	public String getDate(int inDate)
+	{
+		SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+		// format.setTimeZone(TimeZone.getTimeZone("GMT"));
+		format.setTimeZone(getTimeZone());
+		Date date = new Date(inDate * 1000L);
+		return format.format(date);
 	}
-	
-	
-	public String getSearchDate(Object inDate) {
-		if(inDate == null) {
+
+	public String getSearchDate(Object inDate)
+	{
+		if (inDate == null)
+		{
 			return null;
 		}
-		
+
 		Date stored = getLocaleManager().getDateStorageUtil().parseFromObject(inDate);
 		String value = getLocaleManager().getDateStorageUtil().formatDateObj(stored, "yyyy-MM-dd");
-		
+
 		return value;
-		
+
 	}
-	
-	public String getDateTime(Object inDate, String format) {
-		if(inDate == null) {
+
+	public String getDateTime(Object inDate, String format)
+	{
+		if (inDate == null)
+		{
 			return null;
 		}
 		if (format == null)
@@ -1351,165 +1389,162 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		}
 		Date stored = getLocaleManager().getDateStorageUtil().parseFromObject(inDate);
 		String value = getLocaleManager().getDateStorageUtil().formatDateObj(stored, format);
-		
+
 		return value;
-		
+
 	}
-	
-	
-	
+
 	public String getHours(Object inDate)
 	{
-		if( inDate == null)
+		if (inDate == null)
 		{
 			return null;
 		}
 		Date date = getLocaleManager().getDateStorageUtil().parseFromObject(inDate);
-		
-		if(date == null){
+
+		if (date == null)
+		{
 			return null;
 		}
-		
+
 		Calendar calendar = Calendar.getInstance();
-	    calendar.setTime(date);
-	    int day = calendar.get(Calendar.HOUR_OF_DAY);
-	    return  String.valueOf(day);
-		
+		calendar.setTime(date);
+		int day = calendar.get(Calendar.HOUR_OF_DAY);
+		return String.valueOf(day);
+
 	}
-	
-	
+
 	public String getMinutes(Object inDate)
 	{
-		if(inDate == null){
+		if (inDate == null)
+		{
 			return null;
 		}
 		Date date = getLocaleManager().getDateStorageUtil().parseFromObject(inDate);
-		
-		if(date == null){
+
+		if (date == null)
+		{
 			return null;
 		}
-		
+
 		Calendar calendar = Calendar.getInstance();
-	    calendar.setTime(date);
-	    int day = calendar.get(Calendar.MINUTE);
-	    return  String.valueOf(day);
+		calendar.setTime(date);
+		int day = calendar.get(Calendar.MINUTE);
+		return String.valueOf(day);
 	}
-	
-	
-	
+
 	public String getDate(String inStoredDate)
 	{
 		Date stored = getLocaleManager().getDateStorageUtil().parseFromStorage(inStoredDate);
 		return getDate(stored);
 	}
+
 	public String getDateTime(Date inDate)
 	{
 		String format = getUserProfileValue("datetimeformat");
-		if( format != null)
+		if (format != null)
 		{
 			String value = getLocaleManager().getDateStorageUtil().formatDateObj(inDate, format);
 			return value;
 		}
-		return getLocaleManager().formatDateTimeForDisplay( inDate, getLocale(), getTimeZone());
+		return getLocaleManager().formatDateTimeForDisplay(inDate, getLocale(), getTimeZone());
 	}
-	
-	
-	
+
 	public String getTimeOfDay(Date inDate)
 	{
 		String format = "hh:mma";
-		if( format != null)
+		if (format != null)
 		{
 			String value = getLocaleManager().getDateStorageUtil().formatDateObj(inDate, format);
 			return value;
 		}
-		return getLocaleManager().formatDateTimeForDisplay( inDate, getLocale());
+		return getLocaleManager().formatDateTimeForDisplay(inDate, getLocale());
 	}
-	
-	
-	public String getTimeOfDay(String  inDate)
-	{		
+
+	public String getTimeOfDay(String inDate)
+	{
 		Date stored = getLocaleManager().getDateStorageUtil().parseFromStorage(inDate);
 		return getTimeOfDay(stored);
 	}
-	
+
 	public String getAge(Object inObj)
 	{
-		if( inObj == null)
+		if (inObj == null)
 		{
 			return null;
 		}
 		Date inDate = null;
-		if( inObj instanceof Date)
+		if (inObj instanceof Date)
 		{
-			inDate = (Date)inObj;
+			inDate = (Date) inObj;
 		}
 		else
 		{
-			inDate = getLocaleManager().getDateStorageUtil().parseFromStorage((String)inObj);
+			inDate = getLocaleManager().getDateStorageUtil().parseFromStorage((String) inObj);
 		}
 		return getLocaleManager().getAge(inDate, getLocale());
 	}
-	
+
 	public DateStorageUtil getDateUtil()
 	{
 		return getLocaleManager().getDateStorageUtil();
 	}
-	
+
 	public String getDateTime(String inStoredDate)
 	{
 		Date stored = getLocaleManager().getDateStorageUtil().parseFromStorage(inStoredDate);
 		return getDateTime(stored);
 	}
+
 	public String getDataText(String inDataType, String inId)
 	{
-		SearcherManager searcher = (SearcherManager)getPageValue("searcherManager");
+		SearcherManager searcher = (SearcherManager) getPageValue("searcherManager");
 		String catalogid = findPathValue("catalogid");
-		Data data = searcher.getData(catalogid,inDataType, inId);
+		Data data = searcher.getData(catalogid, inDataType, inId);
 		String label = null;
-		if( data != null)
+		if (data != null)
 		{
 			label = data.getName(getLocale());
 		}
 		return label;
-		
+
 	}
+
 	public String getPageText(String inKey)
 	{
 		String text = getPage().getText(inKey, getLocale());
 		return text;
 	}
+
 	public String getText(Object inValue)
 	{
-		if( inValue == null)
+		if (inValue == null)
 		{
 			return null;
 		}
-		if( inValue instanceof Data)
+		if (inValue instanceof Data)
 		{
-			String text = ((Data)inValue).getName( getLocale());
+			String text = ((Data) inValue).getName(getLocale());
 			return text;
 		}
-		if( inValue instanceof LanguageMap)
+		if (inValue instanceof LanguageMap)
 		{
-			LanguageMap map = (LanguageMap)inValue;
+			LanguageMap map = (LanguageMap) inValue;
 			return map.getDefaultText(getLocale());
 		}
-		if( inValue instanceof String)
-		{	
-			return (String)inValue;
+		if (inValue instanceof String)
+		{
+			return (String) inValue;
 		}
 		return String.valueOf(inValue);
 	}
-	
+
 	public String getText(Data inParent, Object inValue)
 	{
 		String text = inParent.getProperties().toString(inValue);
 		return text;
 	}
-	
 
-	
 	public LocaleManager getLocaleManager()
 	{
 		return fieldLocaleManager;
@@ -1522,19 +1557,19 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 
 	public boolean isSecure()
 	{
-		if( getRequest() == null)
+		if (getRequest() == null)
 		{
 			return false;
 		}
 		return getRequest().isSecure();
 	}
-	
+
 	public UserProfile getUserProfile()
 	{
 		if (fieldUserProfile == null)
 		{
-			fieldUserProfile = (UserProfile)getPageValue("userprofile");
-			if( fieldUserProfile == null && getParent() != null)
+			fieldUserProfile = (UserProfile) getPageValue("userprofile");
+			if (fieldUserProfile == null && getParent() != null)
 			{
 				fieldUserProfile = getParent().getUserProfile();
 			}
@@ -1549,7 +1584,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 
 	public String getUserProfileValue(String inKey)
 	{
-		if( getUserProfile() == null)
+		if (getUserProfile() == null)
 		{
 			return null;
 		}
@@ -1561,22 +1596,22 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	public void putAllRequestParameters(Map inArgs)
 	{
 		getLocalParameters().putAll(inArgs);
-		
+
 	}
 
-	
-	
-	public String getMethod(){
-		if(getRequest() != null){
-		return getRequest().getMethod();
+	public String getMethod()
+	{
+		if (getRequest() != null)
+		{
+			return getRequest().getMethod();
 		}
-		
+
 		return null;
 	}
-	
-	
-	public void setMethod(String inMethod){
-		//NOOP
+
+	public void setMethod(String inMethod)
+	{
+		// NOOP
 	}
 
 	@Deprecated
@@ -1584,8 +1619,7 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	{
 		return getParameterData();
 	}
-	
-	
+
 	public Data getParameterData()
 	{
 		BaseData data = new BaseData();
@@ -1597,79 +1631,86 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	public boolean hasPermission(String inKey)
 	{
 		Object can = getPageValue("can" + inKey);
-		if( can != null)
+		if (can != null)
 		{
-			return (Boolean)can;
+			return (Boolean) can;
 		}
 		return false;
 	}
+
 	/**
 	 * On Tomcat there is no issue closing streams even when using Chunked Encoding or Keepalive
 	 */
 	@Override
 	public void closeStreams()
 	{
-		Writer outputw = (Writer)getPageValue(PageRequestKeys.OUTPUT_WRITER);
-		
-		if ( outputw != null)
+		Writer outputw = (Writer) getPageValue(PageRequestKeys.OUTPUT_WRITER);
+
+		if (outputw != null)
 		{
 			try
 			{
 				outputw.close();
 			}
 			catch (IOException ex)
-			{ }
+			{
+			}
 		}
-		
-		OutputStream outputs = (OutputStream)getPageValue(PageRequestKeys.OUTPUT_STREAM);
-		
-		if ( outputs != null)
+
+		OutputStream outputs = (OutputStream) getPageValue(PageRequestKeys.OUTPUT_STREAM);
+
+		if (outputs != null)
 		{
 			try
 			{
 				outputs.close();
 			}
 			catch (IOException ex)
-			{ }
+			{
+			}
 		}
 
 	}
 
 	public String replaceProperty(String inValue)
 	{
-		if( inValue == null)
+		if (inValue == null)
 		{
 			return inValue;
 		}
 		String edittext = inValue;
 		int start = 0;
-		while( (start = edittext.indexOf("${",start)) != -1)
+		while ((start = edittext.indexOf("${", start)) != -1)
 		{
-			int end = edittext.indexOf("}",start);
-			if( end != -1)
+			int end = edittext.indexOf("}", start);
+			if (end != -1)
 			{
-				String key = edittext.substring(start+2,end);
-				Object variable = getRequestParameter(key); //check for property
-				if( variable == null)
+				String key = edittext.substring(start + 2, end);
+				Object variable = getRequestParameter(key); // check for property
+				if (variable == null)
 				{
 					variable = getPageValue(key);
 				}
-				if( variable != null)
+				if (variable != null)
 				{
 					String sub = variable.toString();
 					sub = replaceProperty(sub);
-					edittext = edittext.substring(0,start) + sub + edittext.substring(end+1);
-					if(sub.length() <= end){
-						start = end-sub.length();
-					}else{
-						start =  sub.length();
+					edittext = edittext.substring(0, start) + sub + edittext.substring(end + 1);
+					if (sub.length() <= end)
+					{
+						start = end - sub.length();
 					}
-				}else{
+					else
+					{
+						start = sub.length();
+					}
+				}
+				else
+				{
 					start = end;
 				}
 			}
-		
-			
+
 		}
 		return edittext;
 	}
@@ -1678,8 +1719,8 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 	public void addRequestParameter(String inKey, String inValue)
 	{
 		Collection values = null;
-		String[]  evalues = getRequestParameters(inKey);
-		if( evalues != null)
+		String[] evalues = getRequestParameters(inKey);
+		if (evalues != null)
 		{
 			values = new ArrayList(Arrays.asList(evalues));
 		}
@@ -1688,19 +1729,22 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 			values = new ArrayList();
 		}
 		values.add(inValue);
-		setRequestParameter(inKey, (String[])values.toArray(new String[values.size()]));
+		setRequestParameter(inKey, (String[]) values.toArray(new String[values.size()]));
 	}
-	
-	public String roundDouble(double val, int decimals) {
-	    return String.format("%.2f", val);
+
+	public String roundDouble(double val, int decimals)
+	{
+		return String.format("%.2f", val);
 	}
-	
-	public String stripePriceToString(int price) {
+
+	public String stripePriceToString(int price)
+	{
 		return String.format("%.2f", price / 100d);
 	}
-	
-	public String doubleToMoney(double val, int decimals) {
-	    return String.format("%,." + decimals + "f", val);
+
+	public String doubleToMoney(double val, int decimals)
+	{
+		return String.format("%,." + decimals + "f", val);
 	}
 
 }
