@@ -882,7 +882,9 @@ public class BaseWebPageRequest implements WebPageRequest, PageRequestKeys
 		{
 			if (getProtectedFields().contains(key))
 			{
-				throw new IllegalArgumentException("Cannot put protected field: " + key);
+				log.error("Cannot put protected field: " + key + " skipping");
+				continue;
+				// throw new IllegalArgumentException("Cannot put protected field: " + key);
 			}
 		}
 		getVariables().putAll(inMap);
