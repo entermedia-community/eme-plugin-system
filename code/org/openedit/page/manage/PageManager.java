@@ -945,7 +945,9 @@ public class PageManager
 					{
 						if (paths.contains(value))
 						{
-							throw new OpenEditException("Duplicate style path " + value + " #" + style.getId() + " Path: " + style.getConfiguration());
+							//throw new OpenEditException("Duplicate style path " + value + " #" + style.getId() + " Path: " + style.getConfiguration());
+							log.info("Skipping duplicate style path " + value + " #" + style.getId() + " Path: " + style.getConfiguration());
+							continue;
 						}
 						// throw new OpenEditException("src value cannot be null " + style.getHref() + " #" +
 						// style.getId());
