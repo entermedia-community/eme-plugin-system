@@ -492,4 +492,8 @@
 		</property>
 	</bean>
 
+	<bean id="httpSharedConnection" class="org.openedit.util.HttpSharedConnection" scope="prototype">
+	</bean>
+
+
 </beans>
