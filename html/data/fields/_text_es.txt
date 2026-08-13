@@ -1,5 +1,5 @@
 #
-#Fri Jul 03 17:35:43 CST 2026
+#Thu Aug 13 10:39:11 CST 2026
 All\ Fields=Todos los campos
 Creation\ Date=Fecha de creaci\u00F3n
 Email=Email
@@ -14,6 +14,7 @@ Last\ Name=Apellido
 Name=Nombre
 Notes=notas
 Password=Contrase\u00F1a
+Profile\ Picture=Imagen de perfil
 Screen\ Name=Nombre de pantalla
 User\ Search=usuario Buscar
 Username=Nombre de usuario
