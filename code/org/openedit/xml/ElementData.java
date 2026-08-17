@@ -216,7 +216,7 @@ public class ElementData extends BaseData implements SaveableData, DataLoaded, S
 		return 0D;
 	}
 
-	public int getInt(String inId)
+	public Integer getInt(String inId)
 	{
 		String val = get(inId);
 		if (val != null)

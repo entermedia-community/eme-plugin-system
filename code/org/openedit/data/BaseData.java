@@ -171,7 +171,7 @@ public class BaseData implements MultiValued, Comparable, Cloneable
 		return Long.parseLong(val.toString());
 	}
 
-	public int getInt(String inId)
+	public Integer getInt(String inId)
 	{
 		Object val = getValue(inId);
 		if (val == null)

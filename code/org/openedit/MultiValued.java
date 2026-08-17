@@ -31,7 +31,7 @@ public interface MultiValued extends Data
 
 	public Double getDouble(String inId);
 
-	public int getInt(String inId);
+	public Integer getInt(String inId);
 
 	public float getFloat(String inId);
 
