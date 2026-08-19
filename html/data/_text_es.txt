@@ -1,6 +1,7 @@
 #
-#Wed Jul 29 17:19:53 CST 2026
+#Tue Aug 18 16:50:29 CST 2026
 Days=D\u00EDas
 Hour=Hora
 Hours=Horas
+Minute=Minuto
 Minutes=Minutos
