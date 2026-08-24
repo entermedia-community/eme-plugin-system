@@ -73,9 +73,8 @@ public class AuthenticationRequest implements CatalogEnabled
 
 	public void putProperty(String inKey, String inValue)
 	{
-		getProperties().put(inKey, inValue);
+		setValue(inKey, inValue);
 	}
-
 	public void setValue(String key, String value)
 	{
 		getProperties().put(key, value);
