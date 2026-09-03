@@ -33,16 +33,16 @@ public class DateStorageUtil
 		{
 			format = new SimpleDateFormat(inFormat);
 			format.setLenient(true);
-			if( inFormat.equals("yyyy-MM-dd'T'HH:mm:ss.SSSXXX") || inFormat.equals("yyyy-MM-dd'T'HH:mm:ss.SSSX") )
+			if (inFormat.equals("yyyy-MM-dd'T'HH:mm:ss.SSSXXX") || inFormat.equals("yyyy-MM-dd'T'HH:mm:ss.SSSX"))
 			{
-				format.setTimeZone(TimeZone.getTimeZone("UTC"));		
+				format.setTimeZone(TimeZone.getTimeZone("UTC"));
 			}
 			fieldDateFormats.put(inFormat, format);
 		}
 		return format;
 	}
 
-	//The entire DateStorage is threadsafe singleton
+	// The entire DateStorage is threadsafe singleton
 	public DateFormat getDateFormat(String inFormat, TimeZone inTimeZone)
 	{
 		if (fieldDateFormats == null)
@@ -54,19 +54,19 @@ public class DateStorageUtil
 		{
 			format = new SimpleDateFormat(inFormat);
 			format.setLenient(true);
-			
-			if( inTimeZone == null )
+
+			if (inTimeZone == null)
 			{
-				if( inFormat.equals("yyyy-MM-dd'T'HH:mm:ss.SSSXXX") || inFormat.equals("yyyy-MM-dd'T'HH:mm:ss.SSSX") )
+				if (inFormat.equals("yyyy-MM-dd'T'HH:mm:ss.SSSXXX") || inFormat.equals("yyyy-MM-dd'T'HH:mm:ss.SSSX"))
 				{
-					inTimeZone  = TimeZone.getTimeZone("UTC");		
+					inTimeZone = TimeZone.getTimeZone("UTC");
 				}
 			}
-			if( inTimeZone != null )
+			if (inTimeZone != null)
 			{
 				format.setTimeZone(inTimeZone);
 			}
-			
+
 			fieldDateFormats.put(inFormat + inTimeZone, format);
 		}
 		return format;
@@ -77,12 +77,12 @@ public class DateStorageUtil
 		return getDateFormat("yyyy-MM-dd HH:mm:ss Z");
 	}
 
-	
-	//getJsonFormat
+	// getJsonFormat
 	public DateFormat getJsonFormat()
 	{
 		return getDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	}
+
 	public DateFormat getJsonSqlFormat()
 	{
 		return getDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -92,6 +92,7 @@ public class DateStorageUtil
 	{
 		return getDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	}
+
 	protected DateFormat getExifFormat()
 	{
 		// 2010:09:20 13:20:53-04:00
@@ -100,7 +101,7 @@ public class DateStorageUtil
 
 	protected DateFormat getExifPhotoshopFormat()
 	{
-		//XMP-photoshop:DateCreated 
+		// XMP-photoshop:DateCreated
 		return getDateFormat("yyyy:MM:dd HH:mm:ss.S");
 	}
 
@@ -155,27 +156,28 @@ public class DateStorageUtil
 		double duration = (double) (current.getTime() - lastDateTime.getTime()) / PERIOD_OF_DAY;
 		return duration;
 	}
+
 	public Date parseFromObject(Object inStoredDate)
 	{
-		if( inStoredDate == null)
+		if (inStoredDate == null)
 		{
 			return null;
 		}
-		
-		if( inStoredDate instanceof String)
+
+		if (inStoredDate instanceof String)
 		{
-			return parseFromStorage((String)inStoredDate);
+			return parseFromStorage((String) inStoredDate);
 		}
 		else
 		{
-			return (Date)inStoredDate;
+			return (Date) inStoredDate;
 		}
 	}
 
 	public long getTime(String inStoredDate)
 	{
 		Date time = parseFromStorage(inStoredDate);
-		if( time != null)
+		if (time != null)
 		{
 			return time.getTime();
 		}
@@ -207,16 +209,16 @@ public class DateStorageUtil
 
 				if (inStoredDate.contains("T"))
 				{
-					if( inStoredDate.contains("+") || inStoredDate.contains("-"))
+					if (inStoredDate.contains("+") || inStoredDate.contains("-"))
 					{
-//					    TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(inStoredDate);
-//					    Instant i = Instant.from(ta);
-//					    Date d = Date.from(i);
+						// TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(inStoredDate);
+						// Instant i = Instant.from(ta);
+						// Date d = Date.from(i);
 						Date d = getDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").parse(inStoredDate);
 						return d;
 					}
-					//If its ends with Z then this is the time in UTC, no offset needed
-					return getJsonFormat().parse(inStoredDate); //Also works for ElasticSearch
+					// If its ends with Z then this is the time in UTC, no offset needed
+					return getJsonFormat().parse(inStoredDate); // Also works for ElasticSearch
 				}
 
 				if (inStoredDate.indexOf("-") < 6)
@@ -224,7 +226,7 @@ public class DateStorageUtil
 					return getStandardFormat().parse(inStoredDate);
 				}
 
-				if (inStoredDate.substring(inStoredDate.length() - ".000".length()).contains(".")) //What is this??!!
+				if (inStoredDate.substring(inStoredDate.length() - ".000".length()).contains(".")) // What is this??!!
 				{
 					return getExifPhotoshopFormat().parse(inStoredDate);
 				}
@@ -239,13 +241,13 @@ public class DateStorageUtil
 				return getExifFormat().parse(inStoredDate);
 			}
 
-			if (inStoredDate.length() > 18)				
+			if (inStoredDate.length() > 18)
 			{
 				// Handle HTML5 datetime-local without timezone: 2025-07-24T15:16
-				
+
 				if (inStoredDate.contains("T"))
 				{
-					return getJsonSqlFormat().parse(inStoredDate); //Also works for ElasticSearch
+					return getJsonSqlFormat().parse(inStoredDate); // Also works for ElasticSearch
 				}
 				if (inStoredDate.contains("-"))
 				{
@@ -271,7 +273,8 @@ public class DateStorageUtil
 				}
 			}
 
-			if (inStoredDate.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}")) {
+			if (inStoredDate.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}"))
+			{
 				return getDateFormat("yyyy-MM-dd'T'HH:mm").parse(inStoredDate);
 			}
 
@@ -286,16 +289,16 @@ public class DateStorageUtil
 			}
 			if (inStoredDate.length() == 10 && inStoredDate.indexOf("-") == 4)
 			{
-				return parse(inStoredDate,"yyyy-MM-dd");
+				return parse(inStoredDate, "yyyy-MM-dd");
 			}
 			String format = determineDateFormat(inStoredDate);
-			if( format != null)
+			if (format != null)
 			{
-				Date old = parse(inStoredDate,format);
+				Date old = parse(inStoredDate, format);
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(old);
-				
-				if( cal.get(Calendar.YEAR) < 100)
+
+				if (cal.get(Calendar.YEAR) < 100)
 				{
 					cal.add(Calendar.YEAR, 2000);
 					return cal.getTime();
@@ -333,7 +336,7 @@ public class DateStorageUtil
 
 	public String formatForStorage(Date inDate)
 	{
-		if( inDate == null)
+		if (inDate == null)
 		{
 			return null;
 		}
@@ -386,16 +389,18 @@ public class DateStorageUtil
 		}
 		return diff;
 	}
+
 	public Date subtractFromNow(long millis)
 	{
 		long subtracted = System.currentTimeMillis() - millis;
-		if( subtracted < 1)
+		if (subtracted < 1)
 		{
 			subtracted = 0;
 		}
 		Date newdate = new Date(subtracted);
 		return newdate;
 	}
+
 	public Calendar getCalendar(Date date)
 	{
 		Calendar cal = createCalendar();
@@ -405,7 +410,7 @@ public class DateStorageUtil
 
 	public Calendar getCalendar()
 	{
-		Calendar c = createCalendar(); //America/New_York ?
+		Calendar c = createCalendar(); // America/New_York ?
 		return c;
 
 	}
@@ -434,9 +439,10 @@ public class DateStorageUtil
 		}
 
 	}
+
 	public Date parse(String inDate, String inFormat, TimeZone inTimezone)
 	{
-		DateFormat format = getDateFormat(inFormat,inTimezone);
+		DateFormat format = getDateFormat(inFormat, inTimezone);
 		try
 		{
 			Date parsed = format.parse(inDate);
@@ -447,8 +453,9 @@ public class DateStorageUtil
 			log.info("Could not parse date " + inDate);
 			return null;
 		}
-		
+
 	}
+
 	public Date parse(String inDate, String inFormat)
 	{
 
@@ -466,8 +473,7 @@ public class DateStorageUtil
 
 	}
 
-	private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>()
-	{
+	private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {
 		{
 			put("^\\d{8}$", "yyyyMMdd");
 			put("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy");
@@ -498,14 +504,11 @@ public class DateStorageUtil
 	};
 
 	/**
-	 * Determine SimpleDateFormat pattern matching with the given date string.
-	 * Returns null if format is unknown. You can simply extend DateUtil with
-	 * more formats if needed.
+	 * Determine SimpleDateFormat pattern matching with the given date string. Returns null if format is
+	 * unknown. You can simply extend DateUtil with more formats if needed.
 	 * 
-	 * @param dateString
-	 *            The date string to determine the SimpleDateFormat pattern for.
-	 * @return The matching SimpleDateFormat pattern, or null if format is
-	 *         unknown.
+	 * @param dateString The date string to determine the SimpleDateFormat pattern for.
+	 * @return The matching SimpleDateFormat pattern, or null if format is unknown.
 	 * @see SimpleDateFormat
 	 */
 	public static String determineDateFormat(String dateString)
@@ -573,13 +576,15 @@ public class DateStorageUtil
 
 	public Date getToday()
 	{
-		return new Date();
+		Calendar cal = createCalendar();
+		return cal.getTime();
 	}
 
 	public String getTodayForStorage()
 	{
-		return formatForStorage( new Date() );
+		return formatForStorage(new Date());
 	}
+
 	public String getTodayForDisplay()
 	{
 		return formatDateObj(new Date(), "yyyy-MM-dd");
@@ -587,35 +592,38 @@ public class DateStorageUtil
 
 	public Calendar createCalendar()
 	{
-		Calendar c = Calendar.getInstance(); //America/New_York ?
+		Calendar c = Calendar.getInstance(); // America/New_York ?
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		return c;
 	}
+
 	public Calendar createCalendar(TimeZone inTimeZone)
 	{
-		Calendar c = Calendar.getInstance(inTimeZone); //America/New_York ?
+		Calendar c = Calendar.getInstance(inTimeZone); // America/New_York ?
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		return c;
-		
+
 	}
+
 	public Calendar createUTCCalendar()
 	{
-		Calendar c = createCalendar(TimeZone.getTimeZone("UTC")); //America/New_York ?
+		Calendar c = createCalendar(TimeZone.getTimeZone("UTC")); // America/New_York ?
 		return c;
 	}
-	
+
 	public Date getThisMonday()
 	{
 		Calendar c = createUTCCalendar();
 		c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 		return c.getTime();
 	}
+
 	public Date getThisMonday(String inDate)
 	{
 		Calendar c = createUTCCalendar();
@@ -623,6 +631,7 @@ public class DateStorageUtil
 		c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 		return c.getTime();
 	}
+
 	public Collection getWeeks(int inCount)
 	{
 		Collection weeks = new ArrayList();
@@ -641,42 +650,50 @@ public class DateStorageUtil
 			c.add(Calendar.DAY_OF_YEAR, 7);
 		}
 		return weeks;
-		
+
 	}
 
 	public boolean newerThan(Date inDate, Date inDate2)
 	{
-		if( inDate == null && inDate2 != null)
+		if (inDate == null && inDate2 != null)
 		{
 			return false;
 		}
-		if( inDate != null && inDate2 == null)
+		if (inDate != null && inDate2 == null)
 		{
 			return true;
 		}
 		int newer = inDate.compareTo(inDate2);
 		return newer == 1;
 	}
-	
 
 	public String getISO8601(Object inDateObj)
 	{
-		if( inDateObj == null)
+		if (inDateObj == null)
 		{
 			return null;
 		}
 		Date date = null;
-		if( inDateObj instanceof Date )
+		if (inDateObj instanceof Date)
 		{
-			date = (Date)inDateObj;
+			date = (Date) inDateObj;
 		}
 		else
 		{
-			date = parseFromStorage((String)inDateObj);
+			date = parseFromStorage((String) inDateObj);
 		}
-		String formated = getISO8601Format().format(date);				
+		String formated = getISO8601Format().format(date);
 		return formated;
 	}
-	
+
+	public Date truncateDate(Date date)
+	{
+		Calendar cal = DateStorageUtil.getStorageUtil().getCalendar(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
 
 }
