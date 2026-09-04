@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
@@ -21,7 +22,6 @@ import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -38,8 +38,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -47,7 +45,6 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
@@ -91,49 +88,66 @@ public class HttpSharedConnection
 	{
 		if (fieldHttpClient == null)
 		{
-
-			try
+			synchronized (this)
 			{
-				SSLContext sslContext;
-				sslContext = SSLContextBuilder.create().useProtocol("TLSv1.2").build();
-				RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).setConnectTimeout(15 * 1000).setSocketTimeout(1200 * 1000).build();
-
-				/**
-				 * 
-				 */
-
-				ConnectionKeepAliveStrategy myStrategy = new ConnectionKeepAliveStrategy() {
-					@Override
-					public long getKeepAliveDuration(HttpResponse response, HttpContext context)
+				if (fieldHttpClient == null)
+				{
+					try
 					{
-						// 1. Honor 'keep-alive' header from the server first
-						HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-						while (it.hasNext())
-						{
-							HeaderElement he = it.nextElement();
-							String param = he.getName();
-							String value = he.getValue();
-							if (value != null && param.equalsIgnoreCase("timeout"))
+						SSLContext sslContext = SSLContextBuilder.create().useProtocol("TLSv1.2").build();
+
+						// 1. Enforce strict timeouts on all network operations
+						RequestConfig globalConfig = RequestConfig.custom()
+							.setCookieSpec(CookieSpecs.STANDARD)
+							.setConnectionRequestTimeout(5 * 1000) // Max 5s wait for connection from pool
+							.setConnectTimeout(10 * 1000) // Max 10s to establish TCP handshake
+							.setSocketTimeout(30 * 1000) // Max 30s waiting for packet data
+							.build();
+
+						// 2. Configure connection pool limits
+						PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+						cm.setMaxTotal(200);
+						cm.setDefaultMaxPerRoute(20);
+
+						// 3. Fallback Keep-Alive strategy (15s fallback to prevent silent drops)
+						ConnectionKeepAliveStrategy myStrategy = (response, context) -> {
+							HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+							while (it.hasNext())
 							{
-								return Long.parseLong(value) * 1000;
+								HeaderElement he = it.nextElement();
+								String param = he.getName();
+								String value = he.getValue();
+								if (value != null && param.equalsIgnoreCase("timeout"))
+								{
+									try
+									{
+										return Long.parseLong(value) * 1000;
+									}
+									catch (NumberFormatException ignored)
+									{
+									}
+								}
 							}
-						}
-						// 2. If the server is silent, keep it alive for 30 seconds as a default
-						return 2 * 60 * 1000; // 120 second defaults
-						// return 500;
+							// Fallback: Keep alive for 15s if server specifies no header
+							return 15 * 1000;
+						};
+
+						// 4. Build client with idle eviction enabled
+						fieldHttpClient = HttpClients.custom()
+							.useSystemProperties()
+							.setDefaultRequestConfig(globalConfig)
+							.setSSLContext(sslContext)
+							.setConnectionManager(cm)
+							.setKeepAliveStrategy(myStrategy)
+							.evictExpiredConnections() // Cleans server-closed connections
+							.evictIdleConnections(30, TimeUnit.SECONDS) // Purges connections idle > 30s
+							.build();
 					}
-				};
-
-				PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-				cm.setMaxTotal(200);
-				cm.setDefaultMaxPerRoute(20);
-
-				fieldHttpClient =
-					HttpClients.custom().useSystemProperties().setDefaultRequestConfig(globalConfig).setSSLContext(sslContext).setConnectionManager(cm).setKeepAliveStrategy(myStrategy).build();
-			}
-			catch (Throwable e)
-			{
-				throw new OpenEditException(e);
+					catch (Throwable e)
+					{
+						throw new OpenEditException(e);
+					}
+				}
 			}
 		}
 		return fieldHttpClient;
@@ -305,20 +319,18 @@ public class HttpSharedConnection
 			{
 				return null;
 			}
-			else
-				if (resp.getStatusLine().getStatusCode() == 422)
-				{
-					throw new HttpException("HTTP Error:" + resp.getStatusLine().getStatusCode() + ":" + resp.getStatusLine().getReasonPhrase(), null, resp.getStatusLine().getStatusCode());
-				}
-				else
-					if (resp.getStatusLine().getStatusCode() < 200 || resp.getStatusLine().getStatusCode() > 206)
-					{
-						String returned = EntityUtils.toString(resp.getEntity());
+			else if (resp.getStatusLine().getStatusCode() == 422)
+			{
+				throw new HttpException("HTTP Error:" + resp.getStatusLine().getStatusCode() + ":" + resp.getStatusLine().getReasonPhrase(), null, resp.getStatusLine().getStatusCode());
+			}
+			else if (resp.getStatusLine().getStatusCode() < 200 || resp.getStatusLine().getStatusCode() > 206)
+			{
+				String returned = EntityUtils.toString(resp.getEntity());
 
-						throw new HttpException("HTTP Error:" + resp.getStatusLine().getStatusCode() + ":" + resp.getStatusLine().getReasonPhrase() + " Body: \n" + returned, null,
-							resp.getStatusLine().getStatusCode());
-						// throw new OpenEditException("Could not process " + returned);
-					}
+				throw new HttpException("HTTP Error:" + resp.getStatusLine().getStatusCode() + ":" + resp.getStatusLine().getReasonPhrase() + " Body: \n" + returned, null,
+					resp.getStatusLine().getStatusCode());
+				// throw new OpenEditException("Could not process " + returned);
+			}
 
 			HttpEntity entity = resp.getEntity();
 
@@ -444,29 +456,25 @@ public class HttpSharedConnection
 			{
 				builder.addPart(key, (String) value);
 			}
-			else
-				if (value instanceof File)
-				{
-					builder.addPart(key, (File) value);
-				}
-				else
-					if (value instanceof ContentItem)
-					{
-						ContentItem item = (ContentItem) value;
-						File file = new File(item.getAbsolutePath());
-						builder.addPart(key, file);
-					}
-					else
-						if (value instanceof JSONObject)
-						{
-							builder.addPart(key, ((JSONObject) value).toJSONString(), "application/json");
-						}
-						else
-							if (value instanceof ByteArrayBody)
-							{
-								// ByteArrayBody bin = new ByteArrayBody(bytes, fileName);
-								builder.addPart(key, (ByteArrayBody) value);
-							}
+			else if (value instanceof File)
+			{
+				builder.addPart(key, (File) value);
+			}
+			else if (value instanceof ContentItem)
+			{
+				ContentItem item = (ContentItem) value;
+				File file = new File(item.getAbsolutePath());
+				builder.addPart(key, file);
+			}
+			else if (value instanceof JSONObject)
+			{
+				builder.addPart(key, ((JSONObject) value).toJSONString(), "application/json");
+			}
+			else if (value instanceof ByteArrayBody)
+			{
+				// ByteArrayBody bin = new ByteArrayBody(bytes, fileName);
+				builder.addPart(key, (ByteArrayBody) value);
+			}
 
 		}
 		return builder.build();
