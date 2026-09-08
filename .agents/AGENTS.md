@@ -65,3 +65,11 @@ editing `system` directly.
   `system` change — `system`'s tables are infrastructure (users, mounts, locks), not content.
 - If unsure whether a change belongs here or in a feature plugin, prefer the feature plugin and
   only touch `system` when the behavior genuinely must be shared by all plugins.
+- `html/display/velocitymacros.vm` defines the `#jesc`/`#jrender` macros used throughout the
+  codebase (notably `plugins/mediadb/html/ai/<provider>/calls/*.json`) to JSON-escape a value for
+  embedding in generated JSON. Both take a single Velocity expression as their argument; if you add
+  a similar macro here, remember that a *literal* double-quoted string passed as that argument is
+  parsed by Velocity as a real string-literal token, so it cannot contain an unescaped `"` (and a
+  backslash-escaped `\"` does not work either, per direct testing against the shipped
+  `velocity-engine-core` jar) — callers must route dynamic/quote-bearing content through a `$var`
+  reference instead of typing it inline.
