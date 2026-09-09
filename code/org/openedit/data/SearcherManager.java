@@ -267,6 +267,10 @@ public class SearcherManager
 			Data data = (Data) iterator.next();
 			// We need a list of searchable (keyword fields)
 			Object obj = data.getValue(inColumn);
+			if (obj == null)
+			{
+				continue;
+			}
 			if (obj instanceof Collection)
 			{
 				Collection values = (Collection) obj;
