@@ -105,11 +105,4 @@ public interface MultiValued extends Data
 
 	public boolean hasValue(String inKey);
 
-	public JSONObject getJSONValue(String inKey);
-
-	public Object getJSONValue(String inFieldKey, String inSubKey);
-
-	public void setJSONValue(String inKey, JSONObject inValue);
-
-	public void setJSONValue(String inFieldKey, String inSubKey, Object inValue);
 }

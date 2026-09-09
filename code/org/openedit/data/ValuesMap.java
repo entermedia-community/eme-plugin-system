@@ -21,6 +21,7 @@ import org.entermediadb.asset.Category;
 import org.json.simple.JSONObject;
 import org.openedit.Data;
 import org.openedit.MultiValued;
+import org.openedit.OpenEditException;
 import org.openedit.modules.translations.LanguageMap;
 import org.openedit.util.DateStorageUtil;
 

@@ -24,8 +24,6 @@ public class BaseData implements MultiValued, Comparable, Cloneable
 
 	protected ValuesMap fieldProperties;
 
-	protected JSONParser fieldJsonParser = new JSONParser();
-
 	public BaseData() {}
 
 	public BaseData(Map inMap) {
@@ -613,61 +611,6 @@ public class BaseData implements MultiValued, Comparable, Cloneable
 	{
 		Date d = getDate(key); // existing
 		return d != null ? d.toInstant() : null;
-	}
-
-	public JSONObject getJSONValue(String inKey)
-	{
-		String value = get(inKey);
-		if (value == null)
-		{
-			return null;
-		}
-		try
-		{
-			return (JSONObject) fieldJsonParser.parse(value);
-		}
-		catch (ParseException e)
-		{
-			return null;
-		}
-	}
-
-	public Object getJSONValue(String inFieldKey, String inSubKey)
-	{
-		JSONObject json = getJSONValue(inFieldKey);
-		if (json == null)
-		{
-			return null;
-		}
-		return json.get(inSubKey);
-	}
-
-	public void setJSONValue(String inKey, JSONObject inValue)
-	{
-		if (inValue == null)
-		{
-			setProperty(inKey, null);
-		}
-		else
-		{
-			setProperty(inKey, inValue.toJSONString());
-		}
-	}
-
-	public void setJSONValue(String inFieldKey, String inSubKey, Object inValue)
-	{
-		if (!(inValue instanceof String) && !(inValue instanceof Number) && !(inValue instanceof Boolean) && !(inValue instanceof JSONObject) && inValue != null)
-		{
-			throw new OpenEditException("Only String, Number, Boolean, JSONObject or null are allowed for JSON values");
-		}
-		JSONObject json = getJSONValue(inFieldKey);
-		if (json == null)
-		{
-			json = new JSONObject();
-		}
-		json.put(inSubKey, inValue);
-
-		setJSONValue(inFieldKey, json);
 	}
 
 }
