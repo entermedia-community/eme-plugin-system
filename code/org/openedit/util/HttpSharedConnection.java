@@ -68,6 +68,23 @@ public class HttpSharedConnection
 	protected HttpClient fieldHttpClient;
 	protected Collection fieldSharedHeaders;
 	protected BasicCookieStore cookieStore = new BasicCookieStore();
+	protected int socketTimeout = 60 * 1000;
+
+	public int getSocketTimeout()
+	{
+		return socketTimeout;
+	}
+
+	/**
+	 * Max time to wait for data on an open connection, eg. while a slow backend (such as an LLM) is
+	 * still generating a response. Must be called before the shared client is first built, or
+	 * followed by reset() to rebuild it.
+	 */
+	public void setSocketTimeout(int inSocketTimeout)
+	{
+		socketTimeout = inSocketTimeout;
+		reset();
+	}
 
 	public Collection getSharedHeaders()
 	{
@@ -99,9 +116,9 @@ public class HttpSharedConnection
 						// 1. Enforce strict timeouts on all network operations
 						RequestConfig globalConfig = RequestConfig.custom()
 							.setCookieSpec(CookieSpecs.STANDARD)
-							.setConnectionRequestTimeout(5 * 1000) // Max 5s wait for connection from pool
-							.setConnectTimeout(10 * 1000) // Max 10s to establish TCP handshake
-							.setSocketTimeout(30 * 1000) // Max 30s waiting for packet data
+							.setConnectionRequestTimeout(20 * 1000) // Max 5s wait for connection from pool
+							.setConnectTimeout(20 * 1000) // Max 10s to establish TCP handshake
+							.setSocketTimeout(socketTimeout) // Max time waiting for packet data
 							.build();
 
 						// 2. Configure connection pool limits
@@ -140,7 +157,7 @@ public class HttpSharedConnection
 							.setConnectionManager(cm)
 							.setKeepAliveStrategy(myStrategy)
 							.evictExpiredConnections() // Cleans server-closed connections
-							.evictIdleConnections(30, TimeUnit.SECONDS) // Purges connections idle > 30s
+							.evictIdleConnections(60, TimeUnit.SECONDS) // Purges connections idle > 60s
 							.build();
 					}
 					catch (Throwable e)
