@@ -505,6 +505,16 @@ public class FinalizedProcessBuilder {
 		}
 		Process process = processBuilder.start();
 
+		//Nothing ever writes to this process's stdin. Left open, it's an unclosed pipe with no
+		//EOF, and a command that reads or checks stdin (e.g. for confirmation input) will block
+		//on it forever. Closing it immediately gives the child the same EOF it would see from
+		//"< /dev/null".
+		try {
+			process.getOutputStream().close();
+		} catch (IOException e) {
+			//ignore
+		}
+
 		Set<StreamGobbler> gobblers = new HashSet<StreamGobbler>(2);
 		if (gobbleInput) {
 			StreamGobbler inputGobbler = new StreamGobbler(process.getInputStream(), gobbleInputLogging);

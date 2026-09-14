@@ -104,6 +104,7 @@ public class StreamGobbler implements Closeable, Runnable
 				{
 					writer.append(line);
 					writer.append('\n');
+					log.info(line);
 					if (writer.length() > 1000000) //Dont let this buffer get more than 100k of memory
 					{
 						String cut = writer.substring(writer.length() - 700000, writer.length());
