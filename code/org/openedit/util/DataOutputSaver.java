@@ -37,17 +37,17 @@ public class DataOutputSaver extends BaseMediaObject implements LogListener
             logBuffer.append(inText);
 
             String snapshot = logBuffer.toString();
-            int max = Math.min(snapshot.length(), 30000); // Lucene limit
+            int length = Math.min(snapshot.length(), 30000); // Lucene limit
 
-            if (max < snapshot.length())
+            if (length < snapshot.length())
             {
+                snapshot = snapshot.substring(snapshot.length() - length, snapshot.length()); // saves in chunks
                 int cutoff = snapshot.lastIndexOf('\n');
                 if (cutoff > 0)
                 {
-                    max = cutoff + 1;
+                    snapshot = snapshot.substring(0, snapshot.length()  - cutoff + 1); 
                 }
             }
-            snapshot = snapshot.substring(snapshot.length() - max, snapshot.length()); // saves in chunks
             inData.setValue(fieldSaveFieldName, snapshot);
             // Dont save it yet
 
