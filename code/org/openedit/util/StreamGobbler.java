@@ -21,6 +21,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +48,7 @@ public class StreamGobbler implements Closeable, Runnable
 	protected Thread parentThread = null;
 	protected String fieldOutput = null;
 	protected boolean fieldErrorStream;
+	private final Consumer<String> lineListener;
 
 	public boolean isErrorStream()
 	{
@@ -60,8 +62,18 @@ public class StreamGobbler implements Closeable, Runnable
 
 	public StreamGobbler(InputStream inputStream, boolean enableLogging)
 	{
+		this(inputStream, enableLogging, null);
+	}
+
+	/**
+	 * @param inLineListener optional callback invoked with each line as it is read from the
+	 *            stream, in addition to the existing logging/buffering behavior. May be null.
+	 */
+	public StreamGobbler(InputStream inputStream, boolean enableLogging, Consumer<String> inLineListener)
+	{
 		this.inputStream = inputStream;
 		this.isLoggingEnabled = enableLogging;
+		this.lineListener = inLineListener;
 
 		//setName("StreamGobbler");
 		//setDaemon(true);
@@ -100,11 +112,15 @@ public class StreamGobbler implements Closeable, Runnable
 			}
 			while (!Thread.currentThread().isInterrupted() && (line = br.readLine()) != null)
 			{
+				if (lineListener != null)
+				{
+					lineListener.accept(line);
+				}
 				if (isLoggingEnabled)
 				{
 					writer.append(line);
 					writer.append('\n');
-					log.info(line);
+					//log.info(line);
 					if (writer.length() > 1000000) //Dont let this buffer get more than 100k of memory
 					{
 						String cut = writer.substring(writer.length() - 700000, writer.length());

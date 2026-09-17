@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -141,6 +142,16 @@ public class Exec
 
 	public ExecResult runExec(String inCommandKey, Collection<String> inArgs, boolean inSaveOutput, File inRootFolder, long inTimeout)
 	{
+		return runExec(inCommandKey, inArgs, inSaveOutput, inRootFolder, inTimeout, null);
+	}
+
+	/**
+	 * Same as {@link #runExec(String, Collection, boolean, File, long)} but additionally invokes
+	 * inLineListener with each line of the subprocess's output as it is produced, before the
+	 * process exits. May be null.
+	 */
+	public ExecResult runExec(String inCommandKey, Collection<String> inArgs, boolean inSaveOutput, File inRootFolder, long inTimeout, Consumer<String> inLineListener)
+	{
 		ArrayList<String> command = new ArrayList<String>();
 		//check for cached version
 		ExecCommand cachedCommand = findCommand(inCommandKey);
@@ -151,11 +162,11 @@ public class Exec
 		}
 		if (inRootFolder == null)
 		{
-			return runExec(command, cachedCommand.inStartDir, inSaveOutput, inTimeout);
+			return runExec(command, cachedCommand.inStartDir, inSaveOutput, inTimeout, inLineListener);
 		}
 		else
 		{
-			return runExec(command, inRootFolder, inSaveOutput, inTimeout);
+			return runExec(command, inRootFolder, inSaveOutput, inTimeout, inLineListener);
 		}
 	}
 
@@ -175,13 +186,23 @@ public class Exec
 
 	public ExecResult runExec(List<String> com, File inRunFrom, boolean inSaveOutput, long inTimeout) throws OpenEditException
 	{
+		return runExec(com, inRunFrom, inSaveOutput, inTimeout, null);
+	}
+
+	/**
+	 * Same as {@link #runExec(List, File, boolean, long)} but additionally invokes inLineListener
+	 * with each line of the subprocess's standard output (stderr is merged into it) as it is
+	 * produced, before the process exits. May be null.
+	 */
+	public ExecResult runExec(List<String> com, File inRunFrom, boolean inSaveOutput, long inTimeout, Consumer<String> inLineListener) throws OpenEditException
+	{
 		if( inTimeout == -1)
 		{
 			inTimeout = getTimeLimit();
 		}
-		log.info("Running: " + com); 
+		log.info("Running: " + com);
 
-		FinalizedProcessBuilder pb = new FinalizedProcessBuilder(com).keepProcess(false).logInputtStream(inSaveOutput);
+		FinalizedProcessBuilder pb = new FinalizedProcessBuilder(com).onOutputLine(inLineListener);
 		if(isOnWindows()) 
 		{ 
 			pb.environment().put("HOME", inRunFrom.getAbsolutePath()); 
@@ -195,12 +216,13 @@ public class Exec
 			try
 			{
 				int returnVal = process.waitFor(inTimeout);
-				
+
+				result.setStandardError(process.getErrorOutputs());
 				if (inSaveOutput)
 				{
 					result.setStandardOut(process.getStandardOutputs());
 				}
-				if (returnVal == 0) 
+				if (returnVal == 0)
 				{
 					result.setRunOk(true); 
 				} 

@@ -34,7 +34,8 @@ import java.util.concurrent.TimeUnit;
  * <ul>
  * 
  * <li>It implements {@link Closeable}. The {@link #close()} method will make sure that all of the processes' streams
- * are closed, and if the {@code keepProcess} flag was not set, the process is destroyed via {@link Process#destroy()}.</li>
+ * are closed and the process is destroyed via {@link Process#destroy()} — this class always runs a command to
+ * completion and never leaves a subprocess behind.</li>
  * 
  * <li>It provides the {@link #waitFor(int)} method that invokes {@link Process#waitFor()} with a timeout period. If the
  * process execution takes longer than the timeout, then the thread is interrupted. This method also makes sure that the
@@ -75,16 +76,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class FinalizedProcess implements Closeable {
 	private final Process process;
-	private final boolean keepProcess;
 	private final Set<StreamGobbler> streamGobblers;
 
-	FinalizedProcess(Process process, boolean keepProcess, Set<StreamGobbler> streamGobblers) {
+	FinalizedProcess(Process process, Set<StreamGobbler> streamGobblers) {
 		if (process == null) {
 			throw new NullPointerException("process: null");
 		}
 
 		this.process = process;
-		this.keepProcess = keepProcess;
 		this.streamGobblers = streamGobblers;
 	}
 
@@ -114,15 +113,10 @@ public class FinalizedProcess implements Closeable {
 	/**
 	 * Returns the input stream connected to the error output of the subprocess. The stream obtains data piped from the
 	 * error output of the process represented by this {@code FinalizedProcess} object.
-	 * 
-	 * <p>
-	 * If the standard error of the subprocess has been redirected using
-	 * {@link FinalizedProcessBuilder#redirectErrorStream(boolean)} then this method will return a null input
-	 * stream</a>.
-	 * 
+	 *
 	 * <p>
 	 * Implementation note: It is a good idea for the returned input stream to be buffered.
-	 * 
+	 *
 	 * @return the input stream connected to the error output of the subprocess
 	 */
 	public InputStream getErrorStream() {
@@ -131,16 +125,12 @@ public class FinalizedProcess implements Closeable {
 
 	/**
 	 * Returns the input stream connected to the normal output of the subprocess. The stream obtains data piped from the
-	 * standard output of the process represented by this {@code FinalizedProcess} object.
-	 * 
-	 * <p>
-	 * If the standard error of the subprocess has been redirected using
-	 * {@link FinalizedProcessBuilder#redirectErrorStream(boolean)} then the input stream returned by this method will
-	 * receive the merged standard output and the standard error of the subprocess.
-	 * 
+	 * standard output of the process represented by this {@code FinalizedProcess} object. Standard error is never
+	 * merged into this stream — read it separately via {@link #getErrorStream()}.
+	 *
 	 * <p>
 	 * Implementation note: It is a good idea for the returned input stream to be buffered.
-	 * 
+	 *
 	 * @return the input stream connected to the normal output of the subprocess
 	 */
 	public InputStream getInputStream() {
@@ -232,9 +222,7 @@ public class FinalizedProcess implements Closeable {
 			} catch (IOException e) {
 			}
 
-			if (!keepProcess) {
-				process.destroy();
-			}
+			process.destroy();
 		}
 	}
 
