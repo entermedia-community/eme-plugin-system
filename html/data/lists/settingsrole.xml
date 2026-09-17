@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<settingsroles> 
+  <settingsrole id="administrator" name="Administrators" permissions="admintoolbar|viewfilemenu|upload|multiupload|viewupload|viewsettings" />  
+  <settingsrole id="users" name="Users" />  
+  <settingsrole id="guest" name="Anonymous" /> 
+</settingsroles>

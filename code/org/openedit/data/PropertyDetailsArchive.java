@@ -148,7 +148,7 @@ public class PropertyDetailsArchive implements CatalogEnabled
 		if (inProfile != null) // this is important since they may have created
 								// a custom search screen or something
 		{
-			// id = id + "_" + inProfile.get("settingsgroup");
+			// id = id + "_" + inProfile.get("settingsrole");
 			String propId = "view_" + id;
 			values = inProfile.getValues(propId);
 			if (values != null)

@@ -5,7 +5,7 @@
 	<property id="boolean">True/False</property>
 	<property id="user">User</property>
 	<property id="group">Group</property>	
-	<property id="settingsgroup">Role</property>	
+	<property id="settingsrole">Role</property>	
 	<property id="userprofile">Role Value</property>	
 	<!--  property id="permission">User Permission</property -->	
 	<property id="action">Action</property>	

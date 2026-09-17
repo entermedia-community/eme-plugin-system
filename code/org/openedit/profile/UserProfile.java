@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.entermediadb.asset.Category;
@@ -17,7 +16,6 @@ import org.openedit.MultiValued;
 import org.openedit.WebPageRequest;
 import org.openedit.data.BaseData;
 import org.openedit.data.DataLoaded;
-import org.openedit.data.EntityPermissions;
 import org.openedit.data.PropertyDetail;
 import org.openedit.data.QueryBuilder;
 import org.openedit.data.SaveableData;
@@ -36,26 +34,17 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 {
 	protected String fieldCatalogId;
 	protected SearcherManager fieldSearcherManager;
-	protected MultiValued fieldSettingsGroup;
-	//	protected Map<String,String> fieldSettingsGroupPermissions;
+	protected MultiValued fieldSettingsRole;
+	//	protected Map<String,String> fieldSettingsRolePermissions;
 	protected Map fieldResultViews;
 	protected XmlArchive fieldXmlArchive;
 	protected Collection fieldViewCategories;
 	protected Collection<String> fieldCollectionIds;
 	protected Collection<Data> fieldModules;
 	protected Permissions fieldPermissions;
-	protected String fieldSettingsGroupIndexId;
+	protected String fieldSettingsRoleIndexId;
 	protected UserManager fieldUserManager;
-	protected EntityPermissions fieldEntityPermissions;
 	
-	public EntityPermissions getEntityPermissions() {
-		return fieldEntityPermissions;
-	}
-
-	public void setEntityPermissions(EntityPermissions inEntityPermissions) {
-		fieldEntityPermissions = inEntityPermissions;
-	}
-
 	public UserManager getUserManager()
 	{
 		return fieldUserManager;
@@ -67,14 +56,14 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 		fieldUserManager = inUserManager;
 	}
 
-	public String getSettingsGroupIndexId()
+	public String getSettingsRoleIndexId()
 	{
-		return fieldSettingsGroupIndexId;
+		return fieldSettingsRoleIndexId;
 	}
 
-	public void setSettingsGroupIndexId(String inIndexId)
+	public void setSettingsRoleIndexId(String inIndexId)
 	{
-		fieldSettingsGroupIndexId = inIndexId;
+		fieldSettingsRoleIndexId = inIndexId;
 	}
 
 	
@@ -297,7 +286,7 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 //	}
 	public boolean isInRole(String inRole)
 	{
-		if( inRole.equals( get("settingsgroup")))
+		if( inRole.equals( get("settingsrole")))
 		{
 			return true;					
 		}
@@ -326,14 +315,14 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 		String val = super.get(inPreference);
 
 		//		
-		if (val == null && getSettingsGroup() != null)
+		if (val == null && getSettingsRole() != null)
 		{
-			val = getSettingsGroup().get(inPreference);
+			val = getSettingsRole().get(inPreference);
 		}
 
-		//		if (val == null && getSettingsGroup() != null)
+		//		if (val == null && getSettingsRole() != null)
 		//		{
-		//			val = getSettingsGroupPermissions().get(inPreference);
+		//			val = getSettingsRolePermissions().get(inPreference);
 		//		}		
 		if (val == null && !inPreference.equals("userid"))
 		{
@@ -359,9 +348,9 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 		}
 		if( inKey.equals("sendcollectionnotifications") || inKey.equals("sendapprovalnotifications") ||  inKey.equals("assethitsperpage") ||  inKey.equals("modulehitsperpage") )
 		{
-			if(getSettingsGroup() != null){
+			if(getSettingsRole() != null){
 			//if we have a local value then user it. Otherwise use parent.
-			return getSettingsGroup().getValue(inKey);
+			return getSettingsRole().getValue(inKey);
 			}
 		}
 		
@@ -388,9 +377,9 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 				return col;
 			}
 		}
-		if (value == null && getSettingsGroup() != null)
+		if (value == null && getSettingsRole() != null)
 		{
-			value = getSettingsGroup().getValue(inPreference);
+			value = getSettingsRole().getValue(inPreference);
 		}
 		String val = null;
 		if( value instanceof Collection)
@@ -463,9 +452,9 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 		return value;
 	}
 
-	public Data getSettingsGroup()
+	public Data getSettingsRole()
 	{
-		return fieldSettingsGroup;
+		return fieldSettingsRole;
 	}
 
 	public Permissions getPermissions() {
@@ -476,9 +465,9 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 		fieldPermissions = inPermissions;
 	}
 
-	public void setSettingsGroup(String inSettingsGroupId)
+	public void setSettingsRole(String inSettingsRoleId)
 	{
-		setProperty("settingsgroup", inSettingsGroupId);
+		setProperty("settingsrole", inSettingsRoleId);
 	}
 
 	public void save()
@@ -804,9 +793,9 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 	public void setProperty(String inId, String inValue)
 	{
 		saveUserIfChanged(inId, inValue);
-		if (inId.equals("settingsgroup"))
+		if (inId.equals("settingsrole"))
 		{
-			fieldSettingsGroup = null;
+			fieldSettingsRole = null;
 		}
 		super.setProperty(inId, inValue);
 	}
@@ -1062,9 +1051,9 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 		getUser().setGroups(inGroupslist);
 	}
 
-	public void setSettingsGroup(Data inFieldSettingsGroup)
+	public void setSettingsRole(Data inFieldSettingsRole)
 	{
-		fieldSettingsGroup = (MultiValued)inFieldSettingsGroup;
+		fieldSettingsRole = (MultiValued)inFieldSettingsRole;
 	}
 
 	public void setUser(User inUser)

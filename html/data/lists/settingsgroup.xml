@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<settingsgroups> 
-  <settingsgroup id="administrator" name="Administrators" permissions="admintoolbar|viewfilemenu|upload|multiupload|viewupload|viewsettings" />  
-  <settingsgroup id="users" name="Users" />  
-  <settingsgroup id="guest" name="Anonymous" /> 
-</settingsgroups>

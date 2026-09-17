@@ -1,15 +1,13 @@
 package org.openedit.servlet;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-
 import org.openedit.MultiValued;
 import org.openedit.cache.CacheManager;
 import org.openedit.data.Searcher;
 import org.openedit.data.SearcherManager;
 import org.openedit.hittracker.HitTracker;
+import org.openedit.util.PathUtilities;
 import org.openedit.util.URLUtilities;
 
 public class SiteManager
@@ -64,7 +62,7 @@ public class SiteManager
 						for (Iterator iterator2 = domains.iterator(); iterator2.hasNext();)
 						{
 							String  tmpdomain = (String ) iterator2.next();
-							if( domain.endsWith(tmpdomain))  //*.oe.com .endswith oe.com
+							if( PathUtilities.match(domain, tmpdomain))  //*.oe.com .endswith oe.com
 							{
 								SiteData sitedata = (SiteData)searcher.loadData(data);
 								found.setSiteData(sitedata);

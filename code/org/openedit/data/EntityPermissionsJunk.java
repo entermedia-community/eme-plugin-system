@@ -6,18 +6,18 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class EntityPermissions
+public class EntityPermissionsJunk
 {
-	private static final Log log = LogFactory.getLog(EntityPermissions.class);
+	private static final Log log = LogFactory.getLog(EntityPermissionsJunk.class);
 
-	protected String fieldSettingsGroup;
+	protected String fieldSettingsRole;
 	
-	public String getSettingsGroup() {
-		return fieldSettingsGroup;
+	public String getSettingsRole() {
+		return fieldSettingsRole;
 	}
 
-	public void setSettingsGroup(String inSettingsGroup) {
-		fieldSettingsGroup = inSettingsGroup;
+	public void setSettingsRole(String inSettingsRole) {
+		fieldSettingsRole = inSettingsRole;
 	}
 
 	Map fieldPermissions;

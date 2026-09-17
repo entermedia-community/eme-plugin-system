@@ -143,12 +143,12 @@ public class FilterReader {
 				id = inConfig.getAttribute("name");
 			}
 			result = new GroupFilter(id);
-		} else if (elemName.equals("settingsgroup")) {
+		} else if (elemName.equals("settingsrole")) {
 			String id = inConfig.getAttribute("id");
 			if (id == null) {
 				id = inConfig.getAttribute("name");
 			}
-			result = new SettingsGroupFilter(id);
+			result = new SettingsRoleFilter(id);
 		} else if (elemName.equals("permission")) {
 			result = new PermissionFilter(inConfig.getAttribute("name"));
 		} else if (elemName.equals("path")) {

@@ -408,17 +408,7 @@ public class QueryBuilder
 				groupids.add(group.getId());
 			}
 		}
-		String roleid = null;
-		if( inProfile.getSettingsGroup() != null)
-		{
-			roleid = inProfile.getSettingsGroup().getId();
-		}
-		else
-		{
-			roleid = "anonymous";
-		}
 			orgroup("viewgroups", groupids).
-			match("viewroles", roleid).
 			match("viewusers", inProfile.getUserId());
 		return this;
 		

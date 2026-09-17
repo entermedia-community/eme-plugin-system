@@ -54,15 +54,15 @@ public class FilterWriter {
 			}
 		} else if (elemName.equals("group")) {
 			newChild.setAttribute("id", ((GroupFilter) inFilter).getGroupId());
-		} else if (elemName.equals("settingsgroup")) {
+		} else if (elemName.equals("settingsrole")) {
 			newChild.setAttribute("id",
-					((SettingsGroupFilter) inFilter).getGroupId());
+					((SettingsRoleFilter) inFilter).getGroupId());
 		} else if (elemName.equals("userprofile")) {
 			UserProfileFilter filter = (UserProfileFilter) inFilter;
 			newChild.setAttribute("name", filter.getPropertyName());
 			newChild.setAttribute("value", filter.getValue());
-		} else if (elemName.equals("settingsgroup")) {
-			SettingsGroupFilter filter = (SettingsGroupFilter) inFilter;
+		} else if (elemName.equals("settingsrole")) {
+			SettingsRoleFilter filter = (SettingsRoleFilter) inFilter;
 			newChild.setAttribute("id", filter.getGroupId());
 		} else if (elemName.equals("user")) {
 			newChild.setAttribute("name", ((UserFilter) inFilter).getUsername());

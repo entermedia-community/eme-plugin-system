@@ -545,7 +545,7 @@ public class SearcherManager
 			String sortfield = null;
 			if (searcher.getPropertyDetails().getDetail("ordering") != null)
 			{
-				sortfield = "ordering";
+				sortfield = "orderingUp";
 			}
 			else if (searcher.getPropertyDetails().getDetail("numberval") != null)
 			{

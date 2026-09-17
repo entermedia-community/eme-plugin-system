@@ -20,7 +20,7 @@ import org.openedit.profile.UserProfile;
  * This filter only passes users who are members of a certain group.
  *
  */
-public class SettingsGroupFilter extends BaseFilter
+public class SettingsRoleFilter extends BaseFilter
 {
 
 	/**
@@ -28,7 +28,7 @@ public class SettingsGroupFilter extends BaseFilter
 	 *
 	 * @see #setGroupName(String)
 	 */
-	public SettingsGroupFilter()
+	public SettingsRoleFilter()
 	{
 		super();
 	}
@@ -38,7 +38,7 @@ public class SettingsGroupFilter extends BaseFilter
 	 *
 	 * @param inGroupName The group name to check for
 	 */
-	public SettingsGroupFilter(String inGroupId)
+	public SettingsRoleFilter(String inGroupId)
 	{
 		setGroupId(inGroupId);
 	}
@@ -72,7 +72,7 @@ public class SettingsGroupFilter extends BaseFilter
 
 		UserProfile profile = req.getUserProfile();
 
-		if (profile == null || profile.getSettingsGroup() == null)
+		if (profile == null || profile.getSettingsRole() == null)
 		{
 			return false;
 		}
@@ -81,7 +81,7 @@ public class SettingsGroupFilter extends BaseFilter
 		{
 			return true;
 		}
-		String id = profile.getSettingsGroup().getId();
+		String id = profile.getSettingsRole().getId();
 		if (id.equalsIgnoreCase(getGroupId()))
 		{
 				return true;
@@ -95,9 +95,9 @@ public class SettingsGroupFilter extends BaseFilter
 	}
 	public boolean equals(Object inObj)
 	{
-		if (inObj instanceof SettingsGroupFilter)
+		if (inObj instanceof SettingsRoleFilter)
 		{
-			SettingsGroupFilter toCompare = (SettingsGroupFilter)inObj;
+			SettingsRoleFilter toCompare = (SettingsRoleFilter)inObj;
 			return getGroupId().equals(toCompare.getGroupId());
 		}
 		return false;

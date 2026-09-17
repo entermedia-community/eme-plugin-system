@@ -1,7 +1,7 @@
 <properties>
 	<property id="id" index="true" stored="true"  keyword="true" internalfield="true" >ID</property>
 	<property id="userid" type="list" index="true" stored="true"  internalfield="true">User Id</property>
-	<property id="settingsgroup" editable="true" index="true" stored="true" datatype="list">Role</property>
+	<property id="settingsrole" editable="true" index="true" stored="true" datatype="list">Role</property>
 	<property id="view_asset_resultstable" index="true" stored="true"  internalfield="true" >View Table Results</property>
 	<property id="profilesearchfilters" index="true" stored="true"  internalfield="true" >Filters Used By Search</property>
 	<property id="maximize_screen" index="true" stored="true"  internalfield="true" >Maximize</property>
