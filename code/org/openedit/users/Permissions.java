@@ -273,7 +273,8 @@ public class Permissions implements CatalogEnabled
 		}
 		for (Iterator iterator = groups.iterator(); iterator.hasNext();)
 		{
-			String groupid = (String) iterator.next();
+			Group group = (Group) iterator.next();
+			String groupid = group.getId();
 			Map<String,Boolean> entitypermissions = getModulePermissions(inModule.getId(), inEntity.getId(), groupid);
 			Boolean can = entitypermissions.get(inKey);
 			if( can != null )
