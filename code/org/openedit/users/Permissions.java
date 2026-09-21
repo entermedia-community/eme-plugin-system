@@ -1,13 +1,13 @@
 package org.openedit.users;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.entermediadb.users.PermissionManager;
 import org.openedit.CatalogEnabled;
 import org.openedit.Data;
 import org.openedit.data.QueryBuilder;
@@ -24,11 +24,21 @@ public class Permissions implements CatalogEnabled
 	protected Set fieldSystemRolePermissions;
 	protected SearcherManager fieldSearcherManager;
 	protected String fieldCatalogId;
-	
+	protected PermissionManager fieldPermissionsManager;
+
 	public Permissions()
 	{
 	}
 	
+	public PermissionManager getPermissionsManager()
+	{
+		return fieldPermissionsManager;
+	}
+	
+	public void setPermissionsManager(PermissionManager inPermissionsManager)
+	{
+		fieldPermissionsManager = inPermissionsManager;
+	}	
 	//system wide
 	
 	public String getCatalogId()
@@ -97,6 +107,11 @@ public class Permissions implements CatalogEnabled
 //		boolean can = can(module,inKey);
 //		return can;
 //	}
+	private Data loadData(Data inModule, String inEntityId)
+	{
+		Data  entity = getSearcherManager().getCachedData(getCatalogId(), inModule.getId(), inEntityId);
+		return entity;
+	}
 
 	private Data loadModule(String inModuleId)
 	{
@@ -229,17 +244,30 @@ public class Permissions implements CatalogEnabled
 		for (Iterator iterator = groups.iterator(); iterator.hasNext();)
 		{
 			Group group = (Group) iterator.next();
-			Map<String,Boolean> entitypermissions = getModulePermissions(inModule.getId(), null,group.getId());
-			Boolean can = entitypermissions.get(inKey);
-			if( can != null )
+			Collection<String> entitypermissions = getCachedModulePermissions(inModule.getId(), group.getId());
+			if( entitypermissions.isEmpty())
 			{
-				return can;
+				return true;
+			}
+			if( entitypermissions.contains(inKey) )
+			{
+				return true;
 			}	
-			return false;
 		}
 		return false;
 	}
-	
+	public Boolean canEntity(String inModule, String inEntity, String inKey)
+	{
+		if (inModule == null || inEntity == null || inKey == null)
+		{
+			return false;
+		}
+
+		Data module = loadModule(inModule);
+		Data entity = loadData(module, inEntity);	
+
+		return canEntity(module, entity, inKey);
+	}
 	public Boolean canEntity(Data inModule, Data inEntity, String inKey)
 	{
 		if (inModule == null || inEntity == null || inKey == null)
@@ -275,15 +303,13 @@ public class Permissions implements CatalogEnabled
 		{
 			Group group = (Group) iterator.next();
 			String groupid = group.getId();
-			Map<String,Boolean> entitypermissions = getModulePermissions(inModule.getId(), inEntity.getId(), groupid);
-			Boolean can = entitypermissions.get(inKey);
-			if( can != null )
+			Collection<String> entitypermissions = getCachedEntityPermissions(inModule.getId(), inEntity.getId(), groupid);
+			if( entitypermissions.contains(inKey) )
 			{
-				return can;
+				return true;
 			}	
 		}
-		boolean found = canModule(inModule, inKey);
-		return found;
+		return false;
 
 	}
 
@@ -300,32 +326,31 @@ public class Permissions implements CatalogEnabled
 		return groupid;
 	}
 
-	public Map<String,Boolean> getModulePermissions(String inModuleId,String entityId, String inGroup)
+	public Collection<String> getCachedEntityPermissions(String inModuleId,String entityId, String inGroup)
 	{
+
 		String id = inModuleId + "_" + entityId + "_" + inGroup;
-		Map<String,Boolean> modulepermissions = (Map<String,Boolean>)getSearcherManager().getCacheManager().get("permissions" + getCatalogId(),id);
+		Collection<String> permissions = (Collection<String>)getSearcherManager().getCacheManager().get("permissions" + getCatalogId(),id);
+		if( permissions == null)
+		{
+
+			permissions = getPermissionsManager().caculateEntityPermissions(inModuleId, entityId, inGroup);
+			
+
+			getSearcherManager().getCacheManager().put("permissions" + getCatalogId(),id, permissions);
+		}
+		
+		return permissions;
+
+	}
+
+	public Collection<String> getCachedModulePermissions(String inModuleId,String inGroup)
+	{
+		String id = inModuleId + "_" + inGroup;
+		Collection<String> modulepermissions = (Collection<String>)getSearcherManager().getCacheManager().get("permissions" + getCatalogId(),id);
 		if( modulepermissions == null)
 		{
-			Searcher searcher = getSearcherManager().getSearcher(getCatalogId(), "permissionentityassigned");
-			QueryBuilder query = searcher.query().exact("group",inGroup);
-			if( entityId != null)
-			{
-				query.exact("entityid", entityId);
-			}
-			else
-			{
-				query.exact("moduleid", inModuleId);
-			}
-			HitTracker grouppermissions = query.search();
-			modulepermissions = new HashMap<String,Boolean>();
-			for (Iterator iterator = grouppermissions.iterator(); iterator.hasNext();)
-			{
-				Data data = (Data) iterator.next();
-				String permissionname = data.get("permissionsentity");
-				Object val = data.getValue("enabled");
-				//modulepermissions.putPermission(permissionname, val);
-				modulepermissions.put(permissionname, Boolean.valueOf(val.toString()));
-			}
+			modulepermissions = getPermissionsManager().caculateModulePermissions(inModuleId,  inGroup);
 			getSearcherManager().getCacheManager().put("permissions" + getCatalogId(),id, modulepermissions);
 		}
 		
