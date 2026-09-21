@@ -235,9 +235,9 @@ public class Permissions implements CatalogEnabled
 			{
 				return can;
 			}	
-			return true;
+			return false;
 		}
-		return true;
+		return false;
 	}
 	
 	public Boolean canEntity(Data inModule, Data inEntity, String inKey)
