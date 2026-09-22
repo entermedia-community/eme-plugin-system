@@ -5,4 +5,5 @@
 <property id="email" />
 <property id="creationdate" />
 <property id="lastlogin" />
+<property id="enabled" />
 </properties> 
