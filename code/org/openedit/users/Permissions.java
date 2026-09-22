@@ -334,7 +334,7 @@ public class Permissions implements CatalogEnabled
 		if( permissions == null)
 		{
 
-			permissions = getPermissionsManager().caculateEntityPermissions(inModuleId, entityId, inGroup);
+			permissions = getPermissionsManager().calculateEntityPermissions(inModuleId, entityId, inGroup);
 			
 
 			getSearcherManager().getCacheManager().put("permissions" + getCatalogId(),id, permissions);
@@ -352,7 +352,7 @@ public class Permissions implements CatalogEnabled
 		{
 			PermissionManager permissionManager = getPermissionsManager();
 			permissionManager.setCatalogId(getCatalogId());
-			modulepermissions = permissionManager.caculateModulePermissions(inModuleId,  inGroup);
+			modulepermissions = permissionManager.calculateModulePermissions(inModuleId,  inGroup);
 			getSearcherManager().getCacheManager().put("permissions" + getCatalogId(),id, modulepermissions);
 		}
 		
