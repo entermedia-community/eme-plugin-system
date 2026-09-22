@@ -2,5 +2,4 @@
 <data>
     <row id="administrators" name="Administrators" /> 
     <row id="users" name="Users" />
-    <row id="guests" name="Guests" />
 </data>
