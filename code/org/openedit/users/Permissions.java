@@ -333,8 +333,9 @@ public class Permissions implements CatalogEnabled
 		Collection<String> permissions = (Collection<String>)getSearcherManager().getCacheManager().get("permissions" + getCatalogId(),id);
 		if( permissions == null)
 		{
-
-			permissions = getPermissionsManager().calculateEntityPermissions(inModuleId, entityId, inGroup);
+			PermissionManager permissionManager = getPermissionsManager();
+			permissionManager.setCatalogId(getCatalogId());
+			permissions = permissionManager.calculateEntityPermissions(inModuleId, entityId, inGroup);
 			
 
 			getSearcherManager().getCacheManager().put("permissions" + getCatalogId(),id, permissions);
