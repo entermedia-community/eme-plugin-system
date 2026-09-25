@@ -119,12 +119,25 @@ public class Permissions implements CatalogEnabled
 		return module;
 	}
 
-	protected boolean isEditorFor(Data inData)
+	public boolean isEditorFor(Data inModule, Data inData)
 	{
 		if(inData == null) {
 			return false;
 		}
+		boolean isowner = getUserProfile().getUserId().equals(inData.get("owner"));
+		if(isowner) {
+			return true;
+		}
+		if (getUserProfile().getSettingsRole().getId().equals("administrator"))
+		{
+			return true;
+		} 
+
 		Collection users = inData.getValues("editorusers");
+		if (users == null || users.isEmpty() )
+		{
+			users = inModule.getValues("editorusers");
+		}
 		if (users != null && !users.isEmpty() )
 		{
 			if( users.contains(getUserProfile().getUserId() ) )
@@ -133,6 +146,10 @@ public class Permissions implements CatalogEnabled
 			}
 		}
 		Collection groups = inData.getValues("editorgroups");
+		if (groups == null || groups.isEmpty() )
+		{
+			groups = inModule.getValues("editorgroups");
+		}
 		if (groups != null && !groups.isEmpty() )
 		{
 			Collection<Group> usergroups = getUserProfile().getUser().getGroups();
@@ -145,14 +162,13 @@ public class Permissions implements CatalogEnabled
 				}
 			}
 		}
-		Collection roles = inData.getValues("editorroles");
-		if (roles != null && !roles.isEmpty() )
+
+
+		if ((users == null || users.isEmpty()) && (groups == null || groups.isEmpty()))
 		{
-			if( roles.contains(getUserProfile().getId() ) )
-			{	
-				return true;
-			}
+			return true;
 		}
+
 		return false;
 	}
 	
@@ -192,13 +208,6 @@ public class Permissions implements CatalogEnabled
 		}
 		return false;
 	}
-	
-	protected boolean isEditorFor(Data inModule, Data inEntity)
-	{
-		boolean iseditor = isEditorFor(inModule) ||  isEditorFor(inEntity);
-		return iseditor;
-	}
-
 
 	//System Level
 	
@@ -234,7 +243,7 @@ public class Permissions implements CatalogEnabled
 		
 		if( inKey.equals("edit") )
 		{
-			boolean istrue = isEditorFor(inModule);
+			boolean istrue = isEditorFor(inModule, null);
 			if( istrue )
 			{
 				return true;
