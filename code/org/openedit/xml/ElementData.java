@@ -195,10 +195,15 @@ public class ElementData extends BaseData implements SaveableData, DataLoaded, S
 						return children;
 					}
 				}
-				value = noderoot.getTextTrim();
+				value = noderoot.getText();
+
 				if (value == null || value.isEmpty())
 				{
 					value = null;
+				}
+				if( value != null)
+				{
+					value = value.trim();
 				}
 			}
 		}
@@ -570,7 +575,7 @@ public class ElementData extends BaseData implements SaveableData, DataLoaded, S
 		{
 			if (!getElement().hasMixedContent())
 			{
-				textvalue = getElement().getTextTrim();
+				textvalue = getElement().getText();
 			}
 			else
 			{
@@ -588,20 +593,24 @@ public class ElementData extends BaseData implements SaveableData, DataLoaded, S
 					for (Iterator iterator = langmaptop.elementIterator("language"); iterator.hasNext();)
 					{
 						Element childlang = (Element) iterator.next();
-						map.put(childlang.attributeValue("id"), childlang.getTextTrim());
+						String text = childlang.getText();
+						if( text !=null)
+						{
+							map.put(childlang.attributeValue("id"), text.trim());
+						}
 					}
 					if (map.isEmpty())
 					{
-						textvalue = langmaptop.getTextTrim();
+						textvalue = langmaptop.getText();
 						if (textvalue != null && !textvalue.isEmpty())
-							map.put("en", textvalue);
+							map.put("en", textvalue.trim());
 					}
 				}
 			}
 		}
 		if (textvalue != null)
 		{
-			map.setText("en", textvalue);
+			map.setText("en", textvalue.trim());
 		}
 		getMap().put(inKey, map);
 		return map;
