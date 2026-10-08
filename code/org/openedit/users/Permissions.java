@@ -119,7 +119,17 @@ public class Permissions implements CatalogEnabled
 		return module;
 	}
 
+	public boolean isViewerFor(Data inModule, Data inData)
+	{
+		return hasSavedValues(inModule, inData, "view");
+	}
+
 	public boolean isEditorFor(Data inModule, Data inData)
+	{
+		return hasSavedValues(inModule, inData, "editor");
+	}
+
+	public boolean hasSavedValues(Data inModule, Data inData, String inType)
 	{
 		if(inData == null) {
 			return false;
@@ -133,10 +143,10 @@ public class Permissions implements CatalogEnabled
 			return true;
 		} 
 
-		Collection users = inData.getValues("editorusers");
+		Collection users = inData.getValues(inType + "users");
 		if (users == null || users.isEmpty() )
 		{
-			users = inModule.getValues("editorusers");
+			users = inModule.getValues(inType + "users");
 		}
 		if (users != null && !users.isEmpty() )
 		{
@@ -145,10 +155,10 @@ public class Permissions implements CatalogEnabled
 				return true;
 			}
 		}
-		Collection groups = inData.getValues("editorgroups");
+		Collection groups = inData.getValues(inType + "groups");
 		if (groups == null || groups.isEmpty() )
 		{
-			groups = inModule.getValues("editorgroups");
+			groups = inModule.getValues(inType + "groups");
 		}
 		if (groups != null && !groups.isEmpty() )
 		{
@@ -172,42 +182,7 @@ public class Permissions implements CatalogEnabled
 		return false;
 	}
 	
-	protected boolean isViewerOnlySet(Data inEntity)
-	{
-		if(inEntity == null) {
-			return false;
-		}
-		Collection users = inEntity.getValues("viewerusers");
-		if (users != null && !users.isEmpty() )
-		{
-			if( users.contains(getUserProfile().getUserId() ) )
-			{	
-				return true;
-			}
-		}
-		Collection groups = inEntity.getValues("viewergroups");
-		if (groups != null && !groups.isEmpty() )
-		{
-			Collection<Group> usergroups = getUserProfile().getUser().getGroups();
-			for (Iterator iterator = usergroups.iterator(); iterator.hasNext();)
-			{
-				Group group = (Group) iterator.next();
-				if( groups.contains(group.getId()) )
-				{
-					return true;
-				}
-			}
-		}
-		Collection roles = inEntity.getValues("viewerroles");
-		if (roles != null && !roles.isEmpty() )
-		{
-			if( roles.contains(getUserProfile().getId() ) )
-			{	
-				return true;
-			}
-		}
-		return false;
-	}
+	
 
 	//System Level
 	
