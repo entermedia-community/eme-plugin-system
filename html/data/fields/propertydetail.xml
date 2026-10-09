@@ -63,9 +63,9 @@
       <language id="en"><![CDATA[Data Type]]></language>
       <language id="es"><![CDATA[Tipo de datos]]></language>
       <language id="fr"><![CDATA[Type de données]]></language>
-    </name>
+    </name> 
   </property>
-  <property id="rendertype" listid="datarendertype" type="list" editable="true" stored="true" index="true" keyword="false" filter="false">Render Type 
+  <property id="rendertype" listid="datarendertype" type="list" editable="true" stored="true" index="true">Render Type 
     <name>
       <language id="de"><![CDATA[render-Typ]]></language>
       <language id="en"><![CDATA[Render Type]]></language>
