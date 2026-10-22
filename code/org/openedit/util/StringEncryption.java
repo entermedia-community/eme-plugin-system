@@ -124,26 +124,26 @@ public class StringEncryption
 	{
 		if (fieldEncryptionKey == null)
 		{
-			File prop = new File(getRootDirectory(), "WEB-INF/encrypt.properties");
-			if (prop.exists())
+			//read .env file
+			File envFile = new File(getRootDirectory(), "../.env");
+			if (envFile.exists())
 			{
-				Properties props = new Properties();
-				FileInputStream reader = null;
-				try
+				try (FileInputStream envReader = new FileInputStream(envFile))
 				{
-					reader = new FileInputStream(prop);
-					props.load(reader);
+					Properties envProps = new Properties();
+					envProps.load(envReader);
+					String envKey = envProps.getProperty("PRIVATEKEY");
+					if (envKey != null)
+					{
+						fieldEncryptionKey = envKey;
+					}
 				}
 				catch (Throwable ex)
 				{
 					throw new OpenEditException(ex);
 				}
-				finally
-				{
-					FileUtils.safeClose(reader);
-				}
-				fieldEncryptionKey = props.getProperty(getSecretKeyName());
 			}
+			
 			if (fieldEncryptionKey == null)
 			{
 				fieldEncryptionKey = getEncryptionKey("autologincookiekey"); // 7939805759879766427939805759879766
@@ -490,6 +490,11 @@ public class StringEncryption
 		{
 			throw new OpenEditException(ex);
 		}
+	}
+
+	public String randomCharacterString()
+	{
+		return java.util.UUID.randomUUID().toString().replace("-", "");
 	}
 
 	public String getTempEnterMediaKey(User user)
