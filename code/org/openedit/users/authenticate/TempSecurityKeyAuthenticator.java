@@ -51,21 +51,8 @@ public class TempSecurityKeyAuthenticator extends BaseAuthenticator
 
 		if( found == null)
 		{
-			if( "testautologinuser".equals(user.getId()))
-			{
-				if( "666666".equals( code ) ) 
-				{
-					if( user.isEnabled())
-					{
-						return true;
-					}
-				}
-			}
-			else
-			{
-				log.error("Security code expired or missing " + code);
-				throw new UserManagerException("Security code expired or missing");
-			}
+			log.error("Security code expired or missing " + code);
+			throw new UserManagerException("Security code expired or missing");
 		}
 
 		
