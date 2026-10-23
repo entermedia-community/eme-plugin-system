@@ -495,7 +495,8 @@ public class BaseUserManager implements UserManager
 	@Override
 	public String createNewTempLoginKey(String userid, String email, String first, String last, String screenName, boolean force)
 	{
-		return findOrCreateTempLogin(userid, email, first, last, screenName, force).get("securitycode");
+		String code = findOrCreateTempLogin(userid, email, first, last, screenName, force).get("securitycode");
+		return code;
 	}
 
 	/**
@@ -529,10 +530,15 @@ public class BaseUserManager implements UserManager
 		cal.add(Calendar.HOUR, -1); // 24 hours
 		Date newerthan = cal.getTime();
 		Data found = searcher.query().match("email", email.toLowerCase()).after("date", newerthan).searchOne();
+
 		if (found != null && !force)
 		{ // force is mostly set to true so we will skip this and make a new one
+			log.info("Existing code sent: " + found.get("securitycode"));
 			return found;
 		}
+		Random random = new Random();
+		String code = String.format("%06d", random.nextInt(999999));
+		log.info("new security code: " + code + " " + email);
 
 		Data data = searcher.createNewData();
 		data.setValue("user", userid);
@@ -542,9 +548,7 @@ public class BaseUserManager implements UserManager
 		data.setValue("email", email.toLowerCase());
 		data.setValue("date", new Date());
 
-		Random random = new Random();
-		String key = String.format("%06d", random.nextInt(999999));
-		data.setValue("securitycode", key);
+		data.setValue("securitycode", code);
 
 		searcher.saveData(data);
 
