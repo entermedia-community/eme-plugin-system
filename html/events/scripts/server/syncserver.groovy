@@ -11,7 +11,7 @@ public void runit()
 {
 	NodeManager nodeManager = moduleManager.getBean("elasticNodeManager");
 	MediaArchive mediaArchive = context.getPageValue("mediaarchive");
-	String key = context.findValue("entermediakey");
+	String key = context.findValue("apppassword"); // application password for the remote server
 	String username = context.findValue("username");
 	String password = context.findValue("password");
 	String serverroot = context.findValue("server");
@@ -19,9 +19,10 @@ public void runit()
 		serverroot = serverroot + "/";
 	}
 	Downloader downloader = new Downloader();
+	downloader.setBearerToken(key);
 	
-	String baseurl = serverroot + "openedit/views/filemanager/download/zip/base.zip?path=/WEB-INF/base&entermedia.key=" + key;
-	String lib = serverroot + "openedit/views/filemanager/download/zip/lib.zip?path=/WEB-INF/lib&entermedia.key=" + key;
+	String baseurl = serverroot + "openedit/views/filemanager/download/zip/base.zip?path=/WEB-INF/base";
+	String lib = serverroot + "openedit/views/filemanager/download/zip/lib.zip?path=/WEB-INF/lib";
 	downloader.download(baseurl, mediaArchive.getFileForPath("/WEB-INF/temp/base.zip"));
 	downloader.download(lib, mediaArchive.getFileForPath("/WEB-INF/temp/lib.zip"));
 	PageManager pm = mediaArchive.getPageManager();

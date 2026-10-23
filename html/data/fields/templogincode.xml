@@ -26,6 +26,7 @@
       <language id="en"><![CDATA[Number Code]]></language>
     </name>
   </property>
+  <property id="linktoken" index="true" stored="true" editable="false">Login Link Token</property>
   <property id="firstName" index="true" stored="true" keyword="true" editable="true">First Name</property>
   <property id="lastName" index="true" stored="true" keyword="true" editable="true">Last Name</property>
   <property id="screenName" index="true" stored="true" keyword="true" editable="true">Screen Name</property>

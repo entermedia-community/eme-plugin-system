@@ -200,11 +200,14 @@ public interface UserManager extends CatalogEnabled
 
 	public void fireUserEvent(User inUser, String inOperation);
 
-	String getEnterMediaKey(User user);
-
-	void logIntoApp(WebPageRequest inReq, User inUser);
-
 	String createNewTempLoginKey(String userid, String email, String first, String last, String screenName, boolean force);
+
+	/**
+	 * @return the user for a Bearer value: a 7 day key token (grant_type=key) or an application password. Null if invalid, revoked or expired.
+	 */
+	User getUserByBearerToken(String inToken);
+
+	String createNewTempLoginLink(String userid, String email, String first, String last, String screenName);
 
 	User checkForNewUser(String inEmail, String inTemplogincode, String groupid);
 

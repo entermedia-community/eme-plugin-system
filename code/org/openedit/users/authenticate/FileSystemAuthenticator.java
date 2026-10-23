@@ -72,17 +72,6 @@ public class FileSystemAuthenticator extends BaseAuthenticator
 			{
 				return true;
 			}
-			else if( inPassword != null && inPassword.contains(StringEncryption.TIMESTAMP) ) //This is required 
-			{
-				//Maybe its an entermediakey with a timestamp
-//				String entermediakey = inReq.getUser().getId() + "md542" + passenc;
-//				String tsenc = encoder.encrypt(String.valueOf(new Date().getTime()));
-				//check the timestamp first
-				if( getStringEncryption().verifyEnterMediaKey(inAReq.getUser(), password, inPassword) )
-				{
-					return true;
-				}
-			}
 		}
 		log.info("Could not log in " + inAReq.getUserName() + ", bad password");
 		return false;

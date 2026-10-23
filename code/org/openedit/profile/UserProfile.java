@@ -991,12 +991,6 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 	}
 	
 	@Override
-	public String getEnterMediaKey()
-	{
-		return getUser().getEnterMediaKey();
-	}
-
-	@Override
 	public void setUserName(String inUserName)
 	{
 		getUser().setUserName(inUserName);

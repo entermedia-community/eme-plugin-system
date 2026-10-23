@@ -613,12 +613,6 @@ public class BaseUser extends BaseData implements User, Comparable
 		return firstpart + " " + secondpart;
 	}
 	
-	@Override
-	public String getEnterMediaKey()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 

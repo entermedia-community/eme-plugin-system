@@ -33,12 +33,6 @@
 	<property id="accesstokentime" type="date" stored="true" index="true" editable="true">Google Access Token
 		Time</property>
 
-	<property id="accessprivatekey" viewtype="password" index="true" stored="true"
-		indextype="not_analyzed">Access Private Key</property>
-	<property id="accesspublickey" viewtype="password" index="true" stored="true"
-		indextype="not_analyzed">Access Public Key</property>
-	
-	
 	<property id="expiresin" type="long" stored="true" index="true" editable="true">Access Token
 		expiry time</property>
 

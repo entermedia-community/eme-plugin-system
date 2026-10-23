@@ -47,7 +47,7 @@ public class TempSecurityKeyAuthenticator extends BaseAuthenticator
 		Calendar cal  = Calendar.getInstance();
 		cal.add(Calendar.HOUR, -1); //24 hours
 		Date newerthan = cal.getTime();
-		Data found = searcher.query().exact("user",user.getId()).exact("securitycode",code).after("date",newerthan).searchOne();
+		Data found = searcher.query().exact("user",user.getId()).exact(code.length() > 6 ? "linktoken" : "securitycode",code).after("date",newerthan).searchOne();
 
 		if( found == null)
 		{
@@ -71,7 +71,7 @@ public class TempSecurityKeyAuthenticator extends BaseAuthenticator
 		
 		if( found != null)
 		{
-			String securitycode = found.get("securitycode");  //Double checking
+			String securitycode = found.get(code.length() > 6 ? "linktoken" : "securitycode");  //Double checking
 			if( code.equals(securitycode))
 			{
 				HitTracker codes = searcher.query().exact("user",user.getId()).search();

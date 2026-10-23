@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<properties beanname="dataSearcher">
+  <property id="id" index="true" stored="true" editable="true" keyword="false" filter="false" sortable="true">Key Id</property>
+  <property id="userid" index="true" stored="true" editable="true" keyword="true">User</property>
+  <property id="label" index="true" stored="true" editable="true" keyword="true">Device Label</property>
+  <property id="keytype" index="true" stored="true" editable="false">Key Type (publickey or apppassword)</property>
+  <property id="secrethash" index="true" stored="true" editable="false" indextype="not_analyzed">App Password SHA-256</property>
+  <property id="algorithm" index="true" stored="true" editable="false">Algorithm (Ed25519, P-256 or SHA-256 for application passwords)</property>
+  <property id="publickey" index="true" stored="true" editable="false" indextype="not_analyzed">Public Key</property>
+  <property id="created" index="true" stored="true" editable="false" datatype="date" sortable="true">Created</property>
+  <property id="lastused" index="true" stored="true" editable="false" datatype="date" sortable="true">Last Used</property>
+  <property id="enabled" index="true" stored="true" editable="true" type="boolean" datatype="boolean">Enabled</property>
+</properties>

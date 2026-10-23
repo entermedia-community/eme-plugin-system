@@ -414,17 +414,6 @@ public class StringEncryption
 		}
 	}
 
-	public String createMd5CookieName(WebPageRequest inReq)
-	{
-		String name = inReq.findPathValue("logincookieroot");
-		if (name == null)
-		{
-			name = "emekey";
-		}
-
-		return name;
-	}
-
 	// TODO: Cache this
 	public String getEncryptionKey(String inType)
 	{
@@ -447,80 +436,301 @@ public class StringEncryption
 		return key;
 	}
 
-	public boolean verifyEnterMediaKey(User inUser, String password, String inTemporaryKey)
-	{
-		int index = inTemporaryKey.indexOf(StringEncryption.TIMESTAMP);
-		if (index == -1)
-		{
-			throw new OpenEditException("Timestamp required");
-		}
-		String time = inTemporaryKey.substring(index + StringEncryption.TIMESTAMP.length());
-		String thetime = decrypt(time);
-		if (thetime != null)
-		{
-			if (System.currentTimeMillis() - Long.parseLong(thetime) > 1000L * 60L * 60L * 24L * 30L) // TODO: Use the content property or catalog setting
-			{
-				log.info("Temporary Encrypted key had expired. age is:" + thetime + inUser.getUserName());
-				return false;
-			}
-			inTemporaryKey = inTemporaryKey.substring(0, inTemporaryKey.indexOf(StringEncryption.TIMESTAMP));
-
-			String md5pass = inTemporaryKey.substring(inTemporaryKey.indexOf("md542") + 5);
-			String usermd5 = getPasswordMd5(password);
-			if (usermd5.equals(md5pass))
-			{
-				return true;
-			}
-			log.info("Some ecryption issue " + usermd5 + " != " + md5pass);
-		}
-		log.info("Ecryption timestamp issue " + time + " | Key: " + inTemporaryKey);
-		return false;
-	}
-
-	public String getPasswordMd5(String inPassword)
-	{
-		String password = decryptIfNeeded(inPassword);
-		try
-		{
-			String secret = getEncryptionKey() + password;
-			String hash = asMd5(secret);
-			return hash;
-		}
-		catch (Exception ex)
-		{
-			throw new OpenEditException(ex);
-		}
-	}
-
 	public String randomCharacterString()
 	{
 		return java.util.UUID.randomUUID().toString().replace("-", "");
 	}
 
-	public String getTempEnterMediaKey(User user)
+	// ---------------------------------------------------------------------------------------------
+	// Public/private key support (SSH style). The client keeps the private key and signs a
+	// challenge; the server only ever stores the public key and verifies the signature.
+	// ---------------------------------------------------------------------------------------------
+
+	public static final String KEY_ALGORITHM = "Ed25519";
+	public static final String ACCESS_TOKEN_MARKER = "keyexp";
+	public static final long SIGNATURE_WINDOW_MILLIS = 5L * 60L * 1000L;
+	public static final long ACCESS_TOKEN_LIFETIME_MILLIS = 7L * 24L * 60L * 60L * 1000L;
+
+	protected final java.util.concurrent.ConcurrentHashMap<String, Long> fieldUsedNonces = new java.util.concurrent.ConcurrentHashMap<String, Long>();
+
+	/**
+	 * @return {publicKey, privateKey} as unpadded base64url strings (X.509 and PKCS#8 encodings)
+	 */
+	public String[] generateKeyPair()
 	{
-		if (user == null)
+		try
+		{
+			java.security.KeyPair pair = java.security.KeyPairGenerator.getInstance(KEY_ALGORITHM).generateKeyPair();
+			java.util.Base64.Encoder enc = java.util.Base64.getUrlEncoder().withoutPadding();
+			return new String[] { enc.encodeToString(pair.getPublic().getEncoded()), enc.encodeToString(pair.getPrivate().getEncoded()) };
+		}
+		catch (Exception e)
+		{
+			throw new OpenEditException("Failed to generate key pair: " + e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Public keys are base64url X.509 (SubjectPublicKeyInfo). Ed25519 is preferred; ECDSA P-256 is accepted for
+	 * browsers whose WebCrypto lacks Ed25519.
+	 */
+	protected java.security.PublicKey decodePublicKey(String inPublicKey) throws Exception
+	{
+		byte[] der = java.util.Base64.getUrlDecoder().decode(inPublicKey);
+		try
+		{
+			return java.security.KeyFactory.getInstance(KEY_ALGORITHM).generatePublic(new java.security.spec.X509EncodedKeySpec(der));
+		}
+		catch (java.security.spec.InvalidKeySpecException notEd25519)
+		{
+			java.security.PublicKey key = java.security.KeyFactory.getInstance("EC").generatePublic(new java.security.spec.X509EncodedKeySpec(der));
+			java.security.spec.ECParameterSpec params = ((java.security.interfaces.ECPublicKey) key).getParams();
+			if (params.getCurve().getField().getFieldSize() != 256)
+			{
+				throw new java.security.spec.InvalidKeySpecException("Only P-256 is supported");
+			}
+			return key;
+		}
+	}
+
+	/**
+	 * @return "Ed25519" or "P-256", worked out from the key itself; null if it is not a supported public key
+	 */
+	public String getPublicKeyAlgorithm(String inPublicKey)
+	{
+		try
+		{
+			return "EC".equals(decodePublicKey(inPublicKey).getAlgorithm()) ? "P-256" : KEY_ALGORITHM;
+		}
+		catch (Exception e)
 		{
 			return null;
 		}
-		String passenc = getPasswordMd5(user.getPassword());
-		String entermediakey = user.getId() + "md542" + passenc;
-
-		String tsenc = encrypt(String.valueOf(new Date().getTime()));
-		if (tsenc.startsWith("DES:"))
-		{
-			tsenc = tsenc.substring("DES:".length());// kloog: remove DES: prefix since appended to URL
-		}
-		entermediakey = entermediakey + StringEncryption.TIMESTAMP + tsenc;
-		return entermediakey;
 	}
 
-	// TODO: Get rid of this option, always use expiring keys
-	public String getEnterMediaKey(User inUser)
+	public boolean isValidPublicKey(String inPublicKey)
 	{
-		String md5 = getPasswordMd5(inUser.getPassword());
-		String value = inUser.getUserName() + "md542" + md5;
-		return value;
+		try
+		{
+			decodePublicKey(inPublicKey);
+			return true;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Client side helper (and used by tests): sign data with an Ed25519 private key from generateKeyPair.
+	 */
+	public String sign(String inPrivateKey, String inData)
+	{
+		try
+		{
+			java.security.KeyFactory factory = java.security.KeyFactory.getInstance(KEY_ALGORITHM);
+			java.security.PrivateKey key = factory.generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(java.util.Base64.getUrlDecoder().decode(inPrivateKey)));
+			java.security.Signature sig = java.security.Signature.getInstance(KEY_ALGORITHM);
+			sig.initSign(key);
+			sig.update(inData.getBytes(UTF8_CHARSET));
+			return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(sig.sign());
+		}
+		catch (Exception e)
+		{
+			throw new OpenEditException("Failed to sign: " + e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * @return true only if inSignature is a valid signature of inData by the private key matching inPublicKey.
+	 *         Ed25519 signatures are the raw 64 bytes; P-256 signatures are WebCrypto's raw r||s (IEEE P1363).
+	 */
+	public boolean verifySignature(String inPublicKey, String inData, String inSignature)
+	{
+		if (inPublicKey == null || inData == null || inSignature == null)
+		{
+			return false;
+		}
+		try
+		{
+			java.security.PublicKey key = decodePublicKey(inPublicKey);
+			java.security.Signature sig = java.security.Signature.getInstance("EC".equals(key.getAlgorithm()) ? "SHA256withECDSAinP1363Format" : KEY_ALGORITHM);
+			sig.initVerify(key);
+			sig.update(inData.getBytes(UTF8_CHARSET));
+			return sig.verify(java.util.Base64.getUrlDecoder().decode(inSignature));
+		}
+		catch (Exception e)
+		{
+			log.info("Signature verification failed: " + e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * The exact string a client must sign to request a token.
+	 */
+	public String createSignedMessage(String inUserId, String inKeyId, String inTimestamp, String inNonce)
+	{
+		return inUserId + "\n" + inKeyId + "\n" + inTimestamp + "\n" + inNonce;
+	}
+
+	/**
+	 * Verifies a signed login request: timestamp inside the allowed window, signature valid for the
+	 * registered public key, and nonce never seen before. The nonce is only consumed once the signature
+	 * is valid, so garbage requests cannot fill the replay cache.
+	 */
+	public boolean verifyKeyLogin(String inUserId, String inKeyId, String inPublicKey, String inTimestamp, String inNonce, String inSignature)
+	{
+		if (inUserId == null || inKeyId == null || inPublicKey == null || inTimestamp == null || inNonce == null || inSignature == null || inNonce.length() < 16 || inNonce.length() > 128)
+		{
+			return false;
+		}
+		long now = System.currentTimeMillis();
+		long ts;
+		try
+		{
+			ts = Long.parseLong(inTimestamp);
+		}
+		catch (NumberFormatException e)
+		{
+			return false;
+		}
+		if (Math.abs(now - ts) > SIGNATURE_WINDOW_MILLIS)
+		{
+			log.info("Key login timestamp outside allowed window for " + inUserId);
+			return false;
+		}
+		if (!verifySignature(inPublicKey, createSignedMessage(inUserId, inKeyId, inTimestamp, inNonce), inSignature))
+		{
+			return false;
+		}
+		fieldUsedNonces.values().removeIf(t -> now - t > 2 * SIGNATURE_WINDOW_MILLIS);
+		if (fieldUsedNonces.putIfAbsent(inKeyId + ":" + inNonce, now) != null)
+		{
+			log.info("Key login nonce replayed for " + inUserId);
+			return false;
+		}
+		return true;
+	}
+
+	protected String hmacAccessToken(String inUserId, String inKeyId, String inExpiry, String inPublicKey)
+	{
+		try
+		{
+			// Bound to the public key as well, so a replaced key can never validate an old token
+			Mac mac = Mac.getInstance("HmacSHA256");
+			mac.init(new SecretKeySpec(getEncryptionKey().getBytes(UTF8_CHARSET), "HmacSHA256"));
+			mac.update((inUserId + "\n" + inKeyId + "\n" + inExpiry + "\n" + inPublicKey).getBytes(UTF8_CHARSET));
+			return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(mac.doFinal());
+		}
+		catch (Exception e)
+		{
+			throw new OpenEditException(e);
+		}
+	}
+
+	/**
+	 * Stateless bearer token: {userid}keyexp{keyid}.{expiresAtMillis}.{hmac}
+	 */
+	public String createAccessToken(String inUserId, String inKeyId, String inPublicKey, long inLifetimeMillis)
+	{
+		String expiry = String.valueOf(System.currentTimeMillis() + inLifetimeMillis);
+		return inUserId + ACCESS_TOKEN_MARKER + inKeyId + "." + expiry + "." + hmacAccessToken(inUserId, inKeyId, expiry, inPublicKey);
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Application passwords: a random secret for tools that cannot sign (curl, scripts). Shown once;
+	// only its SHA-256 is stored. 256 bits of randomness, so a fast hash is enough. Format:
+	// emeapp.{keyid}.{secret}
+	// ---------------------------------------------------------------------------------------------
+
+	public static final String APP_PASSWORD_PREFIX = "emeapp.";
+
+	public String generateAppSecret()
+	{
+		byte[] bytes = new byte[32];
+		new java.security.SecureRandom().nextBytes(bytes);
+		return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+	}
+
+	public String createAppPassword(String inKeyId, String inSecret)
+	{
+		return APP_PASSWORD_PREFIX + inKeyId + "." + inSecret;
+	}
+
+	public boolean isAppPassword(String inToken)
+	{
+		return inToken != null && inToken.startsWith(APP_PASSWORD_PREFIX);
+	}
+
+	/**
+	 * @return {keyid, secret} or null if malformed
+	 */
+	public String[] parseAppPassword(String inToken)
+	{
+		if (!isAppPassword(inToken))
+		{
+			return null;
+		}
+		String[] parts = inToken.substring(APP_PASSWORD_PREFIX.length()).split("\\.");
+		return parts.length == 2 ? parts : null;
+	}
+
+	public boolean verifyAppSecret(String inSecret, String inStoredHash)
+	{
+		if (inSecret == null || inStoredHash == null)
+		{
+			return false;
+		}
+		return MessageDigest.isEqual(getSha256(inSecret).getBytes(UTF8_CHARSET), inStoredHash.getBytes(UTF8_CHARSET));
+	}
+
+	public boolean isAccessToken(String inToken)
+	{
+		return inToken != null && inToken.contains(ACCESS_TOKEN_MARKER);
+	}
+
+	/**
+	 * @return {userid, keyid, expiry, hmac} or null if the token is malformed
+	 */
+	public String[] parseAccessToken(String inToken)
+	{
+		if (!isAccessToken(inToken))
+		{
+			return null;
+		}
+		int index = inToken.lastIndexOf(ACCESS_TOKEN_MARKER);
+		String[] rest = inToken.substring(index + ACCESS_TOKEN_MARKER.length()).split("\\.");
+		if (index <= 0 || rest.length != 3)
+		{
+			return null;
+		}
+		return new String[] { inToken.substring(0, index), rest[0], rest[1], rest[2] };
+	}
+
+	/**
+	 * Checks expiry and HMAC. The caller must already have loaded the key record named in the token and
+	 * confirmed it is enabled and belongs to the user.
+	 */
+	public boolean verifyAccessToken(String[] inParsed, String inPublicKey)
+	{
+		if (inParsed == null || inPublicKey == null)
+		{
+			return false;
+		}
+		try
+		{
+			if (System.currentTimeMillis() > Long.parseLong(inParsed[2]))
+			{
+				return false;
+			}
+		}
+		catch (NumberFormatException e)
+		{
+			return false;
+		}
+		byte[] expected = hmacAccessToken(inParsed[0], inParsed[1], inParsed[2], inPublicKey).getBytes(UTF8_CHARSET);
+		return MessageDigest.isEqual(expected, inParsed[3].getBytes(UTF8_CHARSET));
 	}
 
 	public String generateHashFromString(String inInput, int length)

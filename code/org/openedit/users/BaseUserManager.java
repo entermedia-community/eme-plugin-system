@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openedit.Data;
+import org.openedit.MultiValued;
 import org.openedit.OpenEditException;
 import org.openedit.WebPageRequest;
 import org.openedit.data.Searcher;
@@ -440,26 +441,82 @@ public class BaseUserManager implements UserManager
 	}
 
 	@Override
-	public String getEnterMediaKey(User user)
+	public User getUserByBearerToken(String inToken)
 	{
-		String tempkey = getStringEncryption().getTempEnterMediaKey(user);
-		return tempkey;
-	}
-
-	@Override
-	public void logIntoApp(WebPageRequest inReq, User inUser)
-	{
-		String md5 = getStringEncryption().getPasswordMd5(inUser.getPassword());
-		String value = inUser.getUserName() + "md542" + md5;
-		inReq.putPageValue("entermediakey", value); // TODO: Remove this, its slow
-		String catalogid = inReq.findPathValue("catalogid");
-		inReq.putSessionValue(catalogid + "user", inUser);
-		inReq.putPageValue("user", inUser);
-
+		StringEncryption encryption = getStringEncryption();
+		if (inToken == null)
+		{
+			return null;
+		}
+		if (encryption.isAppPassword(inToken))
+		{
+			String[] parsed = encryption.parseAppPassword(inToken);
+			if (parsed == null)
+			{
+				return null;
+			}
+			Data key = getSearcherManager().getCachedData("system", "userkey", parsed[0]);
+			if (key == null || !Boolean.parseBoolean(key.get("enabled")) || !"apppassword".equals(key.get("keytype")) || !encryption.verifyAppSecret(parsed[1], key.get("secrethash")))
+			{
+				return null;
+			}
+			User user = getUser(key.get("userid"));
+			if (user == null || !user.isEnabled())
+			{
+				return null;
+			}
+			// Saving clears the cache entry, so only record usage about once an hour
+			Date last = key instanceof MultiValued ? ((MultiValued) key).getDate("lastused") : null;
+			if (last == null || System.currentTimeMillis() - last.getTime() > 60L * 60L * 1000L)
+			{
+				key.setValue("lastused", new Date());
+				getSearcherManager().getSearcher("system", "userkey").saveData(key);
+			}
+			return user;
+		}
+		String[] parsed = encryption.parseAccessToken(inToken);
+		if (parsed == null)
+		{
+			return null;
+		}
+		Data key = getSearcherManager().getCachedData("system", "userkey", parsed[1]);
+		if (key == null || !Boolean.parseBoolean(key.get("enabled")) || !parsed[0].equals(key.get("userid")))
+		{
+			return null;
+		}
+		User user = getUser(parsed[0]);
+		if (user != null && user.isEnabled() && encryption.verifyAccessToken(parsed, key.get("publickey")))
+		{
+			return user;
+		}
+		return null;
 	}
 
 	@Override
 	public String createNewTempLoginKey(String userid, String email, String first, String last, String screenName, boolean force)
+	{
+		return findOrCreateTempLogin(userid, email, first, last, screenName, force).get("securitycode");
+	}
+
+	/**
+	 * Long random token for login links. Unlike the 6 digit code it cannot be guessed, so a link may carry it.
+	 * Shares the row (and the one hour life, and single use) of the 6 digit code created for the same email.
+	 */
+	@Override
+	public String createNewTempLoginLink(String userid, String email, String first, String last, String screenName)
+	{
+		Data row = findOrCreateTempLogin(userid, email, first, last, screenName, false);
+		String token = row.get("linktoken");
+		if (token == null)
+		{
+			token = getStringEncryption().randomCharacterString() + getStringEncryption().randomCharacterString();
+			row.setValue("linktoken", token);
+			getSearcherManager().getSearcher("system", "templogincode").saveData(row);
+		}
+		return token;
+	}
+
+	protected Data findOrCreateTempLogin(String userid, String email, String first, String last, String screenName, boolean force)
 	{
 		// Create a new one for this user
 		Searcher searcher = getSearcherManager().getSearcher("system", "templogincode");
@@ -474,7 +531,7 @@ public class BaseUserManager implements UserManager
 		Data found = searcher.query().match("email", email.toLowerCase()).after("date", newerthan).searchOne();
 		if (found != null && !force)
 		{ // force is mostly set to true so we will skip this and make a new one
-			return found.get("securitycode");
+			return found;
 		}
 
 		Data data = searcher.createNewData();
@@ -491,7 +548,7 @@ public class BaseUserManager implements UserManager
 
 		searcher.saveData(data);
 
-		return key;
+		return data;
 	}
 
 	@Override
@@ -502,7 +559,9 @@ public class BaseUserManager implements UserManager
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DAY_OF_YEAR, -5); // 5 days
 		Date newerthan = cal.getTime();
-		Data found = searcher.query().exact("securitycode", inTemplogincode).after("date", newerthan).sort("date").searchOne();
+		// Codes longer than the 6 digit typed code are link tokens
+		String field = inTemplogincode != null && inTemplogincode.length() > 6 ? "linktoken" : "securitycode";
+		Data found = searcher.query().exact(field, inTemplogincode).after("date", newerthan).sort("date").searchOne();
 		if (found != null)
 		{
 			String email = found.get("email");

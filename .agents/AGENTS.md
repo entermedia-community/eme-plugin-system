@@ -61,6 +61,9 @@ editing `system` directly.
 
 ### Notes For Agents
 
+- A `<property>` that is not `index="true"` is never written to Elasticsearch (`BaseElasticSearcher.updateIndex` skips
+  it), whatever `stored` says. Persisted fields need `index="true"`; add `indextype="not_analyzed"` for opaque strings.
+  The `userkey` table (public keys, application password hashes) is the worked example: see the `mediadb-auth` skill.
 - Treat any request to "add a field/table" for application content as a `catalog` change, not a
   `system` change — `system`'s tables are infrastructure (users, mounts, locks), not content.
 - If unsure whether a change belongs here or in a feature plugin, prefer the feature plugin and

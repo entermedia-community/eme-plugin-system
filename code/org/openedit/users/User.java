@@ -174,8 +174,6 @@ public interface User extends Data
 	void setGroups(Collection<Group> inGroupslist);
 	
 	
-	public String getEnterMediaKey(); //Hash
-
 	boolean isInGroup(Collection<String> inEditorgroups);
 	
 
