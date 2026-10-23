@@ -9,7 +9,6 @@ import org.openedit.users.User;
 public class AuthenticationRequest implements CatalogEnabled
 {
 	protected User fieldUser;
-	protected String fieldPassword;
 	protected Map fieldProperties;
 	protected String fieldCatalogId;
 
@@ -31,16 +30,6 @@ public class AuthenticationRequest implements CatalogEnabled
 	public void setUser(User inUser)
 	{
 		fieldUser = inUser;
-	}
-
-	public String getPassword()
-	{
-		return fieldPassword;
-	}
-
-	public void setPassword(String inPassword)
-	{
-		fieldPassword = inPassword;
 	}
 
 	public Map getProperties()

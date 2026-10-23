@@ -20,7 +20,5 @@ public interface UserSearcher extends Searcher
 
 	//public XmlUserArchive getXmlUserArchive();  //TODO: Remove this one day?
 	StringEncryption getStringEncryption();
-	public String encryptPassword(User inUser);
-	String decryptPassword(User inUser);
 	
 }

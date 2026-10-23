@@ -83,8 +83,6 @@ public interface UserManager extends CatalogEnabled
 	 */
 	boolean authenticate(AuthenticationRequest inReq);
 
-	boolean authenticate(User inUser, String inPassword);
-
 	/**
 	 * Create a new group with the given name.
 	 *
@@ -100,17 +98,16 @@ public interface UserManager extends CatalogEnabled
 	Group createGroup(String inGroupId, String inGroupName) throws UserManagerException;
 
 	/**
-	 * Create a user with the given username and password.
+	 * Create a user with the given username.
 	 *
 	 * @param inUserName The new user's username
-	 * @param inPassword The new user's password
 	 *
 	 * @return The new user
 	 *
 	 * @throws DuplicateUserException If there is already a user with the given username
 	 * @throws UserManagerException If the user could not be created for some reason
 	 */
-	User createUser(String inUserName, String inPassword) throws UserManagerException;
+	User createUser(String inUserName) throws UserManagerException;
 
 	/**
 	 * Delete the given group.
@@ -176,15 +173,11 @@ public interface UserManager extends CatalogEnabled
 
 	StringEncryption getStringEncryption();
 
-	public String encryptPassword(User inUser) throws OpenEditException;
-
-	public String decryptPassword(User inUser) throws OpenEditException;
-
 	public void setEventManager(EventManager inHandler);
 
 	public void logout(User inUser);
 
-	User createGuestUser(String inAccount, String inPassword, String inGroupname);
+	User createGuestUser(String inAccount, String inGroupname);
 
 	public User createTempUserFromEmail(String email);
 
@@ -196,7 +189,7 @@ public interface UserManager extends CatalogEnabled
 
 	GroupSearcher getGroupSearcher();
 
-	AuthenticationRequest createAuthenticationRequest(WebPageRequest inReq, String inPassword, User inUser);
+	AuthenticationRequest createAuthenticationRequest(WebPageRequest inReq, User inUser);
 
 	public void fireUserEvent(User inUser, String inOperation);
 

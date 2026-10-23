@@ -100,17 +100,6 @@ public class BaseUser extends BaseData implements User, Comparable
 		setProperty(EMAIL_PROPERTY, inEmail);
 	}
 	/**
-	 * @see org.openedit.users.User#setPassword(String)
-	 */
-	public void setPassword(String inPassword) throws UserManagerException
-	{
-		if(inPassword == null){
-			return;
-		}
-		setProperty("password",inPassword);
-	}
-
-	/**
 	 * @see org.openedit.users.User#getUserName()
 	 */
 	public String getUserName()
@@ -244,36 +233,6 @@ public class BaseUser extends BaseData implements User, Comparable
 		return sn;
 	}
 
-//	public String getClearPassword() throws UserManagerException
-//	{
-//		String password = getPassword();
-//		if( !password.startsWith("DES:") )
-//		{
-//			return password;
-//		}
-//		else
-//		{
-//			return decrypt(password);
-//		}
-//	}
-	
-//	protected String decrypt(String inPassword) throws UserManagerException
-//	{
-//		long encryptionKey = 7939805759879765L; //TODO: Move this to authenticator
-//		encryptionKey++;
-//		try
-//		{
-//			StringEncryption encrypter = new StringEncryption( StringEncryption.DES_ENCRYPTION_SCHEME, encryptionKey + "42" + encryptionKey );
-//			String code = inPassword.substring(4,inPassword.length()); //take off the DES:
-//			String decryptedString = encrypter.decrypt( code );
-//			return decryptedString;
-//		} catch ( Exception ex)
-//		{
-//			throw new UserManagerException(ex);
-//		}
-//	}
-
-	
 	/**
 	 * @see org.openedit.users.User#hasPermission(String)
 	 */
@@ -332,16 +291,6 @@ public class BaseUser extends BaseData implements User, Comparable
 		return all;
 	}
 	
-	/**
-	 * Returns the password.
-	 *
-	 * @return String
-	 */
-	public String getPassword()
-	{
-		return get("password");
-	}
-
 	/**
 	 * Add the given group to the list of groups to which this user belongs. If the given group is
 	 * already in the list of groups, this method does nothing.

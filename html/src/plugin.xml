@@ -104,27 +104,9 @@
 	<bean id="authenticator" class="org.openedit.users.authenticate.CompositeAuthenticator">
 		<property name="authenticators">
 			<list>
-				<ref bean="fileAuthenticator"/>
-				<ref bean="ldapAuthenticator"/>
-				<ref bean="jaasAuthenticator"/>
 			</list>
 		</property>
 	</bean>
-	<bean id="ldapAuthenticator" class="org.openedit.users.authenticate.LdapAuthenticator">
-		<property name="searcherManager">
-			<ref bean="searcherManager"/>
-		</property>
-	</bean>
-
-	<bean id="jaasAuthenticator" class="org.openedit.users.authenticate.JaasAuthenticator" />
-
-	<bean id="fileAuthenticator" class="org.openedit.users.authenticate.FileSystemAuthenticator">
-		<property name="stringEncryption">
-			<ref bean="stringEncryption"/>
-		</property>
-
-	</bean>
-
 	<bean id="pageManager" class="org.openedit.page.manage.PageManager">
 		<property name="repository">
 			<ref bean="repository"/>

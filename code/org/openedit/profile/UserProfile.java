@@ -953,18 +953,6 @@ public class UserProfile extends BaseData implements SaveableData, DataLoaded, C
 	}
 
 	@Override
-	public String getPassword()
-	{
-		return getUser().getPassword();
-	}
-
-	@Override
-	public void setPassword(String inPassword) throws UserManagerException
-	{
-		getUser().setPassword(inPassword);		
-	}
-
-	@Override
 	public String getUserName()
 	{
 		// TODO Auto-generated method stub

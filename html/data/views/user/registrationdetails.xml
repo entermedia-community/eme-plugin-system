@@ -7,5 +7,4 @@
   <property id="firstName"/>
   <property id="lastName"/>
   <property id="email" required="true" viewtype="matched"/>
-  <property id="password" editable="true"/>
 </root>

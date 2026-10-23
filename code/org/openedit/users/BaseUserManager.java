@@ -20,7 +20,6 @@ import org.openedit.event.EventManager;
 import org.openedit.event.WebEvent;
 import org.openedit.hittracker.HitTracker;
 import org.openedit.users.authenticate.AuthenticationRequest;
-import org.openedit.users.authenticate.PasswordGenerator;
 import org.openedit.util.StringEncryption;
 
 public class BaseUserManager implements UserManager
@@ -122,15 +121,6 @@ public class BaseUserManager implements UserManager
 	{
 
 		return getUserSearcher().getAllHits();
-	}
-
-	public boolean authenticate(User inUser, String inPassword) throws UserManagerException
-	{
-		AuthenticationRequest req = new AuthenticationRequest();
-		req.setUser(inUser);
-		req.setPassword(inPassword);
-		req.setCatalogId(getCatalogId());
-		return authenticate(req);
 	}
 
 	public boolean authenticate(AuthenticationRequest inReq) throws UserManagerException
@@ -239,14 +229,13 @@ public class BaseUserManager implements UserManager
 	}
 
 	@Override
-	public User createUser(String inUserName, String inPassword) throws UserManagerException
+	public User createUser(String inUserName) throws UserManagerException
 	{
 		User user = (User) getUserSearcher().createNewData();
 		if (inUserName != null)
 		{
 			user.setUserName(cleanUsername(inUserName));
 		}
-		user.setPassword(inPassword);
 		saveUser(user);
 		return user;
 	}
@@ -338,19 +327,6 @@ public class BaseUserManager implements UserManager
 	}
 
 	@Override
-	public String encryptPassword(User inUser) throws OpenEditException
-	{
-
-		return getUserSearcher().encryptPassword(inUser);
-	}
-
-	@Override
-	public String decryptPassword(User inUser) throws OpenEditException
-	{
-		return getUserSearcher().decryptPassword(inUser);
-	}
-
-	@Override
 	public void setEventManager(EventManager inHandler)
 	{
 		fieldEventManager = inHandler;
@@ -363,12 +339,11 @@ public class BaseUserManager implements UserManager
 	}
 
 	@Override
-	public User createGuestUser(String inAccount, String inPassword, String inGroupId)
+	public User createGuestUser(String inAccount, String inGroupId)
 	{
 		User user = (User) getUserSearcher().createNewData();
 		user.setId(inAccount);
 		user.setUserName(inAccount);
-		user.setPassword(inPassword);
 		// Virtual user causing issues with paypal
 		user.setVirtual(true);
 		user.setEnabled(false);
@@ -390,12 +365,11 @@ public class BaseUserManager implements UserManager
 	{}
 
 	@Override
-	public AuthenticationRequest createAuthenticationRequest(WebPageRequest inReq, String password, User user)
+	public AuthenticationRequest createAuthenticationRequest(WebPageRequest inReq, User user)
 	{
 		AuthenticationRequest aReq = new AuthenticationRequest();
 		aReq.setUser(user);
 		aReq.setCatalogId(getCatalogId());
-		aReq.setPassword(password);
 
 		String domain = inReq.getRequestParameter("domain");
 		if (domain == null)
@@ -572,8 +546,7 @@ public class BaseUserManager implements UserManager
 			if (inEmail.equalsIgnoreCase(email))
 			{
 				// Must be valid user
-				String tmppassword = new PasswordGenerator().generate();
-				User user = createGuestUser(null, tmppassword, groupid);
+				User user = createGuestUser(null, groupid);
 				user.setVirtual(false);
 				user.setEnabled(true);
 				user.setValue("firstName", found.get("firstName"));

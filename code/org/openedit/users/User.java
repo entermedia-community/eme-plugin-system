@@ -96,27 +96,6 @@ public interface User extends Data
 	
 	public boolean isInGroup(String inGroupId); 
 	/**
-	 * DOCUMENT ME!
-	 * @return
-	 */
-	public String getPassword();
-	
-	//public String getClearPassword();
-	
-	/**
-	 * Set this user's password to the given password.
-	 * 
-	 * <p>
-	 * FIXME: Do we need to pass in the old password too?
-	 * </p>
-	 *
-	 * @param inPassword The new password
-	 *
-	 * @throws UserManagerException If the password could not be set
-	 */
-	void setPassword(String inPassword) throws UserManagerException;
-
-	/**
 	 * Retrieve the user's login name (e.g. "mavery").
 	 *
 	 * @return The login name

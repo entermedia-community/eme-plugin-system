@@ -38,7 +38,6 @@ import org.openedit.users.Group;
 import org.openedit.users.GroupSearcher;
 import org.openedit.users.User;
 import org.openedit.users.UserManagerException;
-import org.openedit.users.authenticate.PasswordGenerator;
 import org.openedit.util.DateStorageUtil;
 import org.openedit.util.IntCounter;
 import org.openedit.util.PathUtilities;
@@ -307,11 +306,6 @@ public class XmlUserArchive implements CatalogEnabled  {
 		// user.setEnabled(true);
 		// }
 
-		Element passwordElem = root.element("password");
-		if (passwordElem != null) {
-			user.setPassword(passwordElem.getText());
-		}
-
 //		Element lastLoginElem = root.element("lastLogined-Time");
 //		if (lastLoginElem != null) {
 //			user.setLastLoginTime(lastLoginElem.getText());
@@ -459,43 +453,6 @@ public class XmlUserArchive implements CatalogEnabled  {
 		}
 	}
 
-	/**
-	 * Create a file representing the given user on disk.
-	 *
-	 * @param inUserName
-	 *            The username of the new user
-	 * @param inPassword
-	 *            The password of the new user
-	 *
-	 * @return The new file
-	 *
-	 * @throws UserManagerException
-	 *             If the new file could not be created
-	 */
-	protected File createUserFile(String inUserName, String inPassword)
-			throws UserManagerException {
-		try {
-			File newFile = loadUserFile(inUserName);
-			newFile.getParentFile().mkdirs();
-
-			FileWriter writer = new FileWriter(newFile);
-
-			try {
-				writer.write("<?xml version=\"1.0\"?>\n" + "<user>\n"
-						+ "  <user-name>" + inUserName + "</user-name>\n"
-						+ "  <password>" + inPassword + "</password>\n"
-						+ "<creation-date>" + new Date().getTime()
-						+ "</creation-date>\n" + "</user>\n");
-			} finally {
-				writer.close();
-			}
-
-			return newFile;
-		} catch (Exception ex) {
-			throw new UserManagerException(ex);
-		}
-	}
-
 	protected File loadGroupFile(String inGroupId) {
 		ContentItem stub = getPageManager().getRepository().getStub(
 				getGroupDirectory() + "/" + inGroupId + ".xml");
@@ -516,22 +473,6 @@ public class XmlUserArchive implements CatalogEnabled  {
 		return file;
 	}
 
-	public String encrypt(String inPassword) throws UserManagerException {
-		try {
-			if (inPassword.startsWith("DES:")) {
-				return inPassword;
-			}
-			// long encryptionKey = 7939805759879765L; encryptionKey++;
-			// StringEncryption encrypter = new StringEncryption(
-			// StringEncryption.DES_ENCRYPTION_SCHEME, encryptionKey + "42" +
-			// encryptionKey );
-			String encryptedString = getStringEncryption().encrypt(inPassword);
-			return encryptedString;
-		} catch (OpenEditException ex) {
-			throw new UserManagerException(ex);
-		}
-	}
-	
 	public void saveUser(User user) throws UserManagerException {
 		if (user.isVirtual()) {
 			log.error("Cannot save virtual users: " + user.getUserName());
@@ -556,20 +497,6 @@ public class XmlUserArchive implements CatalogEnabled  {
 		}
 		Element userNameElem = userElem.addElement("user-name");
 		userNameElem.addCDATA(user.getUserName());
-
-		Element passwordElem = userElem.addElement("password");
-		//
-		if (user.getPassword() == null || user.getPassword().isEmpty()) 
-		{
-			String tmppassword = new PasswordGenerator().generate();
-			user.setPassword(tmppassword);
-		}
-		String ps = user.getPassword();
-		ps = encrypt(ps);
-		// password may have changed we should set it so it's not in plain
-		// text anymore.
-		user.setPassword(ps);
-		passwordElem.addCDATA(ps);
 
 //		// Tuan add property lastLogined-Time
 //		Element lastLoginTime = userElem.addElement("lastLogined-Time");
@@ -688,22 +615,6 @@ public class XmlUserArchive implements CatalogEnabled  {
 
 	public void setStringEncryption(StringEncryption inStringEncryption) {
 		fieldStringEncryption = inStringEncryption;
-	}
-
-	public String decryptPassword(User inUser) throws OpenEditException {
-		String pw = inUser.getPassword();
-		if (pw.startsWith("DES:")) {
-			pw = getStringEncryption().decrypt(pw);
-		}
-		return pw;
-	}
-
-	public String encryptPassword(User inUser) throws OpenEditException {
-		String pw = inUser.getPassword();
-		if (!pw.startsWith("DES:")) {
-			pw = getStringEncryption().encrypt(pw);
-		}
-		return pw;
 	}
 
 	
