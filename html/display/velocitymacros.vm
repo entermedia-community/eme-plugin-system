@@ -71,7 +71,7 @@ $!jsonUtil.toJsonArray($list)
 #end 
 
 #macro(rendervalue $hit $detail $value)
-"${detail.id}":#if($detail.isMultiValue())[
+"${detail.id}":#if($detail.isViewType("password"))"***"#elseif($detail.isMultiValue())[
 #foreach($mvalue in $hit.getValues($detail.id))
 #if(${foreach.count} > 1),#end
 #datajsonmin($detail $mvalue)
