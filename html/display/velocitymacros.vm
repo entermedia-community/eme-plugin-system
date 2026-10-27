@@ -64,6 +64,7 @@ $!jsonUtil.toJsonArray($list)
 #end
 #macro(jesc $object)"$!jsonUtil.escape($object)"#end
 #macro(jrender $object)$!jsonUtil.escape($object)#end
+#macro(jtext $t)$!jsonUtil.escape($context.getText($t))#end
 #macro(json $hit $details)
 { 
 #jsonpartial($hit, $details)
