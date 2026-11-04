@@ -1,5 +1,7 @@
 #
-#Thu Sep 24 15:11:10 CST 2026
+#Fri Oct 09 16:37:21 CST 2026
+Access\ Token\n\t\tTime=Temps du jeton d' acc\u00E8s
+Access\ Token\n\t\texpiry\ time=Temps d' expiration du jeton d' acc\u00E8s
 Access\ Token\ Time=Temps du jeton d' acc\u00E8s
 Access\ Token\ expiry\ time=Temps d' expiration du jeton d' acc\u00E8s
 Address\ 1=Adresse 1
@@ -14,6 +16,7 @@ Enabled=Activ\u00E9
 EnterMedia\ Key=Cl\u00E9 EnterMedia
 Failed\ login\ attempts=Tentatives de connexion infructueuses
 Firebase\ ID=Identifiant de la base de tir
+Firebase\ Password=Mot de passe de base de tir
 First\ Name=Pr\u00E9nom
 Google\ Client\ ID=Identifiant du client Google
 Google\ Refresh\ Token=Le jeton de mise \u00E0 jour de Google
