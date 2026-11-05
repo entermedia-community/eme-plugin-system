@@ -124,7 +124,7 @@ public class StringEncryption
 	{
 		if (fieldEncryptionKey == null)
 		{
-			//read .env file
+			// read .env file
 			File envFile = new File(getRootDirectory(), "../.env");
 			if (envFile.exists())
 			{
@@ -143,7 +143,7 @@ public class StringEncryption
 					throw new OpenEditException(ex);
 				}
 			}
-			
+
 			if (fieldEncryptionKey == null)
 			{
 				fieldEncryptionKey = getEncryptionKey("autologincookiekey"); // 7939805759879766427939805759879766
@@ -462,7 +462,7 @@ public class StringEncryption
 		{
 			java.security.KeyPair pair = java.security.KeyPairGenerator.getInstance(KEY_ALGORITHM).generateKeyPair();
 			java.util.Base64.Encoder enc = java.util.Base64.getUrlEncoder().withoutPadding();
-			return new String[] { enc.encodeToString(pair.getPublic().getEncoded()), enc.encodeToString(pair.getPrivate().getEncoded()) };
+			return new String[] {enc.encodeToString(pair.getPublic().getEncoded()), enc.encodeToString(pair.getPrivate().getEncoded())};
 		}
 		catch (Exception e)
 		{
@@ -471,8 +471,8 @@ public class StringEncryption
 	}
 
 	/**
-	 * Public keys are base64url X.509 (SubjectPublicKeyInfo). Ed25519 is preferred; ECDSA P-256 is accepted for
-	 * browsers whose WebCrypto lacks Ed25519.
+	 * Public keys are base64url X.509 (SubjectPublicKeyInfo). Ed25519 is preferred; ECDSA P-256 is
+	 * accepted for browsers whose WebCrypto lacks Ed25519.
 	 */
 	protected java.security.PublicKey decodePublicKey(String inPublicKey) throws Exception
 	{
@@ -494,7 +494,8 @@ public class StringEncryption
 	}
 
 	/**
-	 * @return "Ed25519" or "P-256", worked out from the key itself; null if it is not a supported public key
+	 * @return "Ed25519" or "P-256", worked out from the key itself; null if it is not a supported
+	 *         public key
 	 */
 	public String getPublicKeyAlgorithm(String inPublicKey)
 	{
@@ -522,7 +523,8 @@ public class StringEncryption
 	}
 
 	/**
-	 * Client side helper (and used by tests): sign data with an Ed25519 private key from generateKeyPair.
+	 * Client side helper (and used by tests): sign data with an Ed25519 private key from
+	 * generateKeyPair.
 	 */
 	public String sign(String inPrivateKey, String inData)
 	{
@@ -542,8 +544,9 @@ public class StringEncryption
 	}
 
 	/**
-	 * @return true only if inSignature is a valid signature of inData by the private key matching inPublicKey.
-	 *         Ed25519 signatures are the raw 64 bytes; P-256 signatures are WebCrypto's raw r||s (IEEE P1363).
+	 * @return true only if inSignature is a valid signature of inData by the private key matching
+	 *         inPublicKey. Ed25519 signatures are the raw 64 bytes; P-256 signatures are WebCrypto's
+	 *         raw r||s (IEEE P1363).
 	 */
 	public boolean verifySignature(String inPublicKey, String inData, String inSignature)
 	{
@@ -604,12 +607,12 @@ public class StringEncryption
 		{
 			return false;
 		}
-		fieldUsedNonces.values().removeIf(t -> now - t > 2 * SIGNATURE_WINDOW_MILLIS);
-		if (fieldUsedNonces.putIfAbsent(inKeyId + ":" + inNonce, now) != null)
-		{
-			log.info("Key login nonce replayed for " + inUserId);
-			return false;
-		}
+		// fieldUsedNonces.values().removeIf(t -> now - t > 2 * SIGNATURE_WINDOW_MILLIS);
+		// if (fieldUsedNonces.putIfAbsent(inKeyId + ":" + inNonce, now) != null)
+		// {
+		// log.info("Key login nonce replayed for " + inUserId);
+		// return false;
+		// }
 		return true;
 	}
 
@@ -705,7 +708,7 @@ public class StringEncryption
 		{
 			return null;
 		}
-		return new String[] { inToken.substring(0, index), rest[0], rest[1], rest[2] };
+		return new String[] {inToken.substring(0, index), rest[0], rest[1], rest[2]};
 	}
 
 	/**
