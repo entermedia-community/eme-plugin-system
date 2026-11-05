@@ -1,5 +1,6 @@
 #
-#Thu Aug 13 10:39:11 CST 2026
+#Thu Nov 05 15:24:11 CST 2026
+Access\ Token\n\t\texpiry\ time=Tiempo de vencimiento del token de acceso
 All\ Fields=Todos los campos
 Creation\ Date=Fecha de creaci\u00F3n
 Email=Email
@@ -7,12 +8,19 @@ Enable\ HTML\ editing=Habilitar la edici\u00F3n de HTML
 Enabled=habilitado
 EnterMedia\ Key=EnterMedia clave
 Failed\ login\ attempts=intentos de conexi\u00F3n fallidos
+Firebase\ Password=Contrase\u00F1a de la base de fuego
 First\ Name=Nombre de pila
+Google\ Access\ Token\n\t\tTime=Tiempo del token de acceso de Google
+Google\ Client\ ID=Identificaci\u00F3n del cliente de Google
+Google\ Refresh\ Token=Token de actualizaci\u00F3n de Google
+Google\ temporary\ Token=Token temporal de Google
 Groups=grupos
 Last\ Login\ Date=\u00DAltima fecha de conexi\u00F3n
 Last\ Name=Apellido
+Login\ Category=Categor\u00EDa de acceso
 Name=Nombre
 Notes=notas
+OE\ Edit\ Mode=Modo de edici\u00F3n OE
 Password=Contrase\u00F1a
 Profile\ Picture=Imagen de perfil
 Screen\ Name=Nombre de pantalla
