@@ -448,7 +448,7 @@ public class StringEncryption
 
 	public static final String KEY_ALGORITHM = "Ed25519";
 	public static final String ACCESS_TOKEN_MARKER = "keyexp";
-	public static final long SIGNATURE_WINDOW_MILLIS = 5L * 60L * 1000L;
+	public static final long SIGNATURE_WINDOW_MILLIS = 24L * 60L * 60L * 1000L;
 	public static final long ACCESS_TOKEN_LIFETIME_MILLIS = 7L * 24L * 60L * 60L * 1000L;
 
 	protected final java.util.concurrent.ConcurrentHashMap<String, Long> fieldUsedNonces = new java.util.concurrent.ConcurrentHashMap<String, Long>();
