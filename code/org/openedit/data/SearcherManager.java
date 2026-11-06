@@ -5,12 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openedit.Data;
@@ -34,6 +32,8 @@ public class SearcherManager
 	protected Map fieldCache;
 	protected HashMap fieldShowLogs;
 	protected CacheManager fieldCacheManager;
+
+	public static final Pattern MULTIDELMITER = Pattern.compile("\\s*[|,]\\s*");
 
 	public CacheManager getCacheManager()
 	{
@@ -260,7 +260,7 @@ public class SearcherManager
 		{
 			inHits.enableBulkOperations();
 		}
-		Set results = new HashSet();
+		Map<String, String> results = new HashMap();
 		startsWith = startsWith.toLowerCase();
 		for (Iterator iterator = inHits.iterator(); iterator.hasNext();)
 		{
@@ -279,18 +279,19 @@ public class SearcherManager
 					String val = (String) iterator2.next();
 					if (val.toLowerCase().startsWith(startsWith))
 					{
-						results.add(val);
+						results.put(val.toLowerCase(), val);
 					}
 				}
 			}
 			else
 			{
 				String val = inContext.getText(obj);
+				/*
 				if (val.toLowerCase().startsWith(startsWith))
 				{
 					results.add(val);
 				}
-
+ */
 				if (val != null)
 				{
 					/*
@@ -305,12 +306,29 @@ public class SearcherManager
 					 * while (matcher.find()) { //return matcher.group(1); String output = matcher.group(0);
 					 * results.add(output); }
 					 */
-					String[] valStrings = MultiValued.VALUEDELMITER.split(val);
+					String[] valStrings = MULTIDELMITER.split(val);
 					for (int i = 0; i < valStrings.length; i++)
 					{
-						if (valStrings[i].toLowerCase().startsWith(startsWith.toLowerCase()))
+						int index = valStrings[i].toLowerCase().indexOf(startsWith.toLowerCase());
+						if (index > -1)
 						{
-							results.add(valStrings[i]);
+							String found = valStrings[i].substring(index);
+							int endIndex = found.indexOf(" ", startsWith.length());
+							if (endIndex > -1) 
+							{
+								found = found.substring(0, endIndex);
+							}
+							if (found.endsWith(",") || found.endsWith("."))
+							{
+								found = found.substring(0, found.length() - 1);
+							}
+							String lowerFound = found.toLowerCase();
+							String existing = results.get(lowerFound);
+							if (existing == null || existing.equals(lowerFound))  //override all lowercase values
+							{
+								results.put(lowerFound, found);
+							}
+							
 						}
 					}
 				}
@@ -320,7 +338,7 @@ public class SearcherManager
 				break;
 			}
 		}
-		List<String> sorted = new ArrayList(results);
+		List<String> sorted = new ArrayList(results.values());
 		Collections.sort(sorted);
 		return sorted;
 	}
