@@ -506,8 +506,9 @@ public class BaseUserManager implements UserManager
 		Data found = searcher.query().match("email", email.toLowerCase()).after("date", newerthan).searchOne();
 
 		if (found != null && !force)
-		{ // force is mostly set to true so we will skip this and make a new one
-			log.info("Existing code sent: " + found.get("securitycode"));
+		{ 
+			// force is mostly set to true so we will skip this and make a new one
+			//log.info("Existing code sent: " + found.get("securitycode"));
 			return found;
 		}
 		Random random = new Random();
