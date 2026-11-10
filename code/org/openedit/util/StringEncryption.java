@@ -784,4 +784,69 @@ public class StringEncryption
 		}
 	}
 
+
+	/**
+	 * @return the saved userkey row, or null after reporting the problem
+	 */
+	public Data createUserKey(WebPageRequest inReq, User user)
+	{
+		if ("apppassword".equals(inReq.getPageValue("loginvia")))
+		{
+			// An application password must not be able to mint further credentials that outlive its own
+			// revocation
+			putOauthError(inReq, "access_denied", "Application passwords cannot register keys");
+			return null;
+		}
+		if (inReq.getSessionValue("realuser") != null)
+		{
+			// Admin "switch to user": the browser belongs to the administrator, not the impersonated user
+			putOauthError(inReq, "access_denied", "Cannot register keys while switched to another user");
+			return null;
+		}
+		Searcher keys = getSearcherManager().getSearcher("system", "userkey");
+		Data key = keys.createNewData();
+		key.setId(randomCharacterString());
+		key.setValue("userid", user.getId());
+		key.setValue("label", inReq.getRequestParameter("label"));
+		key.setValue("created", new Date());
+		key.setValue("enabled", true);
+
+		if ("apppassword".equals(inReq.getRequestParameter("keytype")))
+		{
+			// Server generated secret for tools that cannot sign. Returned once, only its hash is kept.
+			String secret = generateAppSecret();
+			key.setValue("keytype", "apppassword");
+			key.setValue("algorithm", "SHA-256"); // how the stored secret is hashed
+			key.setValue("secrethash", getSha256(secret));
+			keys.saveData(key);
+			inReq.putPageValue("apppassword", createAppPassword(key.getId(), secret));
+		}
+		else
+		{
+			String publickey = inReq.getRequestParameter("publickey");
+			if (publickey == null || !isValidPublicKey(publickey))
+			{
+				putOauthError(inReq, "invalid_request", "publickey must be a base64url X.509 encoded Ed25519 or P-256 public key");
+				return null;
+			}
+			key.setValue("keytype", "publickey");
+			key.setValue("algorithm", getPublicKeyAlgorithm(publickey)); // detected from the key, not taken from the client
+			key.setValue("publickey", publickey);
+			keys.saveData(key);
+		}
+		inReq.putPageValue("userkey", key);
+		return key;
+	}
+
+	protected void putOauthError(WebPageRequest inReq, String inError, String inDescription)
+	{
+		inReq.putPageValue("oauth_error", inError);
+		inReq.putPageValue("oauth_error_description", inDescription);
+		inReq.putPageValue("commandSucceeded", "error");
+		if (inReq.getResponse() != null)
+		{
+			inReq.getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		}
+	}
+
 }
