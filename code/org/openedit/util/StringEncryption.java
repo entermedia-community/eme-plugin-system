@@ -849,4 +849,15 @@ public class StringEncryption
 		}
 	}
 
+	public void mintKeyToken(WebPageRequest inReq, User inUser, Data inKey)
+	{
+
+		inReq.putPageValue("access_token", createAccessToken(inUser.getId(), inKey.getId(), inKey.get("publickey"), StringEncryption.ACCESS_TOKEN_LIFETIME_MILLIS));
+		inReq.putPageValue("token_type", "Bearer");
+		inReq.putPageValue("expires_in", StringEncryption.ACCESS_TOKEN_LIFETIME_MILLIS / 1000);
+		inReq.putPageValue("key_id", inKey.getId());
+		inReq.putPageValue("user", inUser);
+		inReq.putPageValue("commandSucceeded", "ok");
+	}
+
 }
