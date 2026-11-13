@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Config and skills for the My EME OpenCode instance. Nothing here is meant to be browsed. -->
+<page>
+	<permission name="view">
+		<group name="administrators"/>
+	</permission>
+</page>
