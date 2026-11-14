@@ -784,7 +784,6 @@ public class StringEncryption
 		}
 	}
 
-
 	/**
 	 * @return the saved userkey row, or null after reporting the problem
 	 */
@@ -856,6 +855,7 @@ public class StringEncryption
 		inReq.putPageValue("token_type", "Bearer");
 		inReq.putPageValue("expires_in", StringEncryption.ACCESS_TOKEN_LIFETIME_MILLIS / 1000);
 		inReq.putPageValue("key_id", inKey.getId());
+		inReq.putPageValue("publickey", inKey.get("publickey"));
 		inReq.putPageValue("user", inUser);
 		inReq.putPageValue("commandSucceeded", "ok");
 	}
