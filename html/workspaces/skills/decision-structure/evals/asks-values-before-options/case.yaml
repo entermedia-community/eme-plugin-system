@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: asks-values-before-options
+expected_outcome: |
+  Although the user has already described both options, the reply asks for the user's current list of values first, before asking any questions about option A or B, and does not score anything yet. It acknowledges the decision briefly and says it will return to the options right after the values.

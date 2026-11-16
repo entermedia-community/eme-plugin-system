@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: saved-profile-asks-still-current
+expected_outcome: |
+  The reply finds and shows the user's saved list of ten values and asks one short question about them, whether the list is still current, before asking anything about option A or B. It does not ask about weights, about which values are always on, or about which folder to save to, and does not score anything yet.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: scores-two-options-and-answers
+expected_outcome: |
+  A table scoring Option A and Option B from 0 to 10 against each of the ten values with a one-line reason per option per row, correct plain-sum totals and an Overall row, then a one-line Answer naming the winning option and stating how much better it fits the user's values as a relative percentage (winner minus loser, divided by loser). It words this as fitting the values better, not as a probability of choosing, followed by a short read-out of the driver values and a gut-check question. It applies no weights and asks no questions about weights. Option A should clearly win on in-person, walk the site, teach by doing and draw the plan.

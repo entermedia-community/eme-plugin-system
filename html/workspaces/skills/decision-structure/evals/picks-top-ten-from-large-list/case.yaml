@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: picks-top-ten-from-large-list
+expected_outcome: |
+  Selects ten of the sixteen values for this decision, including the two marked always (Family first, Finish what you start), shows the ten chosen and briefly why the other six were left out, invites swaps, then scores both options 0-10 on exactly those ten with a reasoning column per option, an Overall row with correct totals out of 100 and a /10 equivalent, and a final scores line.

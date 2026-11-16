@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: new-user-builds-values-first
+expected_outcome: |
+  Because the user has not supplied any values, the response starts building their list of values (explains what a value is with an example, asks prompting questions) and does not invent values for them or score the apartment against the house yet. It stays friendly and light, and mentions the two options will be scored after the values exist.
