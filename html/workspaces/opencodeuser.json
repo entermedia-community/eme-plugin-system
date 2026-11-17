@@ -4,5 +4,11 @@
 		"paths": [
 			"{env:EME_WORKSPACE_SKILLS}"
 		]
-	}
+	},
+	"permissions": [
+		{ "action": "*", "resource": "*", "effect": "allow" },
+		{ "action": "edit", "resource": "*.env", "effect": "deny" },
+		{ "action": "edit", "resource": "*.env.*", "effect": "deny" },
+		{ "action": "shell", "resource": "sudo *", "effect": "deny" }
+	],
 }
