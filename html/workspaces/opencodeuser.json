@@ -10,14 +10,15 @@
 		{ "action": "webfetch", "resource": "*", "effect": "allow" },
 		{ "action": "edit", "resource": "*.env", "effect": "deny" },
 		{ "action": "edit", "resource": "*.env.*", "effect": "deny" },
-		{ "action": "shell", "resource": "sudo *", "effect": "deny" }
+		{ "action": "shell", "resource": "sudo *", "effect": "deny" },
+		{ "action": "shell", "resource": "*/bin/refreshtoken.sh*", "effect": "allow" }
 	],
 	"mcp": {
 		"eme-mediadb": {
 			"type": "remote",
 			"url": "http://localhost:8080/site/mediadb/ai/mcp/",
 			"headers": {
-				"X-Token": "{\"username\":\"{env:EME_USERNAME}\",\"key_id\":\"{env:EME_KEY_ID}\",\"timestamp\":\"{env:EME_TIMESTAMP}\",\"nonce\":\"{env:EME_NONCE}\",\"signature\":\"{env:EME_SIGNATURE}\"}",
+				"X-Token": "{\"username\":\"{env:EME_USER}\",\"key_id\":\"{env:EME_KEY_ID}\",\"timestamp\":\"{env:EME_TIMESTAMP}\",\"nonce\":\"{env:EME_NONCE}\",\"signature\":\"{env:EME_SIGNATURE}\"}",
 				"X-Tokentype": "signature"
 				
 			},
