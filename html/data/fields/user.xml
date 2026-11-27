@@ -13,6 +13,7 @@
 	<property id="firstName" index="true" stored="true" keyword="true" editable="true">First Name</property>
 	<property id="lastName" index="true" stored="true" keyword="true" editable="true">Last Name</property>
 	<property id="email" index="true" stored="true" keyword="true" editable="true">Email</property>
+	<property id="phonenumber" index="true" stored="true" keyword="true" editable="true" indextype="not_analyzed">Phone Number</property>
 	<property id="enabled" index="true" stored="true" editable="true" datatype="boolean"
 		type="boolean">Enabled</property>
 

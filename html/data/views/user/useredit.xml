@@ -7,6 +7,7 @@
 
 	<property id="email" required="true" header="Contact Information" />
     <property id="phone" /> 
+    <property id="phonenumber" />
     <property id="country"  />
     <property id="address1"  />
     <property id="address2"  />
